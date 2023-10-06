@@ -1,0 +1,37 @@
+name: BeerGarden CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14' # or another version you prefer
+
+    - name: Install dependencies
+      run: |
+        cd client
+        npm install
+
+    - name: Run tests
+      run: |
+        cd client
+        npm test
+
+    - name: Build React Native for Android (optional)
+      run: |
+        cd client/android
+        ./gradlew assembleRelease
+
+  # Add more jobs for iOS build, server tests, deployment, etc.

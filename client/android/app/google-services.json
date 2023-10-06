@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "604245629841",
+    "firebase_url": "https://beergarden2-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "beergarden2",
+    "storage_bucket": "beergarden2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:604245629841:android:087295672df19682935830",
+        "android_client_info": {
+          "package_name": "com.beergarden"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsHug5M-gKelNK0beD1VyTO3BzXN9W36k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

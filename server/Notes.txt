@@ -1,0 +1,43 @@
+1. Main Folder (React Native Codebase):
+
+When to Use:
+
+    Client-Side Operations: If you're directly interacting with Firebase services from the client-side, such as fetching data from Firestore to display in your app, storing user-generated content in Firebase Storage, or authenticating users with Firebase Authentication.
+
+    Real-time Updates: If you're using features like real-time listeners with Firestore or the Realtime Database.
+
+    Firebase Messaging: For handling push notifications and foreground/background notification events.
+
+Advantages:
+
+    Direct and real-time interaction with Firebase services.
+    Easier to implement real-time data updates and user interactions.
+
+2. Functions Folder (Firebase Cloud Functions):
+
+When to Use:
+
+    Server-Side Logic: If you need to execute logic that shouldn't be exposed to the client, such as validating data, processing payments, or interacting with other third-party services.
+
+    Triggers: If you're using Firebase triggers, like Firestore triggers (e.g., onCreate, onUpdate) or Realtime Database triggers.
+
+    Scheduled Tasks: If you're implementing cron jobs or scheduled functions.
+
+    Enhanced Security: When you need to perform actions that require elevated permissions or when you want to ensure operations are done securely without exposing sensitive logic to the client.
+
+Advantages:
+
+    Centralized and secure execution of logic.
+    Can interact with multiple Firebase services and third-party APIs in one place.
+    Scalable and managed serverless execution environment.
+
+Recommendation:
+
+    Hybrid Approach: In most real-world applications, a hybrid approach is taken. Client-side operations, user interactions, and real-time data fetching are handled directly in the React Native codebase (main folder). Meanwhile, server-side logic, data validation, and other secure operations are offloaded to Cloud Functions (in the functions folder).
+
+For example:
+
+    Use the main folder to authenticate users, display data from Firestore, and upload images to Firebase Storage.
+    Use Cloud Functions to validate data before saving it to Firestore, send welcome emails after user registration, or process payments.
+
+In summary, the decision is based on the nature of the operation and where it makes the most architectural sense to implement it. Always consider factors like security, scalability, and user experience when making your decision.
