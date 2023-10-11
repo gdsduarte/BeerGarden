@@ -6,6 +6,13 @@ import { enableScreens } from 'react-native-screens';
 import AuthContext from './src/contexts/AuthContext';
 import MainNavigator from './src/navigation/MainNavigator';
 import Loading from './src/components/common/Loading';
+import { firebase } from '@react-native-firebase/app';
+
+import {decode, encode} from 'base-64'
+if (!global.btoa) {  global.btoa = encode }
+if (!global.atob) { global.atob = decode }
+
+
 
 enableScreens();
 

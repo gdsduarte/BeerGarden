@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import authService from '../services/authService';
+import firestoreService from '../services/firestoreService';
 
 function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -9,17 +10,41 @@ function LoginScreen() {
   const navigation = useNavigation();
 
   const handleLogin = async () => {
-    try {
-      await authService.signIn(email, password);
-      navigation.navigate('Home');
-    } catch (error) {
-      console.error("Error logging in:", error.message);
-      // You can also show an alert or any other UI feedback for the error
-    }
+    
+    authService
+      .signIn(email, password)
+      .then(async (response) => {
+        if (response && response.user) {
+          const uid = response.user.uid;
+          try {
+            const user = await firestoreService.getUser(uid);
+            if (user) {
+              navigation.navigate('Home', { user });
+            } else {
+              console.error(response);
+              alert("User does not exist.");
+            }
+          } catch (error) {
+            alert(error);
+          }
+        } else {
+          alert("Error: User sign-in failed.");
+        }
+      })
+      .catch(error => {
+        alert(error);
+      });
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     // handle Google login logic here
+    /* try {
+      await authService.signInWithGoogle();
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error("Error logging in with Google:", error.message);
+      // You can also show an alert or any other UI feedback for the error
+    } */
   };
 
   return (

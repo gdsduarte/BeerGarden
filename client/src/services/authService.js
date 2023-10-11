@@ -1,11 +1,6 @@
 /* eslint-disable prettier/prettier */
 import firebase from '@react-native-firebase/app';
 import auth from '@react-native-firebase/auth';
-import firebaseConfig from '../config/firebaseConfig';
-
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
 
 const authService = {
 
@@ -25,7 +20,7 @@ const authService = {
   signUp: async (email, password) => {
     try {
       const userCredential = await auth().createUserWithEmailAndPassword(email, password);
-      return userCredential.user;
+      return userCredential;
     } catch (error) {
       throw error;
     }
@@ -34,7 +29,7 @@ const authService = {
   signIn: async (email, password) => {
     try {
       const userCredential = await auth().signInWithEmailAndPassword(email, password);
-      return userCredential.user;
+      return userCredential;
     } catch (error) {
       throw error;
     }
@@ -64,6 +59,24 @@ const authService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  sendEmailVerification: async (user) => {
+    try {
+      await user.sendEmailVerification();
+    } catch (error) {
+      throw error;
+    }
+    return user;
+  },
+
+  updateProfile: async (user, data) => {
+    try {
+      await user.updateProfile(data);
+    } catch (error) {
+      throw error;
+    }
+    return user;
   },
 };
 

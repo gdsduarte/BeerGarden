@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:604245629841:android:087295672df19682935830",
+        "mobilesdk_app_id": "1:604245629841:android:5d3bff69ca0e51b1935830",
         "android_client_info": {
-          "package_name": "com.beergarden"
+          "package_name": "com.client"
         }
       },
       "oauth_client": [],

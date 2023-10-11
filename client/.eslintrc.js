@@ -1,21 +1,21 @@
 module.exports = {
   root: true,
-  parser: '@babel/eslint-parser', // Use Babel's ESLint parser
+  parser: '@babel/eslint-parser',
   extends: [
     '@react-native',
-    'plugin:react/recommended',  // Use recommended rules from eslint-plugin-react
+    'plugin:react/recommended',
   ],
-  plugins: ['react'], // Use eslint-plugin-react
+  plugins: ['react'],
   parserOptions: {
     ecmaFeatures: {
       jsx: true, // Enable JSX
     },
-    requireConfigFile: false, // Add this line to disable the requirement for a Babel config file
+    requireConfigFile: false,
   },
   settings: {
     react: {
-      version: 'detect', // Automatically detect the React version
+      version: 'detect',
     },
   },
-  ignorePatterns: [".eslintrc.js"], // Add this line to exclude the ESLint config file from being parsed
+  ignorePatterns: [".eslintrc.js"],
 };

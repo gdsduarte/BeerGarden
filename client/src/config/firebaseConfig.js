@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
-//Initialize Firebase services (Realtime Database, Firestore, Storage, Authentication, etc.) in this file.
-//App Check: Initialize and configure in the firebase.js
+import firebase from '@react-native-firebase/app';
+import '@firebase/auth';
+import '@firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -13,5 +14,8 @@ const firebaseConfig = {
   measurementId: process.env.FIREBASE_MEASUREMENT_ID,
 };
 
-export default firebaseConfig;
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
+export { firebase };
