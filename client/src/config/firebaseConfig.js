@@ -1,8 +1,7 @@
 /* eslint-disable prettier/prettier */
 import firebase from '@react-native-firebase/app';
-import '@firebase/auth';
-import '@firebase/firestore';
 
+// Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -14,6 +13,7 @@ const firebaseConfig = {
   measurementId: process.env.FIREBASE_MEASUREMENT_ID,
 };
 
+// Initialize Firebase
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }

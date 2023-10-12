@@ -1,19 +1,9 @@
 /* eslint-disable prettier/prettier */
-import firebase from '@react-native-firebase/app';
 import auth from '@react-native-firebase/auth';
 
 const authService = {
-
-  checkUserAuthentication: (setIsUserLoggedIn, setIsLoading) => {
-    const unsubscribe = auth().onAuthStateChanged((user) => {
-      if (user) {
-        setIsUserLoggedIn(true);
-      } else {
-        setIsUserLoggedIn(false);
-      }
-      setIsLoading(false);
-      return user;
-    });
+  checkUserAuthentication: (callback) => {
+    const unsubscribe = auth().onAuthStateChanged(callback);
     return unsubscribe;
   },
 
@@ -22,6 +12,7 @@ const authService = {
       const userCredential = await auth().createUserWithEmailAndPassword(email, password);
       return userCredential;
     } catch (error) {
+      console.error('Error signing up:', error);
       throw error;
     }
   },
@@ -31,6 +22,7 @@ const authService = {
       const userCredential = await auth().signInWithEmailAndPassword(email, password);
       return userCredential;
     } catch (error) {
+      console.error('Error signing in:', error);
       throw error;
     }
   },
@@ -39,6 +31,7 @@ const authService = {
     try {
       await auth().signOut();
     } catch (error) {
+      console.error('Error signing out:', error);
       throw error;
     }
   },
@@ -47,16 +40,18 @@ const authService = {
     try {
       await auth().sendPasswordResetEmail(email);
     } catch (error) {
+      console.error('Error resetting password:', error);
       throw error;
     }
   },
 
   signInWithGoogle: async () => {
     try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      const userCredential = await firebase.auth().signInWithPopup(provider);
+      const provider = new auth.GoogleAuthProvider();
+      const userCredential = await auth().signInWithPopup(provider);
       return userCredential.user;
     } catch (error) {
+      console.error('Error signing in with Google:', error);
       throw error;
     }
   },
@@ -64,19 +59,21 @@ const authService = {
   sendEmailVerification: async (user) => {
     try {
       await user.sendEmailVerification();
+      return user;
     } catch (error) {
+      console.error('Error sending email verification:', error);
       throw error;
     }
-    return user;
   },
 
   updateProfile: async (user, data) => {
     try {
       await user.updateProfile(data);
+      return user;
     } catch (error) {
+      console.error('Error updating profile:', error);
       throw error;
     }
-    return user;
   },
 };
 

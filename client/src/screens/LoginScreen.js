@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import authService from '../services/authService';
 import firestoreService from '../services/firestoreService';
+import styles from '../styles/loginScreenStyles';
 
-function LoginScreen() {
+const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
 
   const handleLogin = async () => {
-    
     authService
       .signIn(email, password)
       .then(async (response) => {
@@ -81,30 +81,6 @@ function LoginScreen() {
       </TouchableOpacity>
     </View>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    marginBottom: 10,
-    padding: 8,
-    borderRadius: 5,
-  },
-  linkText: {
-    marginTop: 10,
-    color: 'blue',
-    textAlign: 'center',
-  },
-});
+};
 
 export default LoginScreen;

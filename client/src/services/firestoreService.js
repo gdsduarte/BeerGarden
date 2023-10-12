@@ -3,67 +3,99 @@ import firebase from '@react-native-firebase/app';
 import '@react-native-firebase/firestore';
 
 const firestoreService = {
-  // Add a user to the database
-  async addUser(uid, user) {
-    const db = firebase.firestore();
-    await db.collection('users').doc(uid).set(user);
-  },
-
-  // Get a user from the database
-  async getUser(uid) {
-    const db = firebase.firestore();
-    const docRef = await db.collection('users').doc(uid).get();
-    if (docRef.exists) {
-      return { id: docRef.id,...docRef.data() };
-    } else {
-      return null;
+  addUser: async (uid, user) => {
+    try {
+      const db = firebase.firestore();
+      await db.collection('users').doc(uid).set(user);
+    } catch (error) {
+      console.error('Error adding user:', error);
+      throw error;
     }
   },
 
-  // Add a pub to the database
-  async addPub(pub) {
-    const db = firebase.firestore();
-    const docRef = await db.collection('pubs').add(pub);
-    return docRef.id;
-  },
-
-  // Create a new document in a collection
-  async createDocument(collection, data) {
-    const db = firebase.firestore();
-    const docRef = await db.collection(collection).add(data);
-    return docRef.id;
-  },
-
-  // Read a document from a collection
-  async getDocument(collection, docId) {
-    const db = firebase.firestore();
-    const doc = await db.collection(collection).doc(docId).get();
-    if (doc.exists) {
-      return { id: doc.id, ...doc.data() };
-    } else {
-      return null;
+  getUser: async (uid) => {
+    try {
+      const db = firebase.firestore();
+      const docRef = await db.collection('users').doc(uid).get();
+      if (docRef.exists) {
+        return { id: docRef.id, ...docRef.data() };
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('Error getting user:', error);
+      throw error;
     }
   },
 
-  // Read all documents from a collection
-  async getDocuments(collection) {
-    const db = firebase.firestore();
-    const snapshot = await db.collection(collection).get();
-    const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    return docs;
+  addPub: async (pub) => {
+    try {
+      const db = firebase.firestore();
+      const docRef = await db.collection('pubs').add(pub);
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding pub:', error);
+      throw error;
+    }
   },
 
-  // Update a document in a collection
-  async updateDocument(collection, docId, data) {
-    const db = firebase.firestore();
-    await db.collection(collection).doc(docId).update(data);
+  createDocument: async (collection, data) => {
+    try {
+      const db = firebase.firestore();
+      const docRef = await db.collection(collection).add(data);
+      return docRef.id;
+    } catch (error) {
+      console.error(`Error creating document in ${collection}:`, error);
+      throw error;
+    }
   },
 
-  // Delete a document from a collection
-  async deleteDocument(collection, docId) {
-    const db = firebase.firestore();
-    await db.collection(collection).doc(docId).delete();
+  getDocument: async (collection, docId) => {
+    try {
+      const db = firebase.firestore();
+      const doc = await db.collection(collection).doc(docId).get();
+      if (doc.exists) {
+        return { id: doc.id, ...doc.data() };
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error(`Error getting document from ${collection}:`, error);
+      throw error;
+    }
+  },
+
+  getDocuments: async (collection) => {
+    try {
+      const db = firebase.firestore();
+      const snapshot = await db.collection(collection).get();
+      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error(`Error getting documents from ${collection}:`, error);
+      throw error;
+    }
+  },
+
+  updateDocument: async (collection, docId, data) => {
+    try {
+      const db = firebase.firestore();
+      await db.collection(collection).doc(docId).update(data);
+    } catch (error) {
+      console.error(`Error updating document in ${collection}:`, error);
+      throw error;
+    }
+  },
+
+  deleteDocument: async (collection, docId) => {
+    try {
+      const db = firebase.firestore();
+      await db.collection(collection).doc(docId).delete();
+    } catch (error) {
+      console.error(`Error deleting document from ${collection}:`, error);
+      throw error;
+    }
   },
 };
 
 export default firestoreService;
+
