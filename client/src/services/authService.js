@@ -2,6 +2,12 @@
 import auth from '@react-native-firebase/auth';
 
 const authService = {
+
+  getCurrentUser: () => {
+    const user = auth().currentUser;
+    return user;
+  },
+
   checkUserAuthentication: (callback) => {
     const unsubscribe = auth().onAuthStateChanged(callback);
     return unsubscribe;

@@ -4,7 +4,7 @@ import { enableScreens } from 'react-native-screens';
 import { decode, encode } from 'base-64';
 import authService from './src/services/authService';
 import AuthContext from './src/contexts/AuthContext';
-import MainNavigator from './src/navigation/MainNavigator';
+import LoginNavigator from './src/navigation/LoginNavigator';
 import Loading from './src/components/common/Loading';
 
 // Global configurations
@@ -46,7 +46,7 @@ const App = () => {
   return (
     <AuthContext.Provider value={authContext}>
       <NavigationContainer>
-        <MainNavigator isUserLoggedIn={isUserLoggedIn} />
+        <LoginNavigator isUserLoggedIn={isUserLoggedIn} />
       </NavigationContainer>
     </AuthContext.Provider>
   );

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import authService from '../services/authService';
-import firestoreService from '../services/firestoreService';
-import styles from '../styles/signUpScreenStyles';
+import authService from '../../services/authService';
+import firestoreService from '../../services/firestoreService';
+import styles from '../../styles/signUpScreenStyles';
+import InputValidationComponent from '../../components/common/InputValidation';
 
 const SignUpScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -22,9 +23,9 @@ const SignUpScreen = ({ navigation }) => {
       if (userCredential && userCredential.user) {
         const { user } = userCredential;
         const userForFirestore = {
-          email: user.email,
-          username: username,
           name: name,
+          email: user.email,
+          phone: phone,
           userUID: user.uid,
         };
         await firestoreService.addUser(user.uid, userForFirestore);
@@ -36,14 +37,24 @@ const SignUpScreen = ({ navigation }) => {
     } catch (error) {
       alert(error.message);
     }
-  };
+    
+    user.sendEmailVerification();
 
+  };
+  
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
+      <Text style={styles.title}>Bussiness Account</Text>
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder="Business Name"
+        value={name}
+        onChangeText={(text) => setName(text)}
+        autoCapitalize="words"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Business Email"
         value={email}
         onChangeText={(text) => setEmail(text)}
         autoCapitalize="none"
@@ -51,17 +62,10 @@ const SignUpScreen = ({ navigation }) => {
       />
       <TextInput
         style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={(text) => setUsername(text)}
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={(text) => setName(text)}
-        autoCapitalize="words"
+        placeholder="Phone"
+        value={phone}
+        onChangeText={(text) => setPhone(text)}
+        keyboardType="phone-pad"
       />
       <TextInput
         style={styles.input}

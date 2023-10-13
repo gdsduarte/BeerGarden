@@ -3,6 +3,13 @@ import firebase from '@react-native-firebase/app';
 import '@react-native-firebase/firestore';
 
 const firestoreService = {
+
+  checkUsernameExists: async (username) => {
+    const userRef = firebase.firestore().collection('users');
+    const snapshot = await userRef.where('username', '==', username).get();
+    return !snapshot.empty;
+  },
+
   addUser: async (uid, user) => {
     try {
       const db = firebase.firestore();

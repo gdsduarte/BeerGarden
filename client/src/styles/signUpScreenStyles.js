@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    width: '80%',
+    minWidth: '80%',
     height: 50,
     padding: 10,
     borderWidth: 1,
