@@ -10,6 +10,12 @@ const firestoreService = {
     return !snapshot.empty;
   },
 
+  checkEmailExists: async (email) => {
+    const userRef = firebase.firestore().collection('users');
+    const snapshot = await userRef.where('email', '==', email).get();
+    return !snapshot.empty;
+  },
+
   addUser: async (uid, user) => {
     try {
       const db = firebase.firestore();

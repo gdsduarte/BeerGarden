@@ -6,49 +6,66 @@ import styles from '../../styles/signUpScreenStyles';
 import InputValidation from '../../components/common/InputValidation';
 
 const UserSignUpScreen = ({ navigation }) => {
+  // Input states
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [shouldValidate, setShouldValidate] = useState(false);
+
+  // Validation states
+  const [nameValidation, setNameValidation] = useState('');
+  const [usernameValidation, setUsernameValidation] = useState('');
+  const [emailValidation, setEmailValidation] = useState('');
+  const [passwordValidation, setPasswordValidation] = useState('');
+  const [confirmPasswordValidation, setConfirmPasswordValidation] = useState('');
+  const [shouldFlagEmpty, setShouldFlagEmpty] = useState(false);
 
   const handleSignUp = async () => {
-    setShouldValidate(true);
+    setShouldFlagEmpty(true);
     
+    // Check if username is taken
     const usernameExists = await firestoreService.checkUsernameExists(username);
     if (usernameExists) {
-      alert("Username is already taken. Please choose a different one.");
+      alert("Username is already taken.");
       return;
     }
 
-    if (password !== confirmPassword) {
-      alert("Passwords don't match.");
+    // Check if email is taken
+    const emailExists = await firestoreService.checkEmailExists(email);
+    if (emailExists) {
+      alert("Email is already registered.");
       return;
     }
 
-    if (!validationMessage) {
-  
-      try {
-        const userCredential = await authService.signUp(email, password);
-        if (userCredential && userCredential.user) {
-          const { user } = userCredential;
-          const userForFirestore = {
-            email: user.email,
-            username: username,
-            name: name,
-            userUID: user.uid,
-          };
-          await firestoreService.addUser(user.uid, userForFirestore);
-          alert("User registered successfully, please confirm your email address.");
-          user.sendEmailVerification();
-          navigation.navigate('Login');
-        } else {
-          alert("Error: User registration failed.");
-        }
-      } catch (error) {
-        alert(error.message);
+    // Check for validation messages
+    if (!(nameValidation || usernameValidation || emailValidation || passwordValidation || confirmPasswordValidation)) {
+      alert("Please correct the errors before submitting.");
+      return;
+    }
+
+    // Firebase logic
+    try {
+      // Create user
+      const userCredential = await authService.signUp(email, password);
+      // Add user to firestore
+      if (userCredential && userCredential.user) {
+        const { user } = userCredential;
+        const userForFirestore = {
+          name: name,
+          username: username,
+          email: user.email,
+          userUID: user.uid,
+        };
+        await firestoreService.addUser(user.uid, userForFirestore);
+        alert("User registered successfully, please confirm your email address.");
+        user.sendEmailVerification();
+        navigation.navigate('Login');
+      } else {
+        alert("Error: User registration failed.");
       }
+    } catch (error) {
+      alert(error.message);
     }
   };
   
@@ -61,7 +78,8 @@ const UserSignUpScreen = ({ navigation }) => {
         placeholder="Name"
         value={name}
         onChange={(text) => setName(text)}
-        shouldValidate={shouldValidate}
+        onValidation={(message) => setNameValidation(message)}
+        shouldFlagEmpty={shouldFlagEmpty}
       />
       <InputValidation
         style={styles.input}
@@ -69,6 +87,8 @@ const UserSignUpScreen = ({ navigation }) => {
         placeholder="Username"
         value={username}
         onChange={(text) => setUsername(text)}
+        onValidation={(message) => setUsernameValidation(message)}
+        shouldFlagEmpty={shouldFlagEmpty}
       />
       <InputValidation
         style={styles.input}
@@ -76,7 +96,8 @@ const UserSignUpScreen = ({ navigation }) => {
         placeholder="Email"
         value={email}
         onChange={(text) => setEmail(text)}
-        shouldValidate={shouldValidate}
+        onValidation={(message) => setEmailValidation(message)}
+        shouldFlagEmpty={shouldFlagEmpty}
       />
       <InputValidation
         style={styles.input}
@@ -84,15 +105,18 @@ const UserSignUpScreen = ({ navigation }) => {
         placeholder="Password"
         value={password}
         onChange={(text) => setPassword(text)}
-        shouldValidate={shouldValidate}
+        onValidation={(message) => setPasswordValidation(message)}
+        shouldFlagEmpty={shouldFlagEmpty}
       />
       <InputValidation
         style={styles.input}
-        type="password"
+        type="confirmPassword"
         placeholder="Confirm Password"
         value={confirmPassword}
         onChange={(text) => setConfirmPassword(text)}
-        shouldValidate={shouldValidate}
+        passwordValue={password}
+        onValidation={(message) => setConfirmPasswordValidation(message)}
+        shouldFlagEmpty={shouldFlagEmpty}
       />
       <TouchableOpacity style={styles.button} onPress={handleSignUp}>
         <Text style={styles.buttonText}>Register</Text>

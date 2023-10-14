@@ -1,19 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 
-const InputValidation = ({ type, value, onChange, style, placeholder, shouldValidate }) => {
+const InputValidation = ({ type, value, onChange, style, placeholder, passwordValue }) => {
   const [validationMessage, setValidationMessage] = useState('');
 
   const validateInput = () => {
-    if (!shouldValidate || !value || value.trim() === '') {
+    // Maximum character length for each input type
+    const maxLength = {
+      name: 35,
+      username: 10,
+      email: 35,
+      phone: 15,
+    };
+  
+    // Check for empty input
+    if (!value || value.trim() === '') {
       setValidationMessage('');
       return;
     }
+  
+    // Check for character limit
+    if (maxLength[type] && value.length > maxLength[type]) {
+      setValidationMessage(`Maximum ${maxLength[type]} characters allowed`);
+      return;
+    }
 
+    // Check for valid input based on type 
     switch (type) {
       case 'name':
         if (!value.trim()) {
-          setValidationMessage('Name cannot be empty');
+          setValidationMessage('Cannot be empty');
         } else if (!/^[a-zA-Z\s]*$/.test(value)) {
           setValidationMessage('Only letters and spaces are allowed');
         } else {
@@ -21,22 +37,85 @@ const InputValidation = ({ type, value, onChange, style, placeholder, shouldVali
         }
         break;
 
+      case 'username':
+        if (!value.trim()) {
+          setValidationMessage('Cannot be empty');
+        } else if (!/^[a-zA-Z0-9]*$/.test(value)) {
+          setValidationMessage('Only letters and numbers are allowed');
+        } else {
+          setValidationMessage('');
+        }
+        break;
+
       case 'email':
         const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        if (!emailRegex.test(value)) {
+        if (!value.trim()) {
+          setValidationMessage('Cannot be empty');
+        } else if (!emailRegex.test(value)) {
           setValidationMessage('Invalid email format');
         } else {
           setValidationMessage('');
         }
         break;
 
-      case 'password':
-        if (value.length < 6) {
-          setValidationMessage('Password is too short');
-        } else if (!/[A-Z]/.test(value) || !/[a-z]/.test(value) || !/[0-9]/.test(value)) {
-          setValidationMessage('Need an uppercase, lowercase, and numbers');
+      case 'phone':
+        const phoneRegex = /^\d+$/;
+        if (!value.trim()) {
+          setValidationMessage('Cannot be empty');
+        } else if (!phoneRegex.test(value)) {
+          setValidationMessage('Invalid phone number');
         } else {
-          setValidationMessage('Strong password');
+          setValidationMessage('');
+        }
+        break;
+
+      case 'password':
+        let passwordMessage = '';
+        if (!value.trim()) {
+            setValidationMessage('Cannot be empty');
+        } else if (value.includes(' ')) {
+            setValidationMessage('Password cannot contain spaces');
+            return;
+        } else if (value.length < 6) {
+            passwordMessage = 'Password is too short';
+        } else {
+            let hasNumber = false;
+            let hasLowercase = false;
+            let hasUppercase = false;
+            for (let i = 0; i < value.length; i++) {
+                const char = value.charAt(i);
+                if (/[0-9]/.test(char)) {
+                    hasNumber = true;
+                } else if (/[a-z]/.test(char)) {
+                    hasLowercase = true;
+                } else if (/[A-Z]/.test(char)) {
+                    hasUppercase = true;
+                }
+            }
+            if (!hasNumber) {
+                passwordMessage += 'At least one number. ';
+            }
+            if (!hasLowercase) {
+                passwordMessage += 'At least one lowercase letter. ';
+            }
+            if (!hasUppercase) {
+                passwordMessage += 'At least one uppercase letter. ';
+            }
+            if (passwordMessage === '') {
+                setValidationMessage('');
+                return;
+            }
+        }
+        setValidationMessage(passwordMessage);
+        break;
+      
+      case 'confirmPassword':
+        if (!value.trim()) {
+          setValidationMessage('Cannot be empty');
+        } else if (value !== passwordValue) {
+          setValidationMessage('Passwords do not match');
+        } else {
+          setValidationMessage('');
         }
         break;
 
@@ -48,7 +127,7 @@ const InputValidation = ({ type, value, onChange, style, placeholder, shouldVali
 
   useEffect(() => {
     validateInput();
-  }, [value, shouldValidate]);
+  }, [value]);
 
   return (
     <View style={{ position: 'relative'}}>
@@ -58,7 +137,7 @@ const InputValidation = ({ type, value, onChange, style, placeholder, shouldVali
         placeholder={placeholder}
         value={value} 
         onChangeText={onChange}
-        secureTextEntry={type === 'password'} 
+        secureTextEntry={type === 'password' || type === 'confirmPassword'} 
       />
       {validationMessage && (
         <Text style={styles.errorMessage}>
@@ -69,6 +148,7 @@ const InputValidation = ({ type, value, onChange, style, placeholder, shouldVali
   );
 };
 
+// Styles for InputValidation component
 const styles = StyleSheet.create({
   inputError: {
     borderColor: 'red',

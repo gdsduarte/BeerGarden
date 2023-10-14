@@ -1,25 +1,40 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import authService from '../../services/authService';
 import firestoreService from '../../services/firestoreService';
 import styles from '../../styles/signUpScreenStyles';
-import InputValidationComponent from '../../components/common/InputValidation';
+import InputValidation from '../../components/common/InputValidation';
 
-const SignUpScreen = ({ navigation }) => {
+const OwnerSignUpScreen = ({ navigation }) => {
+  // Input states
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  // Validation states
+  const [nameValidation, setNameValidation] = useState('');
+  const [emailValidation, setEmailValidation] = useState('');
+  const [phoneValidation, setPhoneValidation] = useState('');
+  const [passwordValidation, setPasswordValidation] = useState('');
+  const [confirmPasswordValidation, setConfirmPasswordValidation] = useState('');
+  const [shouldFlagEmpty, setShouldFlagEmpty] = useState(false);
+
   const handleSignUp = async () => {
-    if (password !== confirmPassword) {
-      alert("Passwords don't match.");
+    setShouldFlagEmpty(true);
+
+    // Check for validation messages or empty fields
+    if (!(nameValidation || emailValidation || phoneValidation || passwordValidation || confirmPasswordValidation)) {
+      alert("Please correct the errors before submitting.");
       return;
     }
-  
+
+    // Firebase logic
     try {
+      // Create user
       const userCredential = await authService.signUp(email, password);
+      // Add user to firestore
       if (userCredential && userCredential.user) {
         const { user } = userCredential;
         const userForFirestore = {
@@ -30,6 +45,7 @@ const SignUpScreen = ({ navigation }) => {
         };
         await firestoreService.addUser(user.uid, userForFirestore);
         alert("User registered successfully, please confirm your email address.");
+        user.sendEmailVerification();
         navigation.navigate('Login');
       } else {
         alert("Error: User registration failed.");
@@ -37,49 +53,56 @@ const SignUpScreen = ({ navigation }) => {
     } catch (error) {
       alert(error.message);
     }
-    
-    user.sendEmailVerification();
-
   };
-  
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bussiness Account</Text>
-      <TextInput
+      <Text style={styles.title}>Business Account</Text>
+      <InputValidation
         style={styles.input}
+        type="name"
         placeholder="Business Name"
         value={name}
-        onChangeText={(text) => setName(text)}
-        autoCapitalize="words"
+        onChange={(text) => setName(text)}
+        onValidation={(message) => setNameValidation(message)}
+        shouldFlagEmpty={shouldFlagEmpty}
       />
-      <TextInput
+      <InputValidation
         style={styles.input}
+        type="email"
         placeholder="Business Email"
         value={email}
-        onChangeText={(text) => setEmail(text)}
-        autoCapitalize="none"
-        keyboardType="email-address"
+        onChange={(text) => setEmail(text)}
+        onValidation={(message) => setEmailValidation(message)}
+        shouldFlagEmpty={shouldFlagEmpty}
       />
-      <TextInput
+      <InputValidation
         style={styles.input}
+        type="phone"
         placeholder="Phone"
         value={phone}
-        onChangeText={(text) => setPhone(text)}
-        keyboardType="phone-pad"
+        onChange={(text) => setPhone(text)}
+        onValidation={(message) => setPhoneValidation(message)}
+        shouldFlagEmpty={shouldFlagEmpty}
       />
-      <TextInput
+      <InputValidation
         style={styles.input}
+        type="password"
         placeholder="Password"
         value={password}
-        onChangeText={(text) => setPassword(text)}
-        secureTextEntry
+        onChange={(text) => setPassword(text)}
+        onValidation={(message) => setPasswordValidation(message)}
+        shouldFlagEmpty={shouldFlagEmpty}
       />
-      <TextInput
+      <InputValidation
         style={styles.input}
+        type="confirmPassword"
         placeholder="Confirm Password"
         value={confirmPassword}
-        onChangeText={(text) => setConfirmPassword(text)}
-        secureTextEntry
+        onChange={(text) => setConfirmPassword(text)}
+        passwordValue={password}
+        onValidation={(message) => setConfirmPasswordValidation(message)}
+        shouldFlagEmpty={shouldFlagEmpty}
       />
       <TouchableOpacity style={styles.button} onPress={handleSignUp}>
         <Text style={styles.buttonText}>Register</Text>
@@ -91,4 +114,4 @@ const SignUpScreen = ({ navigation }) => {
   );
 };
 
-export default SignUpScreen;
+export default OwnerSignUpScreen;
