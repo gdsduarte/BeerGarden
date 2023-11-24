@@ -1,16 +1,20 @@
 import React from 'react';
 import { View, Text, Button, TouchableOpacity } from 'react-native';
 import styles from '../styles/SignupSelectionScreenStyles';
+import { navigateWithAlert } from '../utils/navigationHelper';
 
 const SignupSelectionScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Join the BeerGarden community as:</Text>
       
-      <Button title="Bussiness Account" 
+      <Button title="Business Account" 
         onPress={() => {
-          alert('To fully register your pub, verification will be required after registration.');
-          navigation.navigate('OwnerSignUpScreen');
+          navigateWithAlert(
+            navigation, 
+            'OwnerSignUpScreen', 
+            'To fully register your bussiness, verification will be required after registration.'
+          );
         }} 
       />
   

@@ -1,8 +1,14 @@
 import React from 'react';
 import { View, Text, TextInput, Button } from 'react-native';
+/* import functions from '@react-native-firebase/functions'; */
 
 const SearchScreen = () => {
   const [searchTerm, setSearchTerm] = React.useState('');
+
+  const getGooglePlacesData = async () => {
+    const response = await functions().httpsCallable('getGooglePlacesData')();
+    console.log(response.data);
+  };
 
   const handleSearch = () => {
     // handle search logic here
