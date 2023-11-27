@@ -15,7 +15,7 @@ const Tab = createMaterialTopTabNavigator();
 
 // Dummy data
 const nearbyPubs = [
-  {id: 'pub1', name: 'Pub 1', latitude: 37.78925, longitude: -122.4314},
+  {id: 'pub1', name: 'Pub 1', latitude: 53.350140, longitude: -7.266155},
   {id: 'pub2', name: 'Pub 2', latitude: 37.78825, longitude: -122.4324},
   {id: 'pub3', name: 'Pub 3', latitude: 37.78725, longitude: -122.4334},
   {id: 'pub4', name: 'Pub 4', latitude: 37.78625, longitude: -122.4344},
