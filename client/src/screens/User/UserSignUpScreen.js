@@ -52,10 +52,10 @@ const UserSignUpScreen = ({ navigation }) => {
       if (userCredential && userCredential.user) {
         const { user } = userCredential;
         const userForFirestore = {
-          name: name,
+          displayName: name,
           username: username,
           email: user.email,
-          userUID: user.uid,
+          uid: user.uid,
           role: 'user',
         };
         await firestoreService.addUser(user.uid, userForFirestore);

@@ -6,9 +6,9 @@ import {
   FlatList,
   Image,
   ScrollView,
+  Carousel
 } from 'react-native';
 
-// Dummy Data - replace these with actual data from your backend
 const featuredPubs = [
   {id: 'p1', name: 'Pub 1', image: 'https://picsum.photos/220'},
   {id: 'p2', name: 'Pub 2', image: 'https://picsum.photos/420'},
