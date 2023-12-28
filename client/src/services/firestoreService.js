@@ -5,13 +5,13 @@ import '@react-native-firebase/firestore';
 const firestoreService = {
 
   checkUsernameExists: async (username) => {
-    const userRef = firebase.firestore().collection('users');
+    const userRef = firebase.firestore().collection('user');
     const snapshot = await userRef.where('username', '==', username).get();
     return !snapshot.empty;
   },
 
   checkEmailExists: async (email) => {
-    const userRef = firebase.firestore().collection('users');
+    const userRef = firebase.firestore().collection('user');
     const snapshot = await userRef.where('email', '==', email).get();
     return !snapshot.empty;
   },
@@ -19,7 +19,7 @@ const firestoreService = {
   addUser: async (uid, user) => {
     try {
       const db = firebase.firestore();
-      await db.collection('users').doc(uid).set(user);
+      await db.collection('user').doc(uid).set(user);
     } catch (error) {
       console.error('Error adding user:', error);
       throw error;
@@ -29,7 +29,7 @@ const firestoreService = {
   getUser: async (uid) => {
     try {
       const db = firebase.firestore();
-      const docRef = await db.collection('users').doc(uid).get();
+      const docRef = await db.collection('user').doc(uid).get();
       if (docRef.exists) {
         return { id: docRef.id, ...docRef.data() };
       } else {

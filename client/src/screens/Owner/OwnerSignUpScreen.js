@@ -38,11 +38,11 @@ const OwnerSignUpScreen = ({ navigation }) => {
       if (userCredential && userCredential.user) {
         const { user } = userCredential;
         const userForFirestore = {
-          name: name,
+          displayName: name,
           email: user.email,
           phone: phone,
           addresses: addresses,
-          userUID: user.uid,
+          uid: user.uid,
           role: 'owner',
         };
         await firestoreService.addUser(user.uid, userForFirestore);
