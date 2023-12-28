@@ -1,83 +1,70 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
-  FlatList,
-  TouchableOpacity,
   StyleSheet,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
   Image,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 
-const ChatScreen = () => {
-  const navigation = useNavigation();
+const Tab = createMaterialTopTabNavigator();
 
-  // Dummy chat data
-  const chats = [
-    {
-      userId: 'user1',
-      userName: 'Alice',
-      lastMessage: 'Hey, how are you doing?',
-      avatar: 'https://example.com/avatar1.jpg',
-      lastMessageTime: '10:30 AM',
-    },
-    {
-      userId: 'user2',
-      userName: 'Bob',
-      lastMessage: 'Are we still on for Friday?',
-      avatar: 'https://example.com/avatar2.jpg',
-      lastMessageTime: 'Yesterday',
-    },
-    {
-      userId: 'user3',
-      userName: 'Charlie',
-      lastMessage: 'That sounds great!',
-      avatar: 'https://example.com/avatar3.jpg',
-      lastMessageTime: '2 days ago',
-    },
-    // ... add more chat sessions as needed
-  ];
+const gardenMessages = [
+  {id: '1', text: 'Hello everyone!', userName: 'User1'},
+  {id: '2', text: 'Welcome to the Beer Garden!', userName: 'User2'},
+  {id: '3', text: 'This is a test message', userName: 'User3'},
+];
+const friendsChats = [
+  {
+    userId: 'user1',
+    userName: 'Alice',
+    lastMessage: 'Hey, how are you doing?',
+    avatar: 'https://example.com/avatar1.jpg',
+    lastMessageTime: '10:30 AM',
+  },
+  {
+    userId: 'user2',
+    userName: 'Bob',
+    lastMessage: 'Are we still on for Friday?',
+    avatar: 'https://example.com/avatar2.jpg',
+    lastMessageTime: 'Yesterday',
+  },
+  {
+    userId: 'user3',
+    userName: 'Charlie',
+    lastMessage: 'That sounds great!',
+    avatar: 'https://example.com/avatar3.jpg',
+    lastMessageTime: '2 days ago',
+  },
+];
+const groupsChats = [
+  {
+    userId: 'user4',
+    userName: 'Beer Garden',
+    lastMessage: 'Welcome to the Beer Garden!',
+    avatar: 'https://example.com/avatar4.jpg',
+    lastMessageTime: '10:30 AM',
+  },
+  {
+    userId: 'user5',
+    userName: 'Beer Garden',
+    lastMessage: 'Welcome to the Beer Garden!',
+    avatar: 'https://example.com/avatar5.jpg',
+    lastMessageTime: 'Yesterday',
+  },
+];
 
-  // Dummy data for a specific chat conversation with "Alice"
-  const specificChatWithAlice = [
-    // Messages between the current user and "Alice"
-    {
-      messageId: 'm1',
-      text: 'Hey, how are you doing?',
-      senderId: 'user1',
-      timestamp: '10:20 AM',
-    },
-    {
-      messageId: 'm2',
-      text: 'I’m good, thanks! Working on the project right now.',
-      senderId: 'currentUser',
-      timestamp: '10:25 AM',
-    },
-    // ... more messages
-  ];
-
-  // State to hold the specific chat data
-  const [currentChat, setCurrentChat] = useState([]);
-
-  // Open chat with Alice when any chat item is clicked (for demonstration)
-  const openChat = (item) => {
-    navigation.navigate('SpecificChat', { 
+const ChatList = ({chats, navigation}) => {
+  const openChat = item => {
+    navigation.navigate('SpecificChat', {
       userId: item.userId,
       userName: item.userName,
-      userAvatar: item.avatar
     });
   };
-  
 
-  // Render item for specific chat messages
-  const renderMessageItem = ({item}) => (
-    <View style={styles.messageItem}>
-      <Text style={styles.messageText}>{item.text}</Text>
-      <Text style={styles.messageTime}>{item.timestamp}</Text>
-    </View>
-  );
-
-  // Render Item for the FlatList
   const renderChatItem = ({item}) => (
     <TouchableOpacity style={styles.chatItem} onPress={() => openChat(item)}>
       <Image source={{uri: item.avatar}} style={styles.avatar} />
@@ -89,24 +76,95 @@ const ChatScreen = () => {
   );
 
   return (
+    <FlatList
+      data={chats}
+      renderItem={renderChatItem}
+      keyExtractor={item => item.userId}
+    />
+  );
+};
+
+const GardenChat = () => {
+  const [inputText, setInputText] = useState('');
+  const [messages, setMessages] = useState(gardenMessages); /* const [messages, setMessages] = useState([]); */
+  const flatListRef = useRef();
+
+  const sendMessage = () => {
+    if (inputText.trim()) {
+      const newMessage = {
+        id: new Date().getTime().toString(),
+        text: inputText,
+        userName: 'You',
+        time: new Date().toLocaleTimeString(),
+      };
+      setMessages(prevMessages => [...prevMessages, newMessage]);
+      setInputText('');
+      setTimeout(() => flatListRef.current.scrollToEnd({animated: true}), 100);
+    }
+  };
+
+  const renderMessageItem = ({item}) => (
+    <View
+      style={[
+        styles.messageItem,
+        item.userName === 'You'
+          ? styles.currentUserMessage
+          : styles.otherUserMessage,
+      ]}>
+      <Text style={styles.messageUserName}>{item.userName}</Text>
+      <Text style={styles.messageText}>{item.text}</Text>
+      <Text style={styles.messageTime}>{item.time}</Text>
+    </View>
+  );
+
+  return (
     <View style={styles.container}>
       <FlatList
-        data={chats.length > 0 ? chats : currentChat} // Display specific chat if available
-        renderItem={chats.length > 0 ? renderChatItem : renderMessageItem}
-        keyExtractor={item => item.messageId || item.userId}
+        ref={flatListRef}
+        data={messages}
+        renderItem={renderMessageItem}
+        keyExtractor={item => item.id}
+        inverted={false}
       />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Type a message..."
+          value={inputText}
+          onChangeText={setInputText}
+        />
+        <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
+          <Text style={styles.sendButtonText}>Send</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
-// Styles following the Beer Garden theme
+const FriendsChat = ({navigation}) => (
+  <ChatList chats={friendsChats} navigation={navigation} />
+);
+const GroupsChat = ({navigation}) => (
+  <ChatList chats={groupsChats} navigation={navigation} />
+);
+
+const ChatScreen = () => (
+  <Tab.Navigator screenOptions={{tabBarStyle: styles.tabBar}}>
+    <Tab.Screen name="Garden" component={GardenChat} />
+    <Tab.Screen name="Friends">
+      {props => <FriendsChat {...props} />}
+    </Tab.Screen>
+    <Tab.Screen name="Groups">{props => <GroupsChat {...props} />}</Tab.Screen>
+  </Tab.Navigator>
+);
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f1e7', // Cream color for background
+    backgroundColor: '#f8f1e7',
   },
   chatItem: {
-    backgroundColor: '#355E3B', // Deep green for chat items
+    backgroundColor: '#355E3B',
     padding: 15,
     borderRadius: 10,
     marginVertical: 5,
@@ -124,7 +182,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   chatTitle: {
-    color: '#FFF', // White text for contrast
+    color: '#FFF',
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -132,23 +190,59 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 14,
   },
+  tabBar: {
+    /* backgroundColor: '#673AB7', */
+  },
   messageItem: {
-    // Style for specific chat messages
     padding: 10,
-    backgroundColor: '#e7e7e7', // Example: Light grey for message bubbles
-    margin: 5,
-    borderRadius: 5,
+    marginVertical: 5,
+    borderRadius: 10,
+    maxWidth: '70%',
     alignSelf: 'flex-start',
   },
+  currentUserMessage: {
+    backgroundColor: '#673AB7',
+    alignSelf: 'flex-end',
+    marginRight: 10,
+  },
+  otherUserMessage: {
+    backgroundColor: '#355E3B',
+    marginLeft: 10,
+  },
+  messageUserName: {
+    fontWeight: 'bold',
+  },
   messageText: {
-    // Style for message text
+    color: '#FFF',
   },
   messageTime: {
-    // Style for message timestamp
+    alignSelf: 'flex-end',
     fontSize: 10,
-    color: '#999',
+    color: '#FFF',
+    marginTop: 5,
   },
-  // ... add more styles as needed
+  inputContainer: {
+    flexDirection: 'row',
+    padding: 10,
+    backgroundColor: '#f8f1e7',
+  },
+  input: {
+    flex: 1,
+    borderColor: '#673AB7',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 8,
+    backgroundColor: '#FFF',
+    marginRight: 10,
+  },
+  sendButton: {
+    backgroundColor: '#673AB7',
+    padding: 10,
+    borderRadius: 10,
+  },
+  sendButtonText: {
+    color: '#FFF',
+  },
 });
 
 export default ChatScreen;
