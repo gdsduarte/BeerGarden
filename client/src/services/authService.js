@@ -13,6 +13,11 @@ const authService = {
     return unsubscribe;
   },
 
+  /* checkEmailVerified: (callback) => {
+    const unsubscribe = auth().onIdTokenChanged(callback);
+    return unsubscribe;
+  }, */
+
   signUp: async (email, password) => {
     try {
       const userCredential = await auth().createUserWithEmailAndPassword(email, password);

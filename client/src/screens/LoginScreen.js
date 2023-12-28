@@ -16,6 +16,13 @@ const LoginScreen = () => {
       .then(async (response) => {
         if (response && response.user) {
           const uid = response.user.uid;
+          const isEmailVerified = response.user.emailVerified;
+  
+          if (!isEmailVerified) {
+            alert("Please verify your email before signing in.");
+            return;
+          }
+  
           try {
             const user = await firestoreService.getUser(uid);
             if (user) {
@@ -35,18 +42,7 @@ const LoginScreen = () => {
         alert(error);
       });
   };
-
-  const handleGoogleLogin = async () => {
-    // handle Google login logic here
-    /* try {
-      await authService.signInWithGoogle();
-      navigation.navigate('Home');
-    } catch (error) {
-      console.error("Error logging in with Google:", error.message);
-      // You can also show an alert or any other UI feedback for the error
-    } */
-  };
-
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
@@ -70,7 +66,6 @@ const LoginScreen = () => {
       />
 
       <Button title="Login" onPress={handleLogin} />
-      <Button title="Login with Google" onPress={handleGoogleLogin} />
 
       <TouchableOpacity onPress={() => {navigation.navigate('ForgotPassword')}}>
         <Text style={styles.linkText}>Forgot Password?</Text>

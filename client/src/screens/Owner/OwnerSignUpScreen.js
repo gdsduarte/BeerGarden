@@ -41,7 +41,9 @@ const OwnerSignUpScreen = ({ navigation }) => {
           name: name,
           email: user.email,
           phone: phone,
+          addresses: addresses,
           userUID: user.uid,
+          role: 'owner',
         };
         await firestoreService.addUser(user.uid, userForFirestore);
         alert("User registered successfully, please confirm your email address.");
