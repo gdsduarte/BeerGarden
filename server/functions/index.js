@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 /* eslint-disable max-len */
 const functions = require("firebase-functions");
 const express = require("express");
