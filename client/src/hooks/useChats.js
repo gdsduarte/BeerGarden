@@ -7,7 +7,7 @@ const useChats = (userId, chatType) => {
 
   useEffect(() => {
     const unsubscribe = firestore()
-      .collection('chats')
+      .collection('group')
       .where('members', 'array-contains', userId)
       .where('type', '==', chatType)
       .orderBy('createdAt')

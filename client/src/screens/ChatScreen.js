@@ -48,14 +48,14 @@ const GardenChat = ({navigation}) => {
   );
 };
 
-const FriendsChat = ({ navigation }) => {
-  const { currentUserUID } = useContext(AuthContext);
+const FriendsChat = ({navigation}) => {
+  const {currentUserUID} = useContext(AuthContext);
   const friendsChats = useChats(currentUserUID, 'private');
   return <ChatList chats={friendsChats} navigation={navigation} />;
 };
 
-const GroupsChat = ({ navigation }) => {
-  const { currentUserUID } = useContext(AuthContext);
+const GroupsChat = ({navigation}) => {
+  const {currentUserUID} = useContext(AuthContext);
   const groupsChats = useChats(currentUserUID, 'group');
   return <ChatList chats={groupsChats} navigation={navigation} />;
 };

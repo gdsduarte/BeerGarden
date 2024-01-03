@@ -1,4 +1,4 @@
-import React, {useState, useLayoutEffect, useRef} from 'react';
+import React, {useState, useLayoutEffect, useRef, useContext} from 'react';
 import {
   View,
   Text,
@@ -8,39 +8,37 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
-
-const chatMessages = [
-  {id: '1', text: 'Hello everyone!', userName: 'User1'},
-  {id: '2', text: 'Welcome to the Beer Garden!', userName: 'User2'},
-  {id: '3', text: 'This is a test message', userName: 'User3'},
-];
+import useChatMessages from '../hooks/useChatMessages';
+import AuthContext from '../contexts/AuthContext';
 
 const SpecificChatScreen = ({route, navigation}) => {
-  const {userId, userName, userAvatar} = route.params;
+  const {chatId} = route.params;
+  const {currentUserUID} = useContext(AuthContext);
+  const {messages, sendMessage} = useChatMessages(chatId);
   const [inputText, setInputText] = useState('');
-  const [messages, setMessages] = useState(chatMessages); /* const [messages, setMessages] = useState([]); */
   const flatListRef = useRef();
+
+  // Placeholder values for chat details
+  const chatName = 'Chat Name';
+  const chatAvatar = 'https://example.com/avatar.jpg';
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
-      title: userName,
+      title: chatName,
       headerRight: () => (
-        <Image source={{uri: userAvatar}} style={styles.avatar} />
+        <Image source={{uri: chatAvatar}} style={styles.avatar} />
       ),
       tabBarVisible: false,
     });
-  }, [navigation, userName, userAvatar]);
+  }, [navigation, chatName, chatAvatar]);
 
-  const sendMessage = () => {
+  const handleSendMessage = () => {
     if (inputText.trim()) {
-      const newMessage = {
-        id: new Date().getTime().toString(),
-        text: inputText,
-        userName: 'You',
-        time: new Date().toLocaleTimeString(),
-      };
-      setMessages(prevMessages => [...prevMessages, newMessage]);
+      sendMessage({
+        sentBY: currentUserUID,
+        messageText: inputText,
+      });
       setInputText('');
       setTimeout(() => flatListRef.current.scrollToEnd({animated: true}), 100);
     }
@@ -50,12 +48,14 @@ const SpecificChatScreen = ({route, navigation}) => {
     <View
       style={[
         styles.messageItem,
-        item.userName === 'You'
-          ? styles.currentUserMessage
-          : styles.otherUserMessage,
+        item.sentBy === currentUserUID
+          ? styles.otherUserMessage
+          : styles.currentUserMessage,
       ]}>
-      <Text style={styles.messageText}>{item.text}</Text>
-      <Text style={styles.messageTime}>{item.time}</Text>
+      <Text style={styles.messageText}>{item.messageText}</Text>
+      <Text style={styles.messageTime}>
+        {item.sentAt.toDate().toLocaleTimeString()}
+      </Text>
     </View>
   );
 
@@ -74,7 +74,7 @@ const SpecificChatScreen = ({route, navigation}) => {
           value={inputText}
           onChangeText={setInputText}
         />
-        <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
+        <TouchableOpacity onPress={handleSendMessage} style={styles.sendButton}>
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
       </View>
