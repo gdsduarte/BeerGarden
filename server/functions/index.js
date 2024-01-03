@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 /* eslint-disable max-len */
 const functions = require("firebase-functions");
 const express = require("express");
@@ -6,6 +7,8 @@ const cors = require("cors");
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
+
+const chatController = require("./routes/api/chat/controller");
 
 // Initialize Express app
 const app = express();
@@ -40,9 +43,24 @@ exports.notifyUserOnReviewReply = reviewFunctions.notifyUserOnReviewReply;
 exports.notifyOnReservationCreation = reservationFunctions.notifyOnReservationCreation;
 exports.sendNewMessageNotification = notificationFunctions.sendNewMessageNotification;
 
-// The helloWorld example function
-exports.helloWorld = functions.https.onRequest((request, response) => {
-  response.send("Hello from Firebase!");
+// Cloud Functions for chat
+exports.getChats = functions.https.onCall((data, context) => {
+  return chatController.getChats(data, context);
+});
+exports.getChat = functions.https.onCall((data, context) => {
+  return chatController.getChat(data, context);
+});
+exports.createChat = functions.https.onCall((data, context) => {
+  return chatController.createChat(data, context);
+});
+exports.updateChat = functions.https.onCall((data, context) => {
+  return chatController.updateChat(data, context);
+});
+exports.deleteChat = functions.https.onCall((data, context) => {
+  return chatController.deleteChat(data, context);
+});
+exports.deleteMessage = functions.https.onCall((data, context) => {
+  return chatController.deleteMessage(data, context);
 });
 
 // External Google API functions

@@ -1,77 +1,19 @@
-import React, {useState, useRef} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TextInput,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
+import React, {useContext} from 'react';
+import {Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
+import useChats from '../hooks/useChats';
+import useNearbyPubs from '../hooks/useNearbyPubs';
+import AuthContext from '../contexts/AuthContext';
 
 const Tab = createMaterialTopTabNavigator();
 
-const gardenMessages = [
-  {id: '1', text: 'Hello everyone!', userName: 'User1'},
-  {id: '2', text: 'Welcome to the Beer Garden!', userName: 'User2'},
-  {id: '3', text: 'This is a test message', userName: 'User3'},
-];
-const friendsChats = [
-  {
-    userId: 'user1',
-    userName: 'Alice',
-    lastMessage: 'Hey, how are you doing?',
-    avatar: 'https://example.com/avatar1.jpg',
-    lastMessageTime: '10:30 AM',
-  },
-  {
-    userId: 'user2',
-    userName: 'Bob',
-    lastMessage: 'Are we still on for Friday?',
-    avatar: 'https://example.com/avatar2.jpg',
-    lastMessageTime: 'Yesterday',
-  },
-  {
-    userId: 'user3',
-    userName: 'Charlie',
-    lastMessage: 'That sounds great!',
-    avatar: 'https://example.com/avatar3.jpg',
-    lastMessageTime: '2 days ago',
-  },
-];
-const groupsChats = [
-  {
-    userId: 'user4',
-    userName: 'Beer Garden',
-    lastMessage: 'Welcome to the Beer Garden!',
-    avatar: 'https://example.com/avatar4.jpg',
-    lastMessageTime: '10:30 AM',
-  },
-  {
-    userId: 'user5',
-    userName: 'Beer Garden',
-    lastMessage: 'Welcome to the Beer Garden!',
-    avatar: 'https://example.com/avatar5.jpg',
-    lastMessageTime: 'Yesterday',
-  },
-];
-
 const ChatList = ({chats, navigation}) => {
-  const openChat = item => {
-    navigation.navigate('SpecificChat', {
-      userId: item.userId,
-      userName: item.userName,
-    });
-  };
-
   const renderChatItem = ({item}) => (
-    <TouchableOpacity style={styles.chatItem} onPress={() => openChat(item)}>
-      <Image source={{uri: item.avatar}} style={styles.avatar} />
-      <View style={styles.chatDetails}>
-        <Text style={styles.chatTitle}>{item.userName}</Text>
-        <Text style={styles.chatSnippet}>{item.lastMessage}</Text>
-      </View>
+    <TouchableOpacity
+      style={styles.chatItem}
+      onPress={() => navigation.navigate('SpecificChat', {chatId: item.id})}>
+      <Text style={styles.chatTitle}>{item.title}</Text>
+      {/* other chat item details */}
     </TouchableOpacity>
   );
 
@@ -79,82 +21,50 @@ const ChatList = ({chats, navigation}) => {
     <FlatList
       data={chats}
       renderItem={renderChatItem}
-      keyExtractor={item => item.userId}
+      keyExtractor={item => item.id}
     />
   );
 };
 
-const GardenChat = () => {
-  const [inputText, setInputText] = useState('');
-  const [messages, setMessages] = useState(gardenMessages); /* const [messages, setMessages] = useState([]); */
-  const flatListRef = useRef();
+const GardenChat = ({navigation}) => {
+  const nearbyPubs = useNearbyPubs();
 
-  const sendMessage = () => {
-    if (inputText.trim()) {
-      const newMessage = {
-        id: new Date().getTime().toString(),
-        text: inputText,
-        userName: 'You',
-        time: new Date().toLocaleTimeString(),
-      };
-      setMessages(prevMessages => [...prevMessages, newMessage]);
-      setInputText('');
-      setTimeout(() => flatListRef.current.scrollToEnd({animated: true}), 100);
-    }
-  };
-
-  const renderMessageItem = ({item}) => (
-    <View
-      style={[
-        styles.messageItem,
-        item.userName === 'You'
-          ? styles.currentUserMessage
-          : styles.otherUserMessage,
-      ]}>
-      <Text style={styles.messageUserName}>{item.userName}</Text>
-      <Text style={styles.messageText}>{item.text}</Text>
-      <Text style={styles.messageTime}>{item.time}</Text>
-    </View>
+  // Define how each pub item is rendered
+  const renderPubItem = ({item}) => (
+    <TouchableOpacity
+      style={styles.pubItem}
+      onPress={() => navigation.navigate('SpecificChat', {pubId: item.id})}>
+      <Text style={styles.pubTitle}>{item.name}</Text>
+      {/* Add other pub details */}
+    </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        renderItem={renderMessageItem}
-        keyExtractor={item => item.id}
-        inverted={false}
-      />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Type a message..."
-          value={inputText}
-          onChangeText={setInputText}
-        />
-        <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
-          <Text style={styles.sendButtonText}>Send</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    <FlatList
+      data={nearbyPubs}
+      renderItem={renderPubItem}
+      keyExtractor={item => item.id}
+    />
   );
 };
 
-const FriendsChat = ({navigation}) => (
-  <ChatList chats={friendsChats} navigation={navigation} />
-);
-const GroupsChat = ({navigation}) => (
-  <ChatList chats={groupsChats} navigation={navigation} />
-);
+const FriendsChat = ({navigation}) => {
+  const {currentUserUID} = useContext(AuthContext);
+  const friendsChats = useChats(currentUserUID, 'private');
+  return <ChatList chats={friendsChats} navigation={navigation} />;
+};
+
+const GroupsChat = ({navigation}) => {
+  const {currentUserUID} = useContext(AuthContext);
+  const groupsChats = useChats(currentUserUID, 'group');
+  return <ChatList chats={groupsChats} navigation={navigation} />;
+};
 
 const ChatScreen = () => (
-  <Tab.Navigator screenOptions={{tabBarStyle: styles.tabBar}}>
+  <Tab.Navigator>
     <Tab.Screen name="Garden" component={GardenChat} />
-    <Tab.Screen name="Friends">
-      {props => <FriendsChat {...props} />}
-    </Tab.Screen>
-    <Tab.Screen name="Groups">{props => <GroupsChat {...props} />}</Tab.Screen>
+    <Tab.Screen name="Friends" component={FriendsChat} />
+    <Tab.Screen name="Groups" component={GroupsChat} />
   </Tab.Navigator>
 );
 

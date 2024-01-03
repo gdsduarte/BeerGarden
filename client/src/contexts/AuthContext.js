@@ -1,7 +1,22 @@
 /* eslint-disable prettier/prettier */
-import { createContext } from 'react';
+import React, { createContext, useState } from 'react';
 
-// Create an authentication context to manage user authentication state
-const AuthContext = createContext();
+const AuthContext = createContext({
+  currentUserUID: null,
+  setCurrentUserUID: () => {},
+});
+
+export const AuthProvider = ({ children }) => {
+  const [currentUserUID, setCurrentUserUID] = useState(null);
+
+  //const signIn = async () => { /* ... */ };
+  //const signOut = async () => { /* ... */ };
+
+  return (
+    <AuthContext.Provider value={{ currentUserUID, setCurrentUserUID }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
 export default AuthContext;
