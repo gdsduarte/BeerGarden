@@ -2,6 +2,15 @@
 /* eslint-disable quotes */
 const admin = require("firebase-admin");
 const db = admin.firestore();
+const {GeoFirestore} = require('geofirestore');
+
+// Initialize GeoFirestore with Firestore
+const geofirestore = new GeoFirestore(db);
+
+// Function to get a GeoCollection reference
+const getGeocollection = (collection) => {
+  return geofirestore.collection(collection);
+};
 
 const addDocument = async (collection, data) => {
   const docRef = await db.collection(collection).add(data);
@@ -35,4 +44,5 @@ module.exports = {
   deleteDocument,
   getDocument,
   getDocuments,
+  getGeocollection,
 };
