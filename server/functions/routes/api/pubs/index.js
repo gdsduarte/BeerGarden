@@ -9,5 +9,6 @@ router.get("/:id", pubController.getPub);
 router.post("/", pubController.createPub);
 router.put("/:id", pubController.updatePub);
 router.delete("/:id", pubController.deletePub);
+router.get("/nearby", pubController.queryNearbyPubs);
 
 module.exports = router;

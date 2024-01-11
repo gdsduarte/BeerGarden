@@ -8,6 +8,8 @@ const cors = require("cors");
 // Initialize Firebase Admin SDK
 admin.initializeApp();
 
+// Importing controllers
+const pubController = require("./routes/api/pubs/controller");
 const chatController = require("./routes/api/chat/controller");
 
 // Initialize Express app
@@ -61,6 +63,11 @@ exports.deleteChat = functions.https.onCall((data, context) => {
 });
 exports.deleteMessage = functions.https.onCall((data, context) => {
   return chatController.deleteMessage(data, context);
+});
+
+// Cloud Function for querying nearby pubs
+exports.queryNearbyPubs = functions.https.onCall((data, context) => {
+  return pubController.queryNearbyPubs(data, context);
 });
 
 // External Google API functions
