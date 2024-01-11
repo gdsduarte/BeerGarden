@@ -1,82 +1,27 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   FlatList,
   Modal,
+  Image,
 } from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import QRCode from 'react-native-qrcode-svg';
+import useReservations from '../hooks/useReservations';
+import AuthContext from '../contexts/AuthContext';
+import Loading from '../components/common/Loading';
+import {format} from 'date-fns';
 
 const Tab = createMaterialTopTabNavigator();
 
-// Dummy data for bookings
-const bookingsData = {
-  active: [
-    {
-      id: 'b1',
-      pubId: 'p1',
-      pubName: 'The Beer Garden',
-      name: 'Friday Night Gathering',
-      date: '2023-12-15',
-      time: '19:00',
-      numberOfPeople: 4,
-      specialRequests: 'Near the window',
-      status: 'Approved',
-      tableNumber: 5,
-      qrCodeData: 'b1-qr-code',
-    },
-    {
-      id: 'b2',
-      pubId: 'p2',
-      pubName: 'Bad Bobs',
-      name: 'Birthday Celebration',
-      date: '2023-12-20',
-      time: '20:00',
-      numberOfPeople: 6,
-      specialRequests: 'Cake at 9 PM',
-      status: 'Pending',
-      tableNumber: null, // No table assigned yet
-      qrCodeData: 'b2-qr-code',
-    },
-    // ... add more active bookings as needed
-  ],
-  archived: [
-    {
-      id: 'b3',
-      pubId: 'p3',
-      pubName: 'Madigans',
-      name: 'Team Lunch',
-      date: '2023-11-10',
-      time: '13:00',
-      numberOfPeople: 8,
-      specialRequests: 'Vegetarian options',
-      status: 'Passed',
-      tableNumber: 8,
-      qrCodeData: 'b3-qr-code',
-    },
-    {
-      id: 'b4',
-      pubId: 'p4',
-      pubName: 'The Lotts',
-      name: 'Business Meeting',
-      date: '2023-11-05',
-      time: '12:00',
-      numberOfPeople: 3,
-      specialRequests: '',
-      status: 'Cancelled',
-      tableNumber: null,
-      qrCodeData: 'b4-qr-code',
-    },
-    // ... add more archived bookings as needed
-  ],
-};
-
 const BookingItem = ({booking, navigation}) => {
   const [isQRCodeVisible, setQRCodeVisible] = useState(false);
+  // Format the date and time for display
+  const formattedDate = format(booking.time, 'dd/MM/yyyy');
+  const formattedTime = format(booking.time, 'HH:mm');
 
   const toggleQRCodeModal = () => {
     setQRCodeVisible(!isQRCodeVisible);
@@ -86,35 +31,39 @@ const BookingItem = ({booking, navigation}) => {
     navigation.navigate('BookingDetailsScreen', {booking});
   };
 
+  // Assuming QR code data needs to be generated. Replace with your logic.
+  const qrCodeData = `bookingId:${booking.id}`;
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.bookingItem} onPress={onBookingPress}>
         <View style={styles.bookingHeader}>
-          <Image source={{uri: booking.pubAvatar}} style={styles.pubAvatar} />
+          <Image
+            source={{uri: 'https://example.com/pubAvatar.jpg'}}
+            style={styles.pubAvatar}
+          />
           <Text style={styles.pubName}>{booking.pubName}</Text>
-
-          {/* Conditionally render the QR code icon for non-archived bookings */}
-          {booking.status !== 'Passed' && booking.status !== 'Cancelled' && (
+          <Text style={styles.pubName}>{formattedDate} {formattedTime}</Text>
+          {booking.group !== 'archived' && (
             <TouchableOpacity
               onPress={toggleQRCodeModal}
               style={styles.qrCodeIcon}>
-              <QRCode value={booking.qrCodeData} size={30} />
+              <QRCode value={qrCodeData} size={30} />
             </TouchableOpacity>
           )}
         </View>
-        <Text style={styles.bookingTitle}>{booking.name}</Text>
+        <Text style={styles.bookingTitle}>{booking.userName}</Text>
         <Text style={styles.bookingDetail}>Status: {booking.status}</Text>
-        {/* QR Code Modal */}
         <Modal
           visible={isQRCodeVisible}
           transparent={false}
           onRequestClose={toggleQRCodeModal}>
           <View style={styles.fullScreenModal}>
-            <Text style={styles.modalTitle}>{booking.name}</Text>
-            <Text style={styles.modalSubtitle}>
-              {booking.pubName} - {booking.date}
+            <Text style={styles.modalTitle}>{booking.userName}</Text>
+            <Text style={styles.bookingDetail}>
+              Date: {formattedDate} Time: {formattedTime}
             </Text>
-            <QRCode value={booking.qrCodeData} size={200} />
+            <QRCode value={qrCodeData} size={200} />
             <TouchableOpacity
               onPress={toggleQRCodeModal}
               style={styles.closeButton}>
@@ -127,34 +76,51 @@ const BookingItem = ({booking, navigation}) => {
   );
 };
 
-const BookingsList = ({ bookings, navigation }) => (
-  <View style={styles.container}>
-    <FlatList
-      data={bookings}
-      renderItem={({ item }) => <BookingItem booking={item} navigation={navigation} />}
-      keyExtractor={item => item.id}
-    />
-  </View>
+const BookingsList = ({bookings, navigation}) => (
+  <FlatList
+    data={bookings}
+    renderItem={({item}) => (
+      <BookingItem booking={item} navigation={navigation} />
+    )}
+    keyExtractor={item => item.id}
+    style={styles.list}
+  />
 );
 
-const ActiveBookings = ({ navigation }) => (
-  <BookingsList bookings={bookingsData.active} navigation={navigation} />
-);
+const BookingsTab = ({navigation, group}) => {
+  const {currentUserUID} = useContext(AuthContext);
+  const [reservations, loading] = useReservations(currentUserUID);
 
-const ArchivedBookings = ({ navigation }) => (
-  <BookingsList bookings={bookingsData.archived} navigation={navigation} />
-);
+  if (loading) {
+    return <Loading />;
+  }
+
+  // Filtering based on 'group' field in Firestore
+  const bookings = reservations.filter(
+    reservation => reservation.group === group.toLowerCase(),
+  );
+
+  return <BookingsList bookings={bookings} navigation={navigation} />;
+};
 
 const BookingsScreen = () => {
   return (
-    <Tab.Navigator>
-      <Tab.Screen name="Active" component={ActiveBookings} />
-      <Tab.Screen name="Archived" component={ArchivedBookings} />
+    <Tab.Navigator screenOptions={{tabBarStyle: styles.tabBar}}>
+      <Tab.Screen name="Upcoming">
+        {props => <BookingsTab {...props} group="Active" />}
+      </Tab.Screen>
+      <Tab.Screen name="Past">
+        {props => <BookingsTab {...props} group="Archived" />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };
 
 const styles = StyleSheet.create({
+  list: {
+    flex: 1,
+    backgroundColor: '#f8f1e7',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f8f1e7', // Ensure this covers the entire view
@@ -227,9 +193,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   // Additional styles for top tab navigator, if necessary
-  tabBar: {
+  /* tabBar: {
     backgroundColor: '#673AB7', // Dark purple for the tab bar
-  },
+  }, */
   tabLabel: {
     fontSize: 16,
     color: '#FFF',
