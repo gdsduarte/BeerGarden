@@ -8,17 +8,22 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
+import {format} from 'date-fns';
 
 const BookingDetailsScreen = ({route, navigation}) => {
   const {booking} = route.params;
-  const isArchived = booking.status === 'Passed' || booking.status === 'Cancelled';
+  const isArchived =
+    booking.status === 'Passed' || booking.status === 'Cancelled';
   const [invitedFriends, setInvitedFriends] = useState([]); // State to track invited friends
+  // Convert Firestore Timestamps to JavaScript Date objects and format them
+  const formattedDate = format(booking.time, 'dd/MM/yyyy');
+  const formattedTime = format(booking.time, 'HH:mm');
 
   React.useLayoutEffect(() => {
-    navigation.setOptions({ title: booking.pubName });
+    navigation.setOptions({title: booking.pubName});
   }, [navigation, booking.pubName]);
 
-  const inviteFriend = (friend) => {
+  const inviteFriend = friend => {
     setInvitedFriends([...invitedFriends, friend]);
     // Close search modal or reset search bar
   };
@@ -46,14 +51,14 @@ const BookingDetailsScreen = ({route, navigation}) => {
       </TouchableOpacity>
       <View style={styles.detailsContainer}>
         <Text style={styles.title}>{booking.name}</Text>
-        <Text style={styles.detail}>Date: {booking.date}</Text>
-        <Text style={styles.detail}>Time: {booking.time}</Text>
+        <Text style={styles.detail}>Date: {formattedDate}</Text>
+        <Text style={styles.detail}>Time: {formattedTime}</Text>
         <Text style={styles.detail}>Table Number: {booking.tableNumber}</Text>
         <Text style={styles.detail}>
-          Number of People: {booking.numberOfPeople}
+          Number of People: {booking.partySize}
         </Text>
         <Text style={styles.detail}>
-          Special Requests: {booking.specialRequests}
+          Special Requests: {booking.specialRequest}
         </Text>
         <Text style={styles.detail}>Status: {booking.status}</Text>
         <TouchableOpacity style={styles.qrCodeIcon} onPress={shareQRCode}>
@@ -61,7 +66,11 @@ const BookingDetailsScreen = ({route, navigation}) => {
         </TouchableOpacity>
         <View style={styles.invitedFriendsContainer}>
           {invitedFriends.map(friend => (
-            <Image key={friend.id} source={{ uri: friend.avatar }} style={styles.friendAvatar} />
+            <Image
+              key={friend.id}
+              source={{uri: friend.avatar}}
+              style={styles.friendAvatar}
+            />
           ))}
         </View>
         {!isArchived && (
