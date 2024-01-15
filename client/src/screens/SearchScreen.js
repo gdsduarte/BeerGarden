@@ -105,7 +105,7 @@ const NearMeSearch = ({navigation}) => {
         value={searchRadius}
         onValueChange={value => setSearchRadius(value)}
       />
-      <Text>Search Radius: {searchRadius.toFixed(1)} km</Text>
+      <Text style={styles.radius}>Search Radius: {searchRadius.toFixed(1)} km</Text>
       <FlatList
         data={pubs}
         renderItem={({item}) => (
@@ -170,6 +170,11 @@ const SearchScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  radius: {
+    alignSelf: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   container: {
     flex: 1,
     padding: 20,
