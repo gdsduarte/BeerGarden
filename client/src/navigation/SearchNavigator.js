@@ -1,7 +1,7 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import SearchScreen from '../screens/SearchScreen';
-import PubDetailsScreen from '../screens/PubDetailsScreen';
+import PubScreen from '../screens/PubScreen';
 
 const Stack = createStackNavigator();
 
@@ -10,8 +10,8 @@ const SearchNavigator = () => {
     <Stack.Navigator>
       <Stack.Screen name="SearchArea" component={SearchScreen} />
       <Stack.Screen
-        name="PubDetailsScreen"
-        component={PubDetailsScreen}
+        name="PubScreen"
+        component={PubScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

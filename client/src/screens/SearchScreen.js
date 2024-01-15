@@ -112,7 +112,7 @@ const NearMeSearch = ({navigation}) => {
           <Card
             item={item}
             onPress={() =>
-              navigation.navigate('PubDetailsScreen', {pubId: item.id})
+              navigation.navigate('PubScreen', {pubId: item.id})
             }
           />
         )}
