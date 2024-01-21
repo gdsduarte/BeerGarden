@@ -1,10 +1,12 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
-import LoginScreen from '../screens/LoginScreen';
-import SignupSelectionScreen from '../screens/SignupSelectionScreen';
+import {
+  LoginScreen,
+  SignupSelectionScreen,
+  UserSignUpScreen,
+  OwnerSignUpScreen,
+} from '../screens';
 import BottomTabNavigator from './BottomTabNavigator';
-import UserSignUpScreen from '../screens/User/UserSignUpScreen';
-import OwnerSignUpScreen from '../screens/Owner/OwnerSignUpScreen';
 
 const Stack = createStackNavigator();
 

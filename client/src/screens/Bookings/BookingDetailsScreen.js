@@ -14,7 +14,7 @@ const BookingDetailsScreen = ({route, navigation}) => {
   const {booking} = route.params;
   const isArchived =
     booking.status === 'Passed' || booking.status === 'Cancelled';
-  const [invitedFriends, setInvitedFriends] = useState([]); // State to track invited friends
+  const [invitedFriends, setInvitedFriends] = useState([]);
   // Convert Firestore Timestamps to JavaScript Date objects and format them
   const formattedDate = format(booking.time, 'dd/MM/yyyy');
   const formattedTime = format(booking.time, 'HH:mm');

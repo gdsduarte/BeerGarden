@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Button, TouchableOpacity } from 'react-native';
-import styles from '../styles/SignupSelectionScreenStyles';
-import { navigateWithAlert } from '../utils/navigationHelper';
+import styles from '../../styles/SignupSelectionScreenStyles';
+import { navigateWithAlert } from '../../utils/navigationHelper';
 
 const SignupSelectionScreen = ({ navigation }) => {
   return (

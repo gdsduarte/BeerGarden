@@ -1,7 +1,7 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
-import SearchScreen from '../screens/SearchScreen';
-import PubScreen from '../screens/PubScreen';
+import {SearchScreen, PubScreen} from '../screens';
+import MenuNavigator from './MenuNavigator';
 
 const Stack = createStackNavigator();
 
@@ -14,6 +14,7 @@ const SearchNavigator = () => {
         component={PubScreen}
         options={{headerShown: false}}
       />
+      <Stack.Screen name="MenuNavigator" component={MenuNavigator} />
     </Stack.Navigator>
   );
 };

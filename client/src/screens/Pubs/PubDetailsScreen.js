@@ -1,6 +1,6 @@
 import React from 'react';
 import {Text, Image, ScrollView, StyleSheet} from 'react-native';
-import usePubDetails from '../hooks/usePubDetails';
+import usePubDetails from '../../hooks/usePubDetails';
 
 const PubDetailsScreen = ({pubId}) => {
   const {pub, loading, error} = usePubDetails(pubId);

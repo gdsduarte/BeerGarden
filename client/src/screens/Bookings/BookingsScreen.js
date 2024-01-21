@@ -10,9 +10,9 @@ import {
 } from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import QRCode from 'react-native-qrcode-svg';
-import useReservations from '../hooks/useReservations';
-import AuthContext from '../contexts/AuthContext';
-import Loading from '../components/common/Loading';
+import useReservations from '../../hooks/useReservations';
+import AuthContext from '../../contexts/AuthContext';
+import Loading from '../../components/common/Loading';
 import {format} from 'date-fns';
 
 const Tab = createMaterialTopTabNavigator();

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import authService from '../../services/authService';
-import firestoreService from '../../services/firestoreService';
-import styles from '../../styles/signUpScreenStyles';
-import InputValidation from '../../components/common/InputValidation';
+import authService from '../../../services/authService';
+import firestoreService from '../../../services/firestoreService';
+import styles from '../../../styles/signUpScreenStyles';
+import InputValidation from '../../../components/common/InputValidation';
 
 const OwnerSignUpScreen = ({ navigation }) => {
   // Input states

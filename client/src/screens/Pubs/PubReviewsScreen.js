@@ -1,9 +1,9 @@
 import React, {useMemo} from 'react';
 import {View, Text, FlatList, StyleSheet} from 'react-native';
-import useReviews from '../hooks/useReviews';
+import useReviews from '../../hooks/useReviews';
 import {Rating} from 'react-native-ratings';
 
-const ReviewsScreen = ({pubId}) => {
+const PubReviewsScreen = ({pubId}) => {
   const {reviews, loading} = useReviews(pubId);
 
   const averageRating = useMemo(() => {
@@ -56,4 +56,4 @@ const styles = StyleSheet.create({
   // Add more styles as needed
 });
 
-export default ReviewsScreen;
+export default PubReviewsScreen;

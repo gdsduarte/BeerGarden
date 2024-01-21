@@ -2,34 +2,34 @@
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
-const useReviews = pubId => {
-  const [reviews, setReviews] = useState([]);
+const useFoodMenu = pubId => {
+  const [foodItems, setFoodItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = firestore()
-      .collection('pubReviews')
+      .collection('foods')
       .where('pubId', '==', pubId)
+      .orderBy('name')
       .onSnapshot(
         querySnapshot => {
-          const reviewsArray = querySnapshot.docs.map(doc => ({
+          const items = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
           }));
-          setReviews(reviewsArray);
+          setFoodItems(items);
           setLoading(false);
         },
         error => {
-          console.error('Error fetching reviews:', error);
+          console.error(error);
           setLoading(false);
         },
       );
 
-    // Unsubscribe from the listener when the component unmounts
     return () => unsubscribe();
   }, [pubId]);
 
-  return {reviews, loading};
+  return {foodItems, loading};
 };
 
-export default useReviews;
+export default useFoodMenu;

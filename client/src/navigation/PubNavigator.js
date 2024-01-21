@@ -1,7 +1,6 @@
 import React from 'react';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-import ReviewsScreen from '../screens/ReviewsScreen';
-import {PubDetailsScreen} from '../screens';
+import {PubDetailsScreen, PubReviewsScreen} from '../screens';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -12,7 +11,7 @@ const PubNavigator = ({pubId}) => {
         {() => <PubDetailsScreen pubId={pubId} />}
       </Tab.Screen>
       <Tab.Screen name="Reviews">
-        {() => <ReviewsScreen pubId={pubId} />}
+        {() => <PubReviewsScreen pubId={pubId} />}
       </Tab.Screen>
     </Tab.Navigator>
   );

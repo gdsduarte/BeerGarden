@@ -8,8 +8,8 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
-import useChatMessages from '../hooks/useChatMessages';
-import AuthContext from '../contexts/AuthContext';
+import useChatMessages from '../../hooks/useChatMessages';
+import AuthContext from '../../contexts/AuthContext';
 
 const SpecificChatScreen = ({route, navigation}) => {
   const {chatId} = route.params;
