@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, Text, StyleSheet, FlatList} from 'react-native';
+import {View, Text, StyleSheet, FlatList, ActivityIndicator} from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import MapView, {Marker} from 'react-native-maps';
 import usePubs from '../../hooks/usePubs';
@@ -9,6 +9,8 @@ import useAllMenuItems from '../../hooks/useAllMenuItems';
 import Slider from '@react-native-community/slider';
 import SearchBar from '../../components/common/SearchBar';
 import Card from '../../components/common/Card';
+import Loading from '../../components/common/Loading';
+
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -22,7 +24,7 @@ const NearMeSearch = ({navigation}) => {
   );
 
   if (loading || !userLocation.location) {
-    return <Text>Loading...</Text>;
+    return <Loading />;
   }
 
   if (userLocation.error) {
@@ -83,7 +85,7 @@ const PlacesSearch = () => {
   );
 
   if (loading) {
-    return <Text>Loading...</Text>;
+    return <Loading />;
   }
 
   return (
@@ -108,7 +110,7 @@ const GoodiesSearch = () => {
   };
 
   if (loading) {
-    return <Text>Loading...</Text>;
+    return <Loading />;
   }
 
   return (

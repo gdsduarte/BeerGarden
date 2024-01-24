@@ -1,11 +1,13 @@
 import React from 'react';
 import {Text, Image, ScrollView, StyleSheet} from 'react-native';
 import usePubDetails from '../../hooks/usePubDetails';
+import Loading from '../../components/common/Loading';
+
 
 const PubDetailsScreen = ({pubId}) => {
   const {pub, loading, error} = usePubDetails(pubId);
 
-  if (loading) return <Text>Loading...</Text>;
+  if (loading) return <Loading />;
   if (error || !pub) return <Text>Pub not found.</Text>;
 
   return (

@@ -18,7 +18,7 @@ function ChatNavigator({navigation}) {
 
   return (
     <Stack.Navigator>
-      <Stack.Screen name="ChatList" component={ChatScreen} />
+      <Stack.Screen name="ChatList" component={ChatScreen} options={{headerTitle: 'Chats'}} />
       <Stack.Screen name="SpecificChat" component={SpecificChatScreen} />
     </Stack.Navigator>
   );

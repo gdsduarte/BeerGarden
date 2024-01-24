@@ -2,6 +2,7 @@ import React, {useMemo} from 'react';
 import {View, Text, FlatList, StyleSheet} from 'react-native';
 import useReviews from '../../hooks/useReviews';
 import {Rating} from 'react-native-ratings';
+import Loading from '../../components/common/Loading';
 
 const PubReviewsScreen = ({pubId}) => {
   const {reviews, loading} = useReviews(pubId);
@@ -13,7 +14,7 @@ const PubReviewsScreen = ({pubId}) => {
     );
   }, [reviews]);
 
-  if (loading) return <Text>Loading reviews...</Text>;
+  if (loading) return <Loading />;
 
   return (
     <View style={styles.container}>

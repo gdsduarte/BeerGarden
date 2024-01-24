@@ -6,26 +6,25 @@ import {
   Text,
 } from 'react-native';
 import FoodCard from '../../../components/common/FoodCard';
-import useFoodMenu from '../../../hooks/useFoodMenu';
+import useDrinkMenu from '../../../hooks/useDrinkMenu.js';
 import {useNavigation} from '@react-navigation/native';
 import Loading from '../../../components/common/Loading';
 
-const FoodMenuScreen = ({pubId}) => {
-  const {foodItems, loading, error} = useFoodMenu(pubId);
+const DrinkMenuScreen = ({pubId}) => {
+  const {drinkItems, loading, error} = useDrinkMenu(pubId);
   const navigation = useNavigation();
 
   if (error) return <Text>Menu not found.</Text>;
   if (loading) {
     return <Loading />;
   }
-
-  if (foodItems.length === 0) {
-    return <Text>No food found.</Text>;
+  if (drinkItems.length === 0) {
+    return <Text>No drinks found.</Text>;
   }
 
   const handlePress = item => {
-    navigation.navigate('MenuNavigator', {
-      screen: 'FoodDetails',
+    navigation.navigate('DrinkNavigator', {
+      screen: 'DrinkDetails',
       params: {item},
     });
   };
@@ -37,7 +36,7 @@ const FoodMenuScreen = ({pubId}) => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={foodItems}
+        data={drinkItems}
         renderItem={renderItem}
         keyExtractor={item => item.id}
       />
@@ -53,4 +52,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FoodMenuScreen;
+export default DrinkMenuScreen;

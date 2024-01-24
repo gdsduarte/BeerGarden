@@ -7,10 +7,10 @@ const Tab = createMaterialTopTabNavigator();
 const PubNavigator = ({pubId}) => {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Details">
+      <Tab.Screen name="PubDetails" options={{title: 'Details'}}>
         {() => <PubDetailsScreen pubId={pubId} />}
       </Tab.Screen>
-      <Tab.Screen name="Reviews">
+      <Tab.Screen name="PubReviews" options={{title: 'Reviews'}}>
         {() => <PubReviewsScreen pubId={pubId} />}
       </Tab.Screen>
     </Tab.Navigator>

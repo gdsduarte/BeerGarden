@@ -5,15 +5,15 @@ import {
   FlatList,
   StyleSheet,
 } from 'react-native';
-import useFoodReviews from '../../../hooks/useFoodReviews';
+import useDrinkReviews from '../../../hooks/useDrinkReviews.js';
 import Loading from '../../../components/common/Loading';
 
 
-const FoodReviewsScreen = ({item}) => {
-  const {reviews, loading} = useFoodReviews(item.id);
+const DrinkReviewsScreen = ({item}) => {
+  const {reviews, loading} = useDrinkReviews(item.id);
 
   if (loading) {
-    return <Loading />;
+    return <Loading />
   }
 
   if (!reviews.length) {
@@ -47,4 +47,4 @@ const styles = StyleSheet.create({
   // Add more styles as needed
 });
 
-export default FoodReviewsScreen;
+export default DrinkReviewsScreen;

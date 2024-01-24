@@ -9,8 +9,6 @@ import AuthContext from './src/contexts/AuthContext';
 import LoginNavigator from './src/navigation/LoginNavigator';
 import Loading from './src/components/common/Loading';
 import BottomTabNavigator from './src/navigation/BottomTabNavigator';
-import NavigationContext from './src/contexts/NavigationContext';
-import MenuNavigator from '../client/src/navigation/MenuNavigator';
 
 if (!global.btoa) global.btoa = encode;
 if (!global.atob) global.atob = decode;

@@ -16,7 +16,7 @@ const useUsers = () => {
         setUsers(loadedUsers);
       });
 
-    return () => unsubscribe(); // Clean up on unmount
+    return () => unsubscribe();
   }, []);
 
   return users;

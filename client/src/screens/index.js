@@ -31,4 +31,6 @@ export {default as FoodDetailScreen} from './Pubs/Foods/FoodDetailScreen';
 export {default as FoodReviewsScreen} from './Pubs/Foods/FoodReviewsScreen';
 
 // Drinks Routes
-export {default as DrinksMenuScreen} from './Pubs/Drinks/DrinksMenuScreen';
+export {default as DrinkMenuScreen} from './Pubs/Drinks/DrinkMenuScreen';
+export {default as DrinkDetailScreen} from './Pubs/Drinks/DrinkDetailScreen';
+export {default as DrinkReviewsScreen} from './Pubs/Drinks/DrinkReviewsScreen';
