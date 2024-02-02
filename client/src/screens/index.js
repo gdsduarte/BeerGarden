@@ -15,7 +15,7 @@ export {default as OwnerSignUpScreen} from './Register/Owner/OwnerSignUpScreen';
 export {default as ChatScreen} from './Chat/ChatScreen';
 export {default as SpecificChatScreen} from './Chat/SpecificChatScreen';
 
-// Booking Routes
+// Reservations Routes
 export {default as BookingsScreen} from './Bookings/BookingsScreen';
 export {default as BookingDetailsScreen} from './Bookings/BookingDetailsScreen';
 
@@ -34,3 +34,7 @@ export {default as FoodReviewsScreen} from './Pubs/Foods/FoodReviewsScreen';
 export {default as DrinkMenuScreen} from './Pubs/Drinks/DrinkMenuScreen';
 export {default as DrinkDetailScreen} from './Pubs/Drinks/DrinkDetailScreen';
 export {default as DrinkReviewsScreen} from './Pubs/Drinks/DrinkReviewsScreen';
+
+// Booking Routes
+export {default as BookingScreen} from './Pubs/Booking/BookingScreen';
+export {default as BookingInputScreen} from './Pubs/Booking/BookingInputScreen';

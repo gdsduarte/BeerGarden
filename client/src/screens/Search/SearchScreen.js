@@ -1,16 +1,21 @@
 import React, {useState} from 'react';
-import {View, Text, StyleSheet, FlatList, ActivityIndicator} from 'react-native';
+import {View, Text, StyleSheet, FlatList} from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import MapView, {Marker} from 'react-native-maps';
-import usePubs from '../../hooks/usePubs';
+/* import usePubs from '../../hooks/usePubs';
 import useUserLocation from '../../hooks/useUserLocation';
 import useNearbyPubs from '../../hooks/useNearbyPubs';
-import useAllMenuItems from '../../hooks/useAllMenuItems';
+import useAllMenuItems from '../../hooks/useAllMenuItems'; */
+import {
+  usePubs,
+  useUserLocation,
+  useNearbyPubs,
+  useAllMenuItems,
+} from '../../hooks';
 import Slider from '@react-native-community/slider';
 import SearchBar from '../../components/common/SearchBar';
 import Card from '../../components/common/Card';
 import Loading from '../../components/common/Loading';
-
 
 const Tab = createMaterialTopTabNavigator();
 

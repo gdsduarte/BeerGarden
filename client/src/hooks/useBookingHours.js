@@ -2,38 +2,65 @@
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
-const useBookingHours = pubId => {
-  const [bookingHours, setBookingHours] = useState([]);
+const useBookingHours = (pubId, startDate, endDate) => {
+  const [availability, setAvailability] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchBookingHours = async () => {
-      try {
-        const bookingHoursRef = firestore()
-          .collection('pub')
-          .doc(pubId)
-          .collection('bookingHours');
-        const snapshot = await bookingHoursRef.get();
+    const fetchAvailability = async () => {
+      if (!pubId) {
+        return;
+      }
 
-        const fetchedHours = [];
-        snapshot.forEach(doc => {
-          fetchedHours.push({id: doc.id, ...doc.data()});
+      setLoading(true);
+      try {
+        // Fetch pub details to get booking slots information
+        const pubRef = await firestore().collection('pub').doc(pubId).get();
+        const pubData = pubRef.exists ? pubRef.data() : null;
+        const bookingSlots = pubData ? pubData.bookingSlots : {};
+
+        const startTimestamp = firestore.Timestamp.fromDate(
+          new Date(startDate),
+        );
+        const endTimestamp = firestore.Timestamp.fromDate(new Date(endDate));
+        const reservationsSnapshot = await firestore()
+          .collection('reservation')
+          .where('pubId', '==', pubId)
+          .where('date', '>=', startTimestamp)
+          .where('date', '<=', endTimestamp)
+          .get();
+
+        // Initialize availability with the booking slots
+        const updatedAvailability = JSON.parse(JSON.stringify(bookingSlots)); // Deep copy to avoid mutation
+
+        reservationsSnapshot.forEach(doc => {
+          const {timeSlot, numberOfTables} = doc.data();
+          // For each reservation, decrement the available slots for the corresponding time
+          if (updatedAvailability[timeSlot] !== undefined) {
+            updatedAvailability[timeSlot] -= numberOfTables;
+          }
         });
 
-        setBookingHours(fetchedHours);
+        // Ensure availability does not go below 0
+        Object.keys(updatedAvailability).forEach(slot => {
+          if (updatedAvailability[slot] < 0) {
+            updatedAvailability[slot] = 0;
+          }
+        });
+
+        // Update state with the new availability
+        setAvailability(updatedAvailability);
       } catch (error) {
-        console.error('Error fetching booking hours:', error);
+        console.error('Error fetching availability:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (pubId) {
-      fetchBookingHours();
-    }
-  }, [pubId]);
+    fetchAvailability();
+  }, [pubId, startDate, endDate]);
 
-  return {bookingHours, loading};
+  return {availability, loading};
 };
 
 export default useBookingHours;

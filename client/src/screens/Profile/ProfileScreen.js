@@ -11,12 +11,17 @@ import {
 import firestore from '@react-native-firebase/firestore';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import authService from '../../services/authService';
 
 const ProfileScreen = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const currentUserId = 'your_current_user_id'; // Replace with actual current user ID
   const userIdToFollow = 'id_of_user_to_follow'; // Replace with actual user ID to follow/unfollow
-  const navigation = useNavigation(); // Hook to access navigation prop
+  const navigation = useNavigation();
+
+  const handleLogout = () => {
+    authService.signOut();
+  };
 
   // Dummy data for places, friends, and followers
   const places = [
@@ -140,7 +145,7 @@ const ProfileScreen = () => {
           <TouchableOpacity style={styles.backButton}>
             <Text style={styles.backButtonText}>{'<'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.settingsButton}>
+          <TouchableOpacity style={styles.settingsButton} onPress={handleLogout}>
             <Text style={styles.settingsButtonText}>{'⚙️'}</Text>
           </TouchableOpacity>
         </View>
