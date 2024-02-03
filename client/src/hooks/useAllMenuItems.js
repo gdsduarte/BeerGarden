@@ -31,7 +31,7 @@ const useAllMenuItems = searchTerm => {
           const combinedItems = responses.flatMap(response =>
             response.docs.map(doc => ({
               id: doc.id,
-              type: doc.ref.parent.id, // this indicates whether it's food or drink
+              type: doc.ref.parent.id,
               ...doc.data(),
             })),
           );
@@ -43,7 +43,6 @@ const useAllMenuItems = searchTerm => {
           setLoading(false);
         });
     } else {
-      // If searchTerm is empty, reset menuItems
       setMenuItems([]);
       setLoading(false);
     }

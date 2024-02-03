@@ -19,7 +19,7 @@ const useReservations = userId => {
               id: doc.id,
               ...data,
               createdAt: data.createdAt.toDate(),
-              time: data.date.toDate(),
+              date: data.date.toDate(),
             };
           });
           setReservations(fetchedReservations);

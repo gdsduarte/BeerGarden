@@ -54,7 +54,6 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: 'black',
   },
-  // Add more styles as needed
 });
 
 export default PubReviewsScreen;

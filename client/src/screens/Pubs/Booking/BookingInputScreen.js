@@ -90,7 +90,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
   },
-  // Additional styles as needed
 });
 
 export default BookingInputScreen;

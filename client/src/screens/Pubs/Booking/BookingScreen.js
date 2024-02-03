@@ -1,38 +1,30 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
 import {Calendar} from 'react-native-calendars';
-import useBookingHours from '../../../hooks/useBookingHours';
 import {useNavigation} from '@react-navigation/native';
 import Loading from '../../../components/common/Loading';
+import useBookingHours from '../../../hooks/useBookingHours';
 import usePubDetails from '../../../hooks/usePubDetails';
 
 const BookingScreen = ({pubId}) => {
   const navigation = useNavigation();
-  const {pub, loading: pubDetailsLoading} = usePubDetails(pubId);
-  const [selectedDate, setSelectedDate] = useState('');
 
-  // Initial setup for dates
   const today = new Date().toISOString().split('T')[0];
   const threeMonthsLater = new Date();
   threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
   const maxDate = threeMonthsLater.toISOString().split('T')[0];
 
-  // Use the hook to get availability and loading status for the selected pub
+  const {pub, loading: pubDetailsLoading} = usePubDetails(pubId);
+  const [selectedDate, setSelectedDate] = useState(today);
   const {availability, loading: availabilityLoading} = useBookingHours(
     pubId,
     today,
     maxDate,
   );
+  
+  const [markedDates, setMarkedDates] = useState({});
 
-  // Log the availability and bookingSlots for debugging
-  console.log('Availability:', availability);
-  console.log(
-    'Booking Slots from Pub:',
-    pub ? pub.bookingSlots : 'No pub data',
-  );
-
-  // Extract and sort booking slots from pub details
-  const bookingSlots = pub ? pub.bookingSlots.sort() : [];
+  const bookingSlots = Object.keys(pub?.bookingSlots || {});
 
   useEffect(() => {
     if (!selectedDate) {
@@ -40,96 +32,116 @@ const BookingScreen = ({pubId}) => {
     }
   }, [selectedDate, today]);
 
+  useEffect(() => {
+    const calculateMarkedDates = () => {
+      let updatedMarkedDates = {};
+      const totalSeats = pub?.seatsCapacity;
+  
+      Object.keys(availability).forEach(date => {
+        const bookedSeats = availability[date]; 
+        const bookingLoad = bookedSeats / totalSeats;
+  
+        // Define color based on booking load
+        let color = 'green';
+        if (bookingLoad >= 1) {
+          color = 'red';
+        } else if (bookingLoad > 0.75) {
+          color = 'orange';
+        } else if (bookingLoad > 0.5) {
+          color = 'yellow';
+        }
+  
+        updatedMarkedDates[date] = {
+          customStyles: {
+            container: {
+              backgroundColor: color,
+            },
+            text: {
+              color: color === 'green' || color === 'red' ? 'white' : 'black',
+            },
+          },
+        };
+      });
+  
+      console.log('updatedMarkedDates pre-update:', updatedMarkedDates);
+  
+      setMarkedDates(updatedMarkedDates);
+    };
+  
+    if (pub && availability) calculateMarkedDates();
+  }, [pub, availability]);
+  
+  
+
+
+  const getSlotColor = timeSlot => {
+    const slots = pub?.bookingSlots?.[timeSlot] || 0;
+    const booked = availability[selectedDate]?.[timeSlot] || 0;
+    const bookingLoad = ((slots - booked) / slots) * 100;
+
+    if (bookingLoad >= 75) return '#f0f0f0';
+    if (bookingLoad >= 50) return 'yellow';
+    if (bookingLoad > 0) return 'orange';
+    return 'red';
+  };
+
   const onDayPress = day => {
     setSelectedDate(day.dateString);
   };
 
-  // Determine if a specific time slot is fully booked
-  const isHourBooked = time => {
-    // If there's no availability data for the selected date, consider it fully booked
-    if (!availability || !availability[selectedDate]) return true;
-
-    // If the specific time slot is not found in availability or it's 0, consider it fully booked
-    return (
-      availability[selectedDate][time] === undefined ||
-      availability[selectedDate][time] <= 0
-    );
-  };
-
-  const handleHourSelect = hour => {
-    // Navigate only if the hour is not fully booked
-    if (!isHourBooked(hour)) {
-      navigation.navigate('BookingInputScreen', {
-        pubId,
-        selectedDate,
-        selectedHour: hour,
-      });
+  const renderItem = ({item: timeSlot}) => {
+    const isClosed = new Date(selectedDate).getDay() === 1;
+    if (isClosed) {
+      return null;
     }
+
+    return (
+      <TouchableOpacity
+        style={[styles.hourItem, {backgroundColor: getSlotColor(timeSlot)}]}
+        onPress={() =>
+          navigation.navigate('BookingInputScreen', {
+            pubId,
+            selectedDate,
+            selectedHour: timeSlot,
+            pubName: pub?.displayName || 'Selected Pub',
+          })
+        }
+        disabled={
+          availability[selectedDate] &&
+          availability[selectedDate][timeSlot] <= 0
+        }>
+        <Text style={styles.hourText}>{timeSlot}</Text>
+      </TouchableOpacity>
+    );
   };
 
   return (
     <View style={styles.container}>
       <Calendar
+        markingType="custom"
         onDayPress={onDayPress}
         minDate={today}
         maxDate={maxDate}
-        pastScrollRange={0}
-        futureScrollRange={3}
         markedDates={{
-          [selectedDate]: {
-            selected: true,
-            disableTouchEvent: true,
-            selectedColor: '#5AC8FA',
-            selectedTextColor: '#ffffff',
-          },
-        }}
-        theme={{
-          arrowColor: '#000000',
-          todayTextColor: '#5AC8FA',
-          monthTextColor: '#5AC8FA',
-          textMonthFontWeight: 'bold',
+          ...markedDates,
+          [selectedDate]: {selected: true, selectedColor: '#5AC8FA'},
         }}
       />
-      {selectedDate && (
+      {selectedDate && !pubDetailsLoading && (
         <View style={styles.bookingForm}>
           <Text style={styles.formTitle}>
             Available Hours for {selectedDate}
           </Text>
-          {availabilityLoading || pubDetailsLoading ? (
+          {availabilityLoading ? (
             <Loading />
           ) : (
-            bookingSlots.map(time => {
-              const hourIsBooked = !availability || availability[time] <= 0;
-              console.log(`Time: ${time}, Available: ${!hourIsBooked}`);
-              return (
-                <TouchableOpacity
-                  key={time}
-                  style={[
-                    styles.hourItem,
-                    hourIsBooked ? styles.bookedHour : styles.availableHour,
-                  ]}
-                  onPress={() =>
-                    !hourIsBooked
-                      ? navigation.navigate('BookingInputScreen', {
-                          pubId: pubId,
-                          selectedDate: selectedDate,
-                          selectedHour: time,
-                          pubName: pub ? pub.displayName : 'Selected Pub',
-                        })
-                      : null
-                  }
-                  disabled={hourIsBooked}>
-                  <Text
-                    style={
-                      hourIsBooked
-                        ? styles.bookedHourText
-                        : styles.availableHourText
-                    }>
-                    {time}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })
+            <FlatList
+              data={bookingSlots}
+              renderItem={renderItem}
+              keyExtractor={item => item}
+              numColumns={2}
+              columnWrapperStyle={styles.columnWrapper}
+            />
           )}
         </View>
       )}
@@ -151,25 +163,21 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   hourItem: {
+    width: '48%',
     padding: 10,
-    marginVertical: 5,
-    borderRadius: 5, // Adding some styling
+    margin: '1%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
     borderWidth: 1,
     borderColor: '#cccccc',
   },
-  availableHour: {
-    backgroundColor: '#f0f0f0',
+  hourText: {
+    textAlign: 'center',
   },
-  bookedHour: {
-    backgroundColor: '#ffcccc',
+  columnWrapper: {
+    justifyContent: 'space-between',
   },
-  availableHourText: {
-    color: '#000000',
-  },
-  bookedHourText: {
-    color: '#ffffff',
-  },
-  // Additional styles as needed
 });
 
 export default BookingScreen;

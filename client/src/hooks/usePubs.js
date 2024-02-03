@@ -33,7 +33,6 @@ const usePubs = () => {
         },
       );
 
-    // Unsubscribe from the listener when unmounting
     return () => unsubscribe();
   }, [loading]);
 

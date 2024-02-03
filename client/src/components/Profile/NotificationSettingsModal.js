@@ -6,7 +6,6 @@ const NotificationSettingsModal = ({ isVisible, closeModal }) => {
     all: false,
     messages: false,
     friends: false,
-    // Add more notification settings here
   });
 
   const toggleSwitch = (setting) => {

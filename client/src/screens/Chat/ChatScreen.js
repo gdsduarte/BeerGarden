@@ -29,7 +29,6 @@ const ChatList = ({chats, navigation}) => {
 const GardenChat = ({navigation}) => {
   const nearbyPubs = useNearbyPubs();
 
-  // Define how each pub item is rendered
   const renderPubItem = ({item}) => (
     <TouchableOpacity
       style={styles.pubItem}

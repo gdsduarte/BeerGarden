@@ -148,7 +148,6 @@ const InputValidation = ({ type, value, onChange, style, placeholder, passwordVa
   );
 };
 
-// Styles for InputValidation component
 const styles = StyleSheet.create({
   inputError: {
     borderColor: 'red',

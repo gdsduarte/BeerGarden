@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import firestore from '@react-native-firebase/firestore';
 
 const useBookingHours = (pubId, startDate, endDate) => {
@@ -9,20 +9,23 @@ const useBookingHours = (pubId, startDate, endDate) => {
   useEffect(() => {
     const fetchAvailability = async () => {
       if (!pubId) {
+        setLoading(false);
         return;
       }
 
       setLoading(true);
       try {
-        // Fetch pub details to get booking slots information
-        const pubRef = await firestore().collection('pub').doc(pubId).get();
-        const pubData = pubRef.exists ? pubRef.data() : null;
-        const bookingSlots = pubData ? pubData.bookingSlots : {};
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          console.error('Invalid startDate or endDate');
+          setLoading(false);
+          return;
+        }
 
-        const startTimestamp = firestore.Timestamp.fromDate(
-          new Date(startDate),
-        );
-        const endTimestamp = firestore.Timestamp.fromDate(new Date(endDate));
+        const startTimestamp = firestore.Timestamp.fromDate(start);
+        const endTimestamp = firestore.Timestamp.fromDate(end);
+
         const reservationsSnapshot = await firestore()
           .collection('reservation')
           .where('pubId', '==', pubId)
@@ -30,26 +33,18 @@ const useBookingHours = (pubId, startDate, endDate) => {
           .where('date', '<=', endTimestamp)
           .get();
 
-        // Initialize availability with the booking slots
-        const updatedAvailability = JSON.parse(JSON.stringify(bookingSlots)); // Deep copy to avoid mutation
+        const dailyBookedSeats = {};
 
         reservationsSnapshot.forEach(doc => {
-          const {timeSlot, numberOfTables} = doc.data();
-          // For each reservation, decrement the available slots for the corresponding time
-          if (updatedAvailability[timeSlot] !== undefined) {
-            updatedAvailability[timeSlot] -= numberOfTables;
+          const { date, partySize } = doc.data();
+          const dateStr = date.toDate().toISOString().split('T')[0];
+          if (!dailyBookedSeats[dateStr]) {
+            dailyBookedSeats[dateStr] = 0;
           }
+          dailyBookedSeats[dateStr] += partySize;
         });
 
-        // Ensure availability does not go below 0
-        Object.keys(updatedAvailability).forEach(slot => {
-          if (updatedAvailability[slot] < 0) {
-            updatedAvailability[slot] = 0;
-          }
-        });
-
-        // Update state with the new availability
-        setAvailability(updatedAvailability);
+        setAvailability(dailyBookedSeats);
       } catch (error) {
         console.error('Error fetching availability:', error);
       } finally {
@@ -60,7 +55,7 @@ const useBookingHours = (pubId, startDate, endDate) => {
     fetchAvailability();
   }, [pubId, startDate, endDate]);
 
-  return {availability, loading};
+  return { availability, loading };
 };
 
 export default useBookingHours;

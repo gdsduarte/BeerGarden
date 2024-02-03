@@ -5,13 +5,13 @@ const admin = require("firebase-admin");
 const getUserToken = async (userId) => {
   // Logic to retrieve the user's device token
   const userDoc = await admin.firestore().collection("user").doc(userId).get();
-  return userDoc.data().deviceToken; // Assuming deviceToken is stored in user's document
+  return userDoc.data().deviceToken;
 };
 
 const getPubToken = async (pubId) => {
   // Logic to retrieve the pub's device token
   const pubDoc = await admin.firestore().collection("pub").doc(pubId).get();
-  return pubDoc.data().deviceToken; // Assuming deviceToken is stored in pub's document
+  return pubDoc.data().deviceToken;
 };
 
 const sendNotification = async (token, notification) => {
@@ -22,7 +22,6 @@ const sendNotification = async (token, notification) => {
       title: notification.title,
       body: notification.body,
     },
-    // Add any other FCM options
   };
   return admin.messaging().send(message);
 };

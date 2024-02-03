@@ -16,7 +16,7 @@ const usePubDetails = pubId => {
           setPub({
             id: doc.id,
             ...pubData,
-            bookingSlots: Object.keys(pubData.bookingSlots),
+            bookingSlots: pubData.bookingSlot || [],
           });
         } else {
           console.error('No such pub found!');

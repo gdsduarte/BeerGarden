@@ -29,7 +29,7 @@ exports.notifyUserOnReviewReply = functions.firestore
     const before = change.before.data();
     const after = change.after.data();
 
-    // Check if the review has been replied to (assuming a 'reply' field exists)
+    // Check if the review has been replied to
     if (after.reply && before.reply !== after.reply) {
       const userId = after.userId;
 

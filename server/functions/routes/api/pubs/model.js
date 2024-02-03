@@ -16,10 +16,7 @@ class Pub {
     this.createdAt = data.createdAt || admin.firestore.Timestamp.now();
   }
 
-  // If you need to add a method to convert a plain object to the class instance
   static fromData(data) {
-    // Handle the conversion from plain
-    // object to Firestore GeoPoint if necessary
     if (data.location && !(data.location instanceof admin.firestore.GeoPoint)) {
       data.location = new admin.firestore.GeoPoint(
           data.location.latitude,

@@ -44,7 +44,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-  // Add more styles as needed
 });
 
 export default DrinkReviewsScreen;

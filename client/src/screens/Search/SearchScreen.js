@@ -109,7 +109,6 @@ const GoodiesSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const {menuItems, loading} = useAllMenuItems(searchTerm);
 
-  // Assuming you want to perform the search when the user triggers onSearch
   const handleSearch = term => {
     setSearchTerm(term);
   };
@@ -122,7 +121,7 @@ const GoodiesSearch = () => {
     <View style={styles.container}>
       <SearchBar placeholder="Search for goodies..." onSearch={handleSearch} />
       <FlatList
-        data={menuItems} // Using the menuItems directly from the hook
+        data={menuItems}
         renderItem={({item}) => <Card item={item} />}
         keyExtractor={item => item.id}
       />

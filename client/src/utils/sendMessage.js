@@ -5,7 +5,7 @@ const sendMessage = (chatType, messageText, userName) => {
   return firestore().collection('Chats').add({
     type: chatType,
     text: messageText,
-    userName: userName, // Replace with actual user data
+    userName: userName,
     createdAt: firestore.FieldValue.serverTimestamp(),
   });
 };

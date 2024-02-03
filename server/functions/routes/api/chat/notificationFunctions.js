@@ -21,7 +21,6 @@ exports.sendNewMessageNotification = functions.firestore
           return notificationService.sendNotification(userToken, {
             title: "New Message",
             body: message.text,
-            // ... other notification data ...
           });
         }
       }

@@ -66,7 +66,6 @@ const useNearbyPubs = (userLatitude, userLongitude, maxDistance) => {
         },
       );
 
-    // Unsubscribe from the listener when unmounting
     return () => unsubscribe();
   }, [loading, userLatitude, userLongitude, maxDistance]);
 

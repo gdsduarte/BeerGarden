@@ -15,15 +15,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff', // Adjust the background color as needed
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333', // Adjust the text color as needed
-    // Add any additional styling for the title
+    color: '#333',
   },
-  // Add more styles as needed for other elements
 });
 
 export default ContactScreen;
