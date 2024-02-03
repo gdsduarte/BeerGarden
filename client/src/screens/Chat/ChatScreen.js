@@ -1,9 +1,9 @@
 import React, {useContext} from 'react';
 import {Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-import useChats from '../hooks/useChats';
-import useNearbyPubs from '../hooks/useNearbyPubs';
-import AuthContext from '../contexts/AuthContext';
+import useChats from '../../hooks/useChats';
+import useNearbyPubs from '../../hooks/useNearbyPubs';
+import AuthContext from '../../contexts/AuthContext';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -29,7 +29,6 @@ const ChatList = ({chats, navigation}) => {
 const GardenChat = ({navigation}) => {
   const nearbyPubs = useNearbyPubs();
 
-  // Define how each pub item is rendered
   const renderPubItem = ({item}) => (
     <TouchableOpacity
       style={styles.pubItem}

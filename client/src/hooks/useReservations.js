@@ -18,8 +18,8 @@ const useReservations = userId => {
             return {
               id: doc.id,
               ...data,
-              createdAt: data.createdAt.toDate(), // Convert Firestore Timestamp to JavaScript Date
-              time: data.time.toDate(), // Convert Firestore Timestamp to JavaScript Date
+              createdAt: data.createdAt.toDate(),
+              date: data.date.toDate(),
             };
           });
           setReservations(fetchedReservations);

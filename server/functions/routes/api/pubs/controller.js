@@ -97,7 +97,7 @@ const queryNearbyPubs = functions.https.onCall(async (data, context) => {
 
   const userLat = data.latitude;
   const userLong = data.longitude;
-  const radius = data.radius; // Ensure radius is in kilometers
+  const radius = data.radius;
 
   try {
     const query = geocollection.near({
@@ -109,7 +109,7 @@ const queryNearbyPubs = functions.https.onCall(async (data, context) => {
       return {id: doc.id, ...doc.data()};
     });
 
-    return {pubs}; // Return the result directly, no need for res.status
+    return {pubs};
   } catch (error) {
     throw new functions.https.HttpsError("unknown", error.message, error);
   }

@@ -12,7 +12,12 @@ const usePubDetails = pubId => {
         const pubRef = firestore().collection('pub').doc(pubId);
         const doc = await pubRef.get();
         if (doc.exists) {
-          setPub({id: doc.id, ...doc.data()});
+          const pubData = doc.data();
+          setPub({
+            id: doc.id,
+            ...pubData,
+            bookingSlots: pubData.bookingSlot || [],
+          });
         } else {
           console.error('No such pub found!');
         }

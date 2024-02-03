@@ -6,7 +6,6 @@ const ProfileSettingsModal = ({ isVisible, closeModal }) => {
 
   const handleSettingClick = (setting) => {
     setSelectedSetting(setting);
-    // Navigate to the specific setting screen or perform the setting action
   };
 
   return (

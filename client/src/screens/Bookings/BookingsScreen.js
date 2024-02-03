@@ -10,9 +10,9 @@ import {
 } from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import QRCode from 'react-native-qrcode-svg';
-import useReservations from '../hooks/useReservations';
-import AuthContext from '../contexts/AuthContext';
-import Loading from '../components/common/Loading';
+import useReservations from '../../hooks/useReservations';
+import AuthContext from '../../contexts/AuthContext';
+import Loading from '../../components/common/Loading';
 import {format} from 'date-fns';
 
 const Tab = createMaterialTopTabNavigator();
@@ -20,8 +20,8 @@ const Tab = createMaterialTopTabNavigator();
 const BookingItem = ({booking, navigation}) => {
   const [isQRCodeVisible, setQRCodeVisible] = useState(false);
   // Format the date and time for display
-  const formattedDate = format(booking.time, 'dd/MM/yyyy');
-  const formattedTime = format(booking.time, 'HH:mm');
+  const formattedDate = format(booking.date, 'dd/MM/yyyy');
+  const formattedTime = format(booking.date, 'HH:mm');
 
   const toggleQRCodeModal = () => {
     setQRCodeVisible(!isQRCodeVisible);
@@ -31,7 +31,6 @@ const BookingItem = ({booking, navigation}) => {
     navigation.navigate('BookingDetailsScreen', {booking});
   };
 
-  // Assuming QR code data needs to be generated. Replace with your logic.
   const qrCodeData = `bookingId:${booking.id}`;
 
   return (
@@ -123,10 +122,10 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#f8f1e7', // Ensure this covers the entire view
+    backgroundColor: '#f8f1e7',
   },
   bookingItem: {
-    backgroundColor: '#355E3B', // Deep green for booking items
+    backgroundColor: '#355E3B',
     borderRadius: 10,
     padding: 15,
     marginVertical: 10,
@@ -142,17 +141,17 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: '#FFF', // White border for contrast
+    borderColor: '#FFF',
   },
   pubName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FFF', // White text for readability
+    color: '#FFF',
     flex: 1,
     marginLeft: 10,
   },
   qrCodeIcon: {
-    padding: 8, // Sufficient padding for easy tapping
+    padding: 8,
   },
   bookingTitle: {
     fontSize: 18,
@@ -169,7 +168,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.75)', // Semi-transparent background for modal
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
   },
   modalTitle: {
     fontSize: 22,
@@ -184,7 +183,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     marginTop: 20,
-    backgroundColor: '#8B4513', // Deep amber for buttons
+    backgroundColor: '#8B4513',
     padding: 10,
     borderRadius: 10,
   },
@@ -192,15 +191,10 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: 'bold',
   },
-  // Additional styles for top tab navigator, if necessary
-  /* tabBar: {
-    backgroundColor: '#673AB7', // Dark purple for the tab bar
-  }, */
   tabLabel: {
     fontSize: 16,
     color: '#FFF',
   },
-  // Any other styles you need
 });
 
 export default BookingsScreen;

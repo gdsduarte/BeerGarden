@@ -1,22 +1,24 @@
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, Platform, StyleSheet } from 'react-native';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHome, faSearch, faComments, faCalendarAlt, faUser } from '@fortawesome/free-solid-svg-icons';
-import HomeScreen from '../screens/HomeScreen';
-import ProfileScreen from '../screens/ProfileScreen';
-import ChatNavigator from './ChatNavigator';
-import BookingNavigator from './BookingNavigator';
-import SearchNavigator from './SearchNavigator';
-
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {Text, Platform} from 'react-native';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {
+  faHome,
+  faSearch,
+  faComments,
+  faCalendarAlt,
+  faUser,
+} from '@fortawesome/free-solid-svg-icons';
+import {HomeScreen, ProfileScreen} from '../screens';
+import {BookingNavigator, SearchNavigator, ChatNavigator} from '.';
 
 const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator = () => {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+      screenOptions={({route}) => ({
+        tabBarIcon: ({focused, color, size}) => {
           let icon;
           if (route.name === 'Home') {
             icon = faHome;
@@ -38,8 +40,8 @@ const BottomTabNavigator = () => {
             />
           );
         },
-        tabBarLabel: ({ focused, color }) => (
-          <Text style={{ color: focused ? '#8B4513' : '#5c5c5c' }}>
+        tabBarLabel: ({focused, color}) => (
+          <Text style={{color: focused ? '#8B4513' : '#5c5c5c'}}>
             {route.name}
           </Text>
         ),
@@ -57,8 +59,7 @@ const BottomTabNavigator = () => {
           fontSize: 12,
           fontWeight: 'bold',
         },
-      })}
-    >
+      })}>
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Search" component={SearchNavigator} />
       <Tab.Screen name="Chat" component={ChatNavigator} />

@@ -11,30 +11,32 @@ import {
 import firestore from '@react-native-firebase/firestore';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import authService from '../../services/authService';
 
 const ProfileScreen = () => {
   const [isFollowing, setIsFollowing] = useState(false);
-  const currentUserId = 'your_current_user_id'; // Replace with actual current user ID
-  const userIdToFollow = 'id_of_user_to_follow'; // Replace with actual user ID to follow/unfollow
-  const navigation = useNavigation(); // Hook to access navigation prop
+  const currentUserId = 'user_id';
+  const userIdToFollow = 'id_of_user_to_follow'; 
+  const navigation = useNavigation();
+
+  const handleLogout = () => {
+    authService.signOut();
+  };
 
   // Dummy data for places, friends, and followers
   const places = [
     {id: 1, name: 'Pub One', image: 'image_url_1'},
     {id: 2, name: 'Pub Two', image: 'image_url_2'},
-    // Add as many places as you have...
   ];
 
   const friends = [
     {id: 1, name: 'Alice', image: 'image_url_1'},
     {id: 2, name: 'Bob', image: 'image_url_2'},
-    // Add as many friends as you have...
   ];
 
   const followers = [
     {id: 1, name: 'Charlie', image: 'image_url_3'},
     {id: 2, name: 'Dana', image: 'image_url_4'},
-    // Add as many followers as you have...
   ];
 
   const reviews = [
@@ -50,14 +52,12 @@ const ProfileScreen = () => {
       content: 'Pub Two had amazing live music!',
       rating: 4,
     },
-    // Add more reviews as needed...
   ];
 
   // Render item functions for each section
   const renderPlaceItem = place => (
     <View key={place.id} style={styles.placeItem}>
       <Text style={styles.placeItemText}>{place.name}</Text>
-      {/* Add more details like image, etc. */}
     </View>
   );
 
@@ -121,7 +121,7 @@ const ProfileScreen = () => {
   // Function to handle message button press
   const handleMessagePress = () => {
     // Navigate to ChatScreen with user information
-    navigation.navigate('Chat', {userId: 'id_of_user_to_chat_with'}); // Replace with actual user ID
+    navigation.navigate('Chat', {userId: 'id_of_user'});
   };
 
   return (
@@ -131,8 +131,8 @@ const ProfileScreen = () => {
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
-            refreshing={false} // Replace with your state
-            onRefresh={() => {}} // Replace with your refresh logic
+            refreshing={false}
+            onRefresh={() => {}}
           />
         }>
         {/* Header Section */}
@@ -140,7 +140,7 @@ const ProfileScreen = () => {
           <TouchableOpacity style={styles.backButton}>
             <Text style={styles.backButtonText}>{'<'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.settingsButton}>
+          <TouchableOpacity style={styles.settingsButton} onPress={handleLogout}>
             <Text style={styles.settingsButtonText}>{'⚙️'}</Text>
           </TouchableOpacity>
         </View>
@@ -206,7 +206,7 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f1e7', // Cream color for background
+    backgroundColor: '#f8f1e7',
   },
   container: {
     flex: 1,
@@ -216,8 +216,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    // Use deep green or brown tones
-    backgroundColor: '#355E3B', // Deep green
+    backgroundColor: '#355E3B',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -262,11 +261,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#000',
-    fontFamily: 'YourSerifFont', // Replace with your chosen font
+    fontFamily: 'YourSerifFont',
     paddingVertical: 5,
   },
   bio: {
-    fontFamily: 'YourSansSerifFont', // Replace with your chosen font
+    fontFamily: 'YourSansSerifFont',
     color: '#666',
     textAlign: 'center',
     paddingBottom: 10,
@@ -276,19 +275,18 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   followButton: {
-    backgroundColor: '#8B4513', // Deep amber color
+    backgroundColor: '#8B4513',
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginHorizontal: 5,
   },
   unfollowButton: {
-    backgroundColor: '#B22222', // Example: a red color to indicate unfollow
-    // ... other styling as needed
+    backgroundColor: '#B22222',
   },
   messageButton: {
-    backgroundColor: '#f0e6d2', // Lighter shade for contrast
-    borderColor: '#8B4513', // Deep amber border
+    backgroundColor: '#f0e6d2',
+    borderColor: '#8B4513',
     borderWidth: 2,
     borderRadius: 20,
     paddingVertical: 10,
@@ -296,18 +294,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   followButtonText: {
-    color: '#FFFFFF', // White text for better readability
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
   messageButtonText: {
-    color: '#8B4513', // Deep amber text
+    color: '#8B4513',
     fontWeight: 'bold',
   },
   statsSection: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 20,
-    backgroundColor: '#f8f1e7', // Cream or off-white background
+    backgroundColor: '#f8f1e7',
   },
   statItem: {
     alignItems: 'center',
@@ -315,12 +313,11 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#355E3B', // Deep green for numbers
+    color: '#355E3B',
   },
   statLabel: {
-    color: '#8B4513', // Amber for labels
+    color: '#8B4513',
   },
-  // Common Styles for Sections
   commonSection: {
     marginTop: 20,
   },
@@ -334,7 +331,6 @@ const styles = StyleSheet.create({
   horizontalScroll: {
     paddingLeft: 20,
   },
-  // Specific Styles for Each Section
   placeItem: {
     marginRight: 15,
     width: 150,

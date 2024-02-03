@@ -14,10 +14,10 @@ const BookingDetailsScreen = ({route, navigation}) => {
   const {booking} = route.params;
   const isArchived =
     booking.status === 'Passed' || booking.status === 'Cancelled';
-  const [invitedFriends, setInvitedFriends] = useState([]); // State to track invited friends
+  const [invitedFriends, setInvitedFriends] = useState([]);
   // Convert Firestore Timestamps to JavaScript Date objects and format them
-  const formattedDate = format(booking.time, 'dd/MM/yyyy');
-  const formattedTime = format(booking.time, 'HH:mm');
+  const formattedDate = format(booking.date, 'dd/MM/yyyy');
+  const formattedTime = format(booking.date, 'HH:mm');
 
   React.useLayoutEffect(() => {
     navigation.setOptions({title: booking.pubName});
@@ -25,7 +25,6 @@ const BookingDetailsScreen = ({route, navigation}) => {
 
   const inviteFriend = friend => {
     setInvitedFriends([...invitedFriends, friend]);
-    // Close search modal or reset search bar
   };
 
   const navigateToPubScreen = () => {
@@ -39,7 +38,6 @@ const BookingDetailsScreen = ({route, navigation}) => {
   };
 
   const startChat = () => {
-    // Navigate to chat screen or open chat (Dummy implementation)
     console.log('Chat with the pub started');
   };
 
@@ -54,9 +52,7 @@ const BookingDetailsScreen = ({route, navigation}) => {
         <Text style={styles.detail}>Date: {formattedDate}</Text>
         <Text style={styles.detail}>Time: {formattedTime}</Text>
         <Text style={styles.detail}>Table Number: {booking.tableNumber}</Text>
-        <Text style={styles.detail}>
-          Number of People: {booking.partySize}
-        </Text>
+        <Text style={styles.detail}>Number of People: {booking.partySize}</Text>
         <Text style={styles.detail}>
           Special Requests: {booking.specialRequest}
         </Text>
@@ -184,7 +180,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginRight: 5,
   },
-  // Add more styles as needed
 });
 
 export default BookingDetailsScreen;

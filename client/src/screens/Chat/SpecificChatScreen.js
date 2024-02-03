@@ -8,8 +8,8 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
-import useChatMessages from '../hooks/useChatMessages';
-import AuthContext from '../contexts/AuthContext';
+import useChatMessages from '../../hooks/useChatMessages';
+import AuthContext from '../../contexts/AuthContext';
 
 const SpecificChatScreen = ({route, navigation}) => {
   const {chatId} = route.params;
@@ -18,7 +18,6 @@ const SpecificChatScreen = ({route, navigation}) => {
   const [inputText, setInputText] = useState('');
   const flatListRef = useRef();
 
-  // Placeholder values for chat details
   const chatName = 'Chat Name';
   const chatAvatar = 'https://example.com/avatar.jpg';
 

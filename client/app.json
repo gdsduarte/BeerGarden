@@ -1,4 +1,12 @@
 {
   "name": "client",
-  "displayName": "client"
+  "displayName": "BeerGarden",
+  "version": "1.0.0",
+  "description": "BeerGarden is the best way to find and share craft beer.",
+  "icon": "",
+  "slug": "beer-garden",
+  "ios": {
+    "bundleIdentifier": "com.client",
+    "buildNumber": "1.0.0"
+  }
 }
