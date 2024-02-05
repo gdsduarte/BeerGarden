@@ -1,119 +1,143 @@
-import React, {useState, useEffect} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
-import {Calendar} from 'react-native-calendars';
-import {useNavigation} from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { Calendar, Agenda } from 'react-native-calendars';
+import { useNavigation } from '@react-navigation/native';
 import Loading from '../../../components/common/Loading';
-import useBookingHours from '../../../hooks/useBookingHours';
+import useBookingAvailability from '../../../hooks/useBookingAvailability';
 import usePubDetails from '../../../hooks/usePubDetails';
 
-const BookingScreen = ({pubId}) => {
+const BookingScreen = ({ pubId }) => {
   const navigation = useNavigation();
-
   const today = new Date().toISOString().split('T')[0];
-  const threeMonthsLater = new Date();
-  threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
-  const maxDate = threeMonthsLater.toISOString().split('T')[0];
+  const maxDate = new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString().split('T')[0];
 
-  const {pub, loading: pubDetailsLoading} = usePubDetails(pubId);
+  const { pub, loading: pubDetailsLoading } = usePubDetails(pubId);
   const [selectedDate, setSelectedDate] = useState(today);
-  const {availability, loading: availabilityLoading} = useBookingHours(
+  const { reservations, loading: availabilityLoading } = useBookingAvailability(
     pubId,
     today,
     maxDate,
   );
-  
   const [markedDates, setMarkedDates] = useState({});
-
-  const bookingSlots = Object.keys(pub?.bookingSlots || {});
-
-  useEffect(() => {
-    if (!selectedDate) {
-      setSelectedDate(today);
-    }
-  }, [selectedDate, today]);
+  const [availability, setAvailability] = useState({});
 
   useEffect(() => {
-    const calculateMarkedDates = () => {
-      let updatedMarkedDates = {};
-      const totalSeats = pub?.seatsCapacity;
-  
-      Object.keys(availability).forEach(date => {
-        const bookedSeats = availability[date]; 
-        const bookingLoad = bookedSeats / totalSeats;
-  
-        // Define color based on booking load
-        let color = 'green';
-        if (bookingLoad >= 1) {
-          color = 'red';
-        } else if (bookingLoad > 0.75) {
-          color = 'orange';
-        } else if (bookingLoad > 0.5) {
-          color = 'yellow';
-        }
-  
-        updatedMarkedDates[date] = {
-          customStyles: {
-            container: {
-              backgroundColor: color,
-            },
-            text: {
-              color: color === 'green' || color === 'red' ? 'white' : 'black',
-            },
-          },
-        };
-      });
-  
-      console.log('updatedMarkedDates pre-update:', updatedMarkedDates);
-  
+    if (pub && reservations.length > 0) {
+      const availability = calculateAvailability(reservations, pub);
+      setAvailability(availability);
+      const updatedMarkedDates = getUpdatedMarkedDates(pub, availability);
       setMarkedDates(updatedMarkedDates);
-    };
-  
-    if (pub && availability) calculateMarkedDates();
-  }, [pub, availability]);
-  
-  
+    }
+  }, [pub, reservations]);
 
+  const calculateAvailability = (reservations) => {
+    const availability = {};
+    reservations.forEach(reservation => {
+      const date = reservation.date.toDate().toISOString().split('T')[0];
+      const timeSlot = reservation.timeSlot;
+      availability[date] = availability[date] || {};
+      availability[date][timeSlot] = availability[date][timeSlot] || 0;
+      availability[date][timeSlot] += reservation.partySize;
+    });
+    console.log(availability);
+    return availability;
+  };
 
-  const getSlotColor = timeSlot => {
-    const slots = pub?.bookingSlots?.[timeSlot] || 0;
-    const booked = availability[selectedDate]?.[timeSlot] || 0;
-    const bookingLoad = ((slots - booked) / slots) * 100;
+  const getUpdatedMarkedDates = (pub, availability) => {
+    let updatedMarkedDates = {};
+    Object.keys(availability).forEach(date => {
+      const bookingLoad = calculateBookingLoadForDate(
+        date,
+        availability,
+        pub.seatsCapacity,
+      );
+      updatedMarkedDates[date] = {
+        customStyles: getCustomStylesBasedOnLoad(bookingLoad),
+      };
+    });
+    return updatedMarkedDates;
+  };
 
-    if (bookingLoad >= 75) return '#f0f0f0';
-    if (bookingLoad >= 50) return 'yellow';
-    if (bookingLoad > 0) return 'orange';
-    return 'red';
+  const calculateBookingLoadForDate = (date, availability, totalSeats) => {
+    const dailyBookings = availability[date] || {};
+    const totalBookedSeats = Object.values(dailyBookings).reduce(
+      (acc, curr) => acc + curr,
+      0,
+    );
+    return totalBookedSeats / totalSeats;
+  };
+
+  const getCustomStylesBasedOnLoad = bookingLoad => {
+    let backgroundColor, textColor;
+    if (bookingLoad >= 1) {
+      backgroundColor = 'red';
+      textColor = 'white';
+    } else if (bookingLoad > 0.75) {
+      backgroundColor = 'orange';
+      textColor = 'black';
+    } else if (bookingLoad > 0.5) {
+      backgroundColor = 'yellow';
+      textColor = 'black';
+    } else {
+      backgroundColor = 'green';
+      textColor = 'white';
+    }
+    return { container: { backgroundColor }, text: { color: textColor } };
   };
 
   const onDayPress = day => {
     setSelectedDate(day.dateString);
   };
 
-  const renderItem = ({item: timeSlot}) => {
-    const isClosed = new Date(selectedDate).getDay() === 1;
-    if (isClosed) {
-      return null;
-    }
-
-    return (
-      <TouchableOpacity
-        style={[styles.hourItem, {backgroundColor: getSlotColor(timeSlot)}]}
-        onPress={() =>
-          navigation.navigate('BookingInputScreen', {
-            pubId,
-            selectedDate,
-            selectedHour: timeSlot,
-            pubName: pub?.displayName || 'Selected Pub',
-          })
-        }
-        disabled={
-          availability[selectedDate] &&
-          availability[selectedDate][timeSlot] <= 0
-        }>
-        <Text style={styles.hourText}>{timeSlot}</Text>
-      </TouchableOpacity>
-    );
+  const isClosedOnSelectedDay = () => {
+    const dayOfWeek = new Date(selectedDate).getDay();
+    const days = [
+      'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+    ];
+    const dayName = days[dayOfWeek];
+    return pub.openingHours[dayName]?.toLowerCase() === 'closed';
   };
+
+  const navigateToBookingInputScreen = timeSlot => {
+    const currentSlotAvailability = availability[selectedDate]?.[timeSlot] || 0;
+    const totalAvailableSeats = pub.seatsCapacity - (currentSlotAvailability || 0);
+    navigation.navigate('BookingInputScreen', {
+      pubId,
+      selectedDate,
+      selectedHour: timeSlot,
+      pubName: pub.displayName || 'Selected Pub',
+      tables: pub.tables || [],
+      totalAvailableSeats,
+    });
+    console.log('total available seats:', totalAvailableSeats);
+  };
+
+  const getSlotColor = timeSlot => {
+    const dailyBookings = availability[selectedDate] || {};
+    const bookedSeatsForSlot = dailyBookings[timeSlot] || 0;
+    const totalSeats = pub.seatsCapacity || 0;
+    const bookingLoad = bookedSeatsForSlot / totalSeats;
+
+    if (bookingLoad >= 1) return 'red';
+    if (bookingLoad > 0.75) return 'orange';
+    if (bookingLoad > 0.5) return 'yellow';
+    if (bookingLoad > 0) return 'green';
+    return '#f0f0f0';
+  };
+
+  const TimeSlotItem = ({ timeSlot }) => (
+    <TouchableOpacity
+      style={[styles.hourItem, { backgroundColor: getSlotColor(timeSlot) }]}
+      onPress={() => navigateToBookingInputScreen(timeSlot)}>
+      <Text style={styles.hourText}>{timeSlot}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
@@ -124,26 +148,22 @@ const BookingScreen = ({pubId}) => {
         maxDate={maxDate}
         markedDates={{
           ...markedDates,
-          [selectedDate]: {selected: true, selectedColor: '#5AC8FA'},
+          [selectedDate]: { selected: true, selectedColor: '#5AC8FA' },
         }}
       />
-      {selectedDate && !pubDetailsLoading && (
-        <View style={styles.bookingForm}>
-          <Text style={styles.formTitle}>
-            Available Hours for {selectedDate}
-          </Text>
-          {availabilityLoading ? (
-            <Loading />
-          ) : (
-            <FlatList
-              data={bookingSlots}
-              renderItem={renderItem}
-              keyExtractor={item => item}
-              numColumns={2}
-              columnWrapperStyle={styles.columnWrapper}
-            />
-          )}
-        </View>
+      <Text style={styles.formTitle}>Available Hours for {selectedDate}</Text>
+      {pubDetailsLoading || availabilityLoading ? (
+        <Loading />
+      ) : isClosedOnSelectedDay() ? (
+        <Text style={styles.closedDayText}>The pub is closed on this day.</Text>
+      ) : (
+        <FlatList
+          data={Object.keys(pub.bookingSlots || {}).sort()}
+          renderItem={({ item }) => <TimeSlotItem timeSlot={item} />}
+          keyExtractor={item => item}
+          numColumns={2}
+          columnWrapperStyle={styles.columnWrapper}
+        />
       )}
     </View>
   );
@@ -177,6 +197,10 @@ const styles = StyleSheet.create({
   },
   columnWrapper: {
     justifyContent: 'space-between',
+  },
+  closedDayText: {
+    textAlign: 'center',
+    padding: 20,
   },
 });
 

@@ -7,30 +7,40 @@ const usePubDetails = pubId => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPubDetails = async () => {
-      try {
-        const pubRef = firestore().collection('pub').doc(pubId);
-        const doc = await pubRef.get();
-        if (doc.exists) {
-          const pubData = doc.data();
-          setPub({
-            id: doc.id,
-            ...pubData,
-            bookingSlots: pubData.bookingSlot || [],
-          });
-        } else {
-          console.error('No such pub found!');
-        }
-      } catch (error) {
-        console.error('Error fetching pub details:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(true);
 
-    if (pubId) {
-      fetchPubDetails();
+    if (!pubId) {
+      console.error('Invalid pubId provided');
+      setLoading(false);
+      setPub(null);
+      return;
     }
+
+    const unsubscribe = firestore()
+      .collection('pub')
+      .doc(pubId)
+      .onSnapshot(
+        doc => {
+          if (doc.exists) {
+            const pubData = doc.data();
+            setPub({
+              id: doc.id,
+              ...pubData,
+            });
+          } else {
+            console.log(`No pub found with ID: ${pubId}`);
+            setPub(null);
+          }
+          setLoading(false);
+        },
+        error => {
+          console.error('Error fetching pub details:', error);
+          setLoading(false);
+          setPub(null);
+        },
+      );
+
+    return () => unsubscribe();
   }, [pubId]);
 
   return {pub, loading};

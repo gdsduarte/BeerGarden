@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 export {default as useAllMenuItems} from './useAllMenuItems';
-export {default as useBookingHours} from './useBookingHours';
+export {default as useBookingAvailability} from './useBookingAvailability';
 export {default as useChatMessages} from './useChatMessages';
 export {default as useChats} from './useChats';
 export {default as useDrinkMenu} from './useDrinkMenu';
