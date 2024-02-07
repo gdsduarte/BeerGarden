@@ -17,9 +17,8 @@ const BookingInputScreen = ({route}) => {
     selectedDate,
     selectedHour,
     pubName,
-    tables,
-    totalAvailableSeats,
-    
+    remainingSeats,
+    remainingTables,
   } = route.params;
   const [partySize, setPartySize] = useState('');
   const [specialRequest, setSpecialRequest] = useState('');
@@ -28,9 +27,12 @@ const BookingInputScreen = ({route}) => {
   const [reservationName, setReservationName] = useState('');
 
   // Logic to calculate table allocation
-  const calculateTableAllocation = (partySize, slotAvailability) => {
+  const calculateTableAllocation = (partySize, tables) => {
+    // Ensure tables is an object to prevent the TypeError
+    const safeTables = tables || {};
+
     // Convert tables object into an array of [tableSize, count] and sort by table size descending
-    const tableSizes = Object.entries(tables)
+    const tableSizes = Object.entries(safeTables)
       .map(([type, count]) => ({
         size: parseInt(type.split('-')[0], 10),
         count,
@@ -41,6 +43,7 @@ const BookingInputScreen = ({route}) => {
     let remainingPartySize = partySize;
     const allocationMap = {};
 
+    // Iterate through table sizes and allocate party size to tables
     for (const {size, count, type} of tableSizes) {
       if (remainingPartySize <= 0) break;
 
@@ -67,41 +70,42 @@ const BookingInputScreen = ({route}) => {
     }
 
     if (remainingPartySize > 0) {
-      // Unable to fully allocate party to tables
       return null;
     }
 
     return allocationMap;
   };
 
+  // Logic to handle reservation submission for the selected pub
   const handleReservationSubmit = async () => {
     const size = parseInt(partySize, 10);
-    if (size <= 0 || size > totalAvailableSeats) {
+    const tableAllocation = calculateTableAllocation(size, remainingTables);
+
+    // Validate party size if the party size is 0 or the input is empty
+    if (!size || size <= 0) {
+      Alert.alert('Invalid Party Size', 'Please enter a valid party size');
+      return;
+    }
+
+    // Validate party size if the party size exceeds the remaining seats
+    if (size > remainingSeats) {
       Alert.alert(
-        'Validation Error',
-        'Please enter a valid party size within the available seats.',
+        'Availability Issue',
+        `The maximum party size that can currently be accommodated is ${remainingSeats}. 
+        Please adjust your party size to ${remainingSeats} or below.`,
       );
       return;
     }
 
-    /* // Updated calculateTableAllocation to consider current availability
-    const tableAllocation = calculateTableAllocation(size, tables);
-    if (!tableAllocation) {
+    /* if (!tableAllocation) {
       Alert.alert(
-        'Sorry',
-        'Unable to allocate tables based on party size and current availability.',
+        'Table Allocation Error',
+        'We are unable to allocate tables based on the selected party size and the available tables. Please adjust your party size or select a different time slot.',
       );
       return;
     } */
 
-    // Calculate table allocation based on passed slotAvailability
-    const { canAccommodate, tableAllocation } = calculateTableAllocation(partySize, slotAvailability.tables);
-
-    if (!canAccommodate) {
-      Alert.alert('Sorry', 'Unable to accommodate the party size with available tables.');
-      return;
-    }
-
+    // Prepare reservation data to be submitted to Firestore
     const reservationData = {
       userId: currentUserUID,
       reservationName,
@@ -135,6 +139,7 @@ const BookingInputScreen = ({route}) => {
     }
   };
 
+  // Render the reservation input form
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Make a Reservation</Text>
@@ -146,6 +151,7 @@ const BookingInputScreen = ({route}) => {
         placeholder="Name"
         value={reservationName}
         onChangeText={setReservationName}
+        required
       />
       <TextInput
         style={styles.input}
@@ -153,6 +159,7 @@ const BookingInputScreen = ({route}) => {
         value={partySize}
         onChangeText={setPartySize}
         keyboardType="number-pad"
+        required
       />
       <TextInput
         style={styles.input}

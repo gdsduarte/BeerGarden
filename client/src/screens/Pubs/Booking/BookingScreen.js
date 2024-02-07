@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
-import { Calendar, Agenda } from 'react-native-calendars';
+import { Calendar } from 'react-native-calendars';
 import { useNavigation } from '@react-navigation/native';
 import Loading from '../../../components/common/Loading';
 import useBookingAvailability from '../../../hooks/useBookingAvailability';
@@ -8,19 +8,20 @@ import usePubDetails from '../../../hooks/usePubDetails';
 
 const BookingScreen = ({ pubId }) => {
   const navigation = useNavigation();
-  const today = new Date().toISOString().split('T')[0];
-  const maxDate = new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString().split('T')[0];
+  const startDate = new Date().toISOString().split('T')[0];
+  const endDate = new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString().split('T')[0];
 
   const { pub, loading: pubDetailsLoading } = usePubDetails(pubId);
-  const [selectedDate, setSelectedDate] = useState(today);
+  const [selectedDate, setSelectedDate] = useState(startDate);
   const { reservations, loading: availabilityLoading } = useBookingAvailability(
     pubId,
-    today,
-    maxDate,
+    startDate,
+    endDate,
   );
   const [markedDates, setMarkedDates] = useState({});
   const [availability, setAvailability] = useState({});
 
+  // Update availability and marked dates when pub or reservations change
   useEffect(() => {
     if (pub && reservations.length > 0) {
       const availability = calculateAvailability(reservations, pub);
@@ -30,6 +31,7 @@ const BookingScreen = ({ pubId }) => {
     }
   }, [pub, reservations]);
 
+  // Logic to calculate availability based on reservations 
   const calculateAvailability = (reservations) => {
     const availability = {};
     reservations.forEach(reservation => {
@@ -43,6 +45,7 @@ const BookingScreen = ({ pubId }) => {
     return availability;
   };
 
+  // Logic to update marked dates based on availability of reservations
   const getUpdatedMarkedDates = (pub, availability) => {
     let updatedMarkedDates = {};
     Object.keys(availability).forEach(date => {
@@ -58,6 +61,7 @@ const BookingScreen = ({ pubId }) => {
     return updatedMarkedDates;
   };
 
+  // Logic to calculate booking load for a given date
   const calculateBookingLoadForDate = (date, availability, totalSeats) => {
     const dailyBookings = availability[date] || {};
     const totalBookedSeats = Object.values(dailyBookings).reduce(
@@ -66,7 +70,40 @@ const BookingScreen = ({ pubId }) => {
     );
     return totalBookedSeats / totalSeats;
   };
+  
+  // Logic to navigate to BookingInputScreen with some data
+  const navigateToBookingInputScreen = (timeSlot) => {
+    const currentSlotReservations = reservations.filter(reservation => 
+      reservation.timeSlot === timeSlot && 
+      reservation.date.toDate().toISOString().split('T')[0] === selectedDate
+    );
+  
+    // Calculate the remaining capacity and table types after current reservations
+    let remainingSeats = pub.seatsCapacity;
+    let remainingTables = { ...pub.tables };
+  
+    currentSlotReservations.forEach(reservation => {
+      remainingSeats -= reservation.partySize;
+      Object.keys(reservation.tableType).forEach(type => {
+        remainingTables[type] = remainingTables[type] - reservation.tableType[type];
+      });
+    });
+  
+    navigation.navigate('BookingInputScreen', {
+      pubId,
+      selectedDate,
+      selectedHour: timeSlot,
+      pubName: pub.displayName,
+      remainingSeats,
+      remainingTables,
+    });
 
+    console.log('Remaining Seats:', remainingSeats);
+    console.log('Navigating with remainingTables:', remainingTables);
+
+  };
+  
+  // Logic to get custom styles based on booking load for a given date
   const getCustomStylesBasedOnLoad = bookingLoad => {
     let backgroundColor, textColor;
     if (bookingLoad >= 1) {
@@ -89,6 +126,7 @@ const BookingScreen = ({ pubId }) => {
     setSelectedDate(day.dateString);
   };
 
+  // Logic to check if the pub is closed on the selected day
   const isClosedOnSelectedDay = () => {
     const dayOfWeek = new Date(selectedDate).getDay();
     const days = [
@@ -104,20 +142,7 @@ const BookingScreen = ({ pubId }) => {
     return pub.openingHours[dayName]?.toLowerCase() === 'closed';
   };
 
-  const navigateToBookingInputScreen = timeSlot => {
-    const currentSlotAvailability = availability[selectedDate]?.[timeSlot] || 0;
-    const totalAvailableSeats = pub.seatsCapacity - (currentSlotAvailability || 0);
-    navigation.navigate('BookingInputScreen', {
-      pubId,
-      selectedDate,
-      selectedHour: timeSlot,
-      pubName: pub.displayName || 'Selected Pub',
-      tables: pub.tables || [],
-      totalAvailableSeats,
-    });
-    console.log('total available seats:', totalAvailableSeats);
-  };
-
+  // Logic to get color for a given time slot based on availability
   const getSlotColor = timeSlot => {
     const dailyBookings = availability[selectedDate] || {};
     const bookedSeatsForSlot = dailyBookings[timeSlot] || 0;
@@ -131,6 +156,7 @@ const BookingScreen = ({ pubId }) => {
     return '#f0f0f0';
   };
 
+  // TimeSlotItem component to render each time slot
   const TimeSlotItem = ({ timeSlot }) => (
     <TouchableOpacity
       style={[styles.hourItem, { backgroundColor: getSlotColor(timeSlot) }]}
@@ -139,18 +165,20 @@ const BookingScreen = ({ pubId }) => {
     </TouchableOpacity>
   );
 
+  // Render the UI elements for BookingScreen
   return (
     <View style={styles.container}>
       <Calendar
         markingType="custom"
         onDayPress={onDayPress}
-        minDate={today}
-        maxDate={maxDate}
+        minDate={startDate}
+        maxDate={endDate}
         markedDates={{
           ...markedDates,
           [selectedDate]: { selected: true, selectedColor: '#5AC8FA' },
         }}
       />
+      {/* set the selectedDate on the 06/12/2024 format */}
       <Text style={styles.formTitle}>Available Hours for {selectedDate}</Text>
       {pubDetailsLoading || availabilityLoading ? (
         <Loading />
