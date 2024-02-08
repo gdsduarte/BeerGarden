@@ -1,6 +1,6 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
-import {SearchScreen, PubScreen, BookingInputScreen} from '../screens';
+import {SearchScreen, PubScreen, BookingInputScreen, ReservationDetailsScreen} from '../screens';
 import MenuNavigator from './MenuNavigator';
 import DrinkNavigator from './DrinkNavigator';
 
@@ -26,6 +26,7 @@ const SearchNavigator = () => {
       />
       <Stack.Screen name="MenuNavigator" component={MenuNavigator} />
       <Stack.Screen name="DrinkNavigator" component={DrinkNavigator} />
+      <Stack.Screen name="ReservationDetailsScreen" component={ReservationDetailsScreen} />
     </Stack.Navigator>
   );
 };

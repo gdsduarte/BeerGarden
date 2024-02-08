@@ -16,8 +16,8 @@ export {default as ChatScreen} from './Chat/ChatScreen';
 export {default as SpecificChatScreen} from './Chat/SpecificChatScreen';
 
 // Reservations Routes
-export {default as BookingsScreen} from './Bookings/BookingsScreen';
-export {default as BookingDetailsScreen} from './Bookings/BookingDetailsScreen';
+export {default as ReservationScreen} from './Bookings/ReservationScreen';
+export {default as ReservationDetailsScreen} from './Bookings/ReservationDetailsScreen';
 
 // Pub Routes
 export {default as PubScreen} from './Pubs/PubScreen';

@@ -1,4 +1,4 @@
-import React, {useState, useContext, useEffect} from 'react';
+import React, {useState, useContext} from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 import firestore from '@react-native-firebase/firestore';
 import {useNavigation} from '@react-navigation/native';
 import AuthContext from '../../../contexts/AuthContext';
+import {format} from 'date-fns';
 
 const BookingInputScreen = ({route}) => {
   const {
@@ -91,8 +92,7 @@ const BookingInputScreen = ({route}) => {
     if (size > remainingSeats) {
       Alert.alert(
         'Availability Issue',
-        `The maximum party size that can currently be accommodated is ${remainingSeats}. 
-        Please adjust your party size to ${remainingSeats} or below.`,
+        `The maximum party size that can currently be accommodated is ${remainingSeats}.\nPlease adjust your party size to ${remainingSeats} or contact the pub.`,
       );
       return;
     }
@@ -144,7 +144,7 @@ const BookingInputScreen = ({route}) => {
     <View style={styles.container}>
       <Text style={styles.title}>Make a Reservation</Text>
       <Text>Pub: {pubName}</Text>
-      <Text>Date: {selectedDate}</Text>
+      <Text>Date: {format(selectedDate, 'dd-MM-yyyy')}</Text>
       <Text>Time: {selectedHour}</Text>
       <TextInput
         style={styles.input}

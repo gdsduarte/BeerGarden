@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import firestore from '@react-native-firebase/firestore';
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 
 const useBookingAvailability = (pubId, startDate, endDate) => {
   const [reservations, setReservations] = useState([]);
@@ -26,7 +26,7 @@ const useBookingAvailability = (pubId, startDate, endDate) => {
         snapshot => {
           const fetchedReservations = [];
           snapshot.forEach(doc => {
-            fetchedReservations.push(doc.data());
+            fetchedReservations.push({id: doc.id, ...doc.data()});
           });
           setReservations(fetchedReservations);
           setLoading(false);
@@ -40,8 +40,7 @@ const useBookingAvailability = (pubId, startDate, endDate) => {
     return () => unsubscribe();
   }, [pubId, startDate, endDate]);
 
-  return { reservations, loading };
+  return {reservations, loading};
 };
-
 
 export default useBookingAvailability;

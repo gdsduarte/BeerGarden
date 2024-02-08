@@ -17,6 +17,46 @@ import {format} from 'date-fns';
 
 const Tab = createMaterialTopTabNavigator();
 
+const ReservationScreen = () => {
+  return (
+    <Tab.Navigator screenOptions={{tabBarStyle: styles.tabBar}}>
+      <Tab.Screen name="Upcoming">
+        {props => <BookingsTab {...props} isBooked={true} />}
+      </Tab.Screen>
+      <Tab.Screen name="Past">
+        {props => <BookingsTab {...props} isBooked={false} />}
+      </Tab.Screen>
+    </Tab.Navigator>
+  );
+};
+
+const BookingsTab = ({navigation, isBooked}) => {
+  const {currentUserUID} = useContext(AuthContext);
+  const [reservations, loading] = useReservations(currentUserUID);
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  // Filtering based on 'group' field in Firestore
+  const bookings = reservations.filter(
+    reservation => reservation.isBooked === isBooked,
+  );
+
+  return <BookingsList bookings={bookings} navigation={navigation} />;
+};
+
+const BookingsList = ({bookings, navigation}) => (
+  <FlatList
+    data={bookings}
+    renderItem={({item}) => (
+      <BookingItem booking={item} navigation={navigation} />
+    )}
+    keyExtractor={item => item.id}
+    style={styles.list}
+  />
+);
+
 const BookingItem = ({booking, navigation}) => {
   const [isQRCodeVisible, setQRCodeVisible] = useState(false);
   // Format the date and time for display
@@ -28,7 +68,7 @@ const BookingItem = ({booking, navigation}) => {
   };
 
   const onBookingPress = () => {
-    navigation.navigate('BookingDetailsScreen', {booking});
+    navigation.navigate('ReservationDetailsScreen', {booking});
   };
 
   const qrCodeData = `bookingId:${booking.id}`;
@@ -38,11 +78,13 @@ const BookingItem = ({booking, navigation}) => {
       <TouchableOpacity style={styles.bookingItem} onPress={onBookingPress}>
         <View style={styles.bookingHeader}>
           <Image
-            source={{uri: 'https://example.com/pubAvatar.jpg'}}
+            source={{uri: booking.pubAvatar}}
             style={styles.pubAvatar}
           />
           <Text style={styles.pubName}>{booking.pubName}</Text>
-          <Text style={styles.pubName}>{formattedDate} {formattedTime}</Text>
+          <Text style={styles.pubName}>
+            {formattedDate} {formattedTime}
+          </Text>
           {booking.group !== 'archived' && (
             <TouchableOpacity
               onPress={toggleQRCodeModal}
@@ -72,46 +114,6 @@ const BookingItem = ({booking, navigation}) => {
         </Modal>
       </TouchableOpacity>
     </View>
-  );
-};
-
-const BookingsList = ({bookings, navigation}) => (
-  <FlatList
-    data={bookings}
-    renderItem={({item}) => (
-      <BookingItem booking={item} navigation={navigation} />
-    )}
-    keyExtractor={item => item.id}
-    style={styles.list}
-  />
-);
-
-const BookingsTab = ({navigation, group}) => {
-  const {currentUserUID} = useContext(AuthContext);
-  const [reservations, loading] = useReservations(currentUserUID);
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  // Filtering based on 'group' field in Firestore
-  const bookings = reservations.filter(
-    reservation => reservation.group === group.toLowerCase(),
-  );
-
-  return <BookingsList bookings={bookings} navigation={navigation} />;
-};
-
-const BookingsScreen = () => {
-  return (
-    <Tab.Navigator screenOptions={{tabBarStyle: styles.tabBar}}>
-      <Tab.Screen name="Upcoming">
-        {props => <BookingsTab {...props} group="Active" />}
-      </Tab.Screen>
-      <Tab.Screen name="Past">
-        {props => <BookingsTab {...props} group="Archived" />}
-      </Tab.Screen>
-    </Tab.Navigator>
   );
 };
 
@@ -197,4 +199,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BookingsScreen;
+export default ReservationScreen;

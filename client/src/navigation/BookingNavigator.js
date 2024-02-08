@@ -1,17 +1,22 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
-import {BookingsScreen, BookingDetailsScreen} from '../screens';
+import {
+  ReservationScreen,
+  ReservationDetailsScreen,
+  SpecificChatScreen,
+} from '../screens';
 
 const Stack = createStackNavigator();
 
 const BookingNavigator = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Bookings" component={BookingsScreen} />
+      <Stack.Screen name="ReservationScreen" component={ReservationScreen} options={{title: 'Bookings'}} />
       <Stack.Screen
-        name="BookingDetailsScreen"
-        component={BookingDetailsScreen}
+        name="ReservationDetailsScreen"
+        component={ReservationDetailsScreen}
       />
+      <Stack.Screen name="SpecificChatScreen" component={SpecificChatScreen} />
     </Stack.Navigator>
   );
 };
