@@ -9,8 +9,8 @@ import {
   faCalendarAlt,
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
-import {HomeScreen, ProfileScreen} from '../screens';
-import {BookingNavigator, SearchNavigator, ChatNavigator} from '.';
+import {HomeScreen} from '../screens';
+import {BookingNavigator, SearchNavigator, ChatNavigator, ProfileNavigator} from '.';
 
 const Tab = createBottomTabNavigator();
 
@@ -64,7 +64,7 @@ const BottomTabNavigator = () => {
       <Tab.Screen name="Search" component={SearchNavigator} />
       <Tab.Screen name="Chat" component={ChatNavigator} />
       <Tab.Screen name="Booking" component={BookingNavigator} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Profile" component={ProfileNavigator} />
     </Tab.Navigator>
   );
 };
