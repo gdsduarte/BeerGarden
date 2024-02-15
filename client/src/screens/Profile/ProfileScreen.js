@@ -37,6 +37,8 @@ const ProfileScreen = ({route}) => {
   } = useUserProfileData(userId);
 
   const isOtherUserProfile = route.params?.isOtherUserProfile || false;
+  const [activeTab, setActiveTab] = useState('pubs');
+  const filteredReviews = reviews.filter(review => review.type === activeTab);
 
   useEffect(() => {
     setLoading(profileLoading);
@@ -47,7 +49,11 @@ const ProfileScreen = ({route}) => {
   };
 
   const handleSearch = async query => {
-    if (!query.trim()) return;
+    // To avoid searching for the current user
+    if (!query.trim() || query === profile?.username) {
+      console.log("Can't search for yourself.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -93,20 +99,41 @@ const ProfileScreen = ({route}) => {
 
   // Render item for the places section
   const renderPlacesItem = ({item}) => (
-    <TouchableOpacity style={styles.placeItem} onPress={() => {}}>
+    <TouchableOpacity
+      style={styles.placeItem}
+      // Navigate to ProfileNavigation with the pubId as pubId
+      onPress={() => {
+        navigation.navigate('PubDetails', {pubId: item.pubId});
+        console.log('PubId:', item.pubId);
+      }}>
       <Image style={styles.placeItemImage} source={{uri: item.photoURL}} />
       <Text style={styles.placeItemText}>{item.displayName}</Text>
     </TouchableOpacity>
   );
 
   // Render item for the reviews section
-  const renderReviewsItem = ({item}) => (
-    <TouchableOpacity style={styles.reviewItem} onPress={() => {}}>
-      <Text style={styles.reviewTitle}>{item.displayName}</Text>
-      <Text style={styles.reviewContent}>{item.comment}</Text>
-      <Text style={styles.reviewRating}>{item.rating}</Text>
-    </TouchableOpacity>
-  );
+  const renderReviewsItem = ({item}) => {
+    // Truncate the comment to limit the characters
+    const truncatedComment =
+      item.comment.length > 70
+        ? item.comment.substring(0, 67) + '...'
+        : item.comment;
+
+    return (
+      <TouchableOpacity
+        style={styles.reviewItem}
+        onPress={() =>
+          navigation.navigate('PubReviews', {
+            pubId: item.pubId,
+            reviewId: item.reviewId,
+          })
+        }>
+        <Text style={styles.reviewTitle}>{item.displayName}</Text>
+        <Text style={styles.reviewContent}>{truncatedComment}</Text>
+        <Text style={styles.reviewRating}>Rating: {item.rating}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   // Render item for the friends section
   const rendeFriendsItem = ({item}) => (
@@ -147,8 +174,9 @@ const ProfileScreen = ({route}) => {
         </View>
         {/* Profile Section */}
         <View style={styles.profileSection}>
-          <Image style={styles.avatar} source={{uri: profile?.photoURL}} />
+          <Image style={styles.avatar} source={{uri: profile?.userAvatar}} />
           <Text style={styles.name}>{profile?.displayName}</Text>
+          <Text style={styles.bio}>@{profile?.username}</Text>
           <Text style={styles.bio}>{profile?.bio}</Text>
         </View>
         {isOtherUserProfile && (
@@ -210,15 +238,28 @@ const ProfileScreen = ({route}) => {
             <Text style={styles.statLabel}>FRIENDS</Text>
           </View>
         </View>
-        {/* Display sections for places, friends, and reviews */}
         <Section
           title="Places Visited"
           data={places}
           renderItem={renderPlacesItem}
         />
+        {/* Subsections for Reviews */}
+        <View style={styles.tabsContainer}>
+          {['pubs', 'food', 'drinks'].map(tab => (
+            <TouchableOpacity
+              key={tab}
+              style={[styles.tab, activeTab === tab && styles.activeTab]}
+              onPress={() => setActiveTab(tab)}>
+              <Text style={styles.tabText}>{tab.toUpperCase()}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        {/* Render the content based on the active tab */}
         <Section
-          title="Reviews"
-          data={reviews}
+          title={`${
+            activeTab.charAt(0).toUpperCase() + activeTab.slice(1)
+          } Reviews`}
+          data={filteredReviews}
           renderItem={renderReviewsItem}
         />
         <Section title="Friends" data={friends} renderItem={rendeFriendsItem} />
@@ -229,6 +270,24 @@ const ProfileScreen = ({route}) => {
 };
 
 const styles = StyleSheet.create({
+  tabsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+    //marginBottom: 20,
+  },
+  tab: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#355E3B',
+  },
+  tabText: {
+    fontWeight: 'bold',
+    color: '#355E3B',
+  },
   scrollView: {
     flex: 1,
   },
@@ -376,7 +435,10 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   horizontalScroll: {
-    paddingLeft: 20,
+    //paddingLeft: 20,
+    //paddingRight: 20,
+    marginLeft: 20,
+    marginRight: 20,
   },
   placeItem: {
     marginRight: 15,
@@ -402,6 +464,31 @@ const styles = StyleSheet.create({
     color: '#fff',
     bottom: 10,
   },
+  reviewItem: {
+    marginRight: 15,
+    padding: 10,
+    width: 200,
+    height: 150,
+    borderRadius: 10,
+    backgroundColor: '#CCC',
+    justifyContent: 'center',
+    //alignItems: 'center',
+    borderColor: '#fff',
+    borderWidth: 3,
+  },
+  reviewTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  reviewContent: {
+    fontSize: 14,
+    marginTop: 5,
+  },
+  reviewRating: {
+    fontSize: 14,
+    marginTop: 5,
+    fontWeight: 'bold',
+  },
   friendItem: {
     width: 60,
     height: 60,
@@ -419,29 +506,6 @@ const styles = StyleSheet.create({
   friendName: {
     fontSize: 12,
     textAlign: 'center',
-  },
-  reviewItem: {
-    width: 250,
-    height: 150,
-    borderRadius: 8,
-    margin: 10,
-    padding: 10,
-    backgroundColor: '#CCC',
-    borderColor: '#fff',
-    borderWidth: 3,
-  },
-  reviewTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  reviewContent: {
-    fontSize: 14,
-    marginTop: 5,
-  },
-  reviewRating: {
-    fontSize: 14,
-    marginTop: 5,
-    fontWeight: 'bold',
   },
 });
 

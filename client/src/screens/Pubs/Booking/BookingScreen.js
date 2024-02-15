@@ -103,6 +103,7 @@ const BookingScreen = ({pubId}) => {
       pubName: pub.displayName,
       remainingSeats,
       remainingTables,
+      pubAvatar: pub.photoUrl
     });
 
     console.log('Remaining Seats:', remainingSeats);

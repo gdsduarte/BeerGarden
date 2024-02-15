@@ -1,14 +1,20 @@
 import React from 'react';
-import {Text, Image, ScrollView, StyleSheet} from 'react-native';
+import {Text, Image, ScrollView, StyleSheet, Alert} from 'react-native';
 import usePubDetails from '../../hooks/usePubDetails';
 import Loading from '../../components/common/Loading';
-
+import {useNavigation} from '@react-navigation/native';
 
 const PubDetailsScreen = ({pubId}) => {
   const {pub, loading, error} = usePubDetails(pubId);
+  const navigation = useNavigation();
 
   if (loading) return <Loading />;
-  if (error || !pub) return <Text>Pub not found.</Text>;
+  if (error || !pubId) {
+    // Handle the lack of a valid pubId, e.g., show an error or navigate back
+    console.error('Invalid pubId provided');
+    navigation.goBack();
+    return null; // Prevent further rendering
+  }
 
   return (
     <ScrollView style={styles.container}>

@@ -18,7 +18,7 @@ const useBookingAvailability = (pubId, startDate, endDate) => {
     const endTimestamp = firestore.Timestamp.fromDate(new Date(endDate));
 
     const unsubscribe = firestore()
-      .collection('reservation')
+      .collection('reservations')
       .where('pubId', '==', pubId)
       .where('date', '>=', startTimestamp)
       .where('date', '<=', endTimestamp)

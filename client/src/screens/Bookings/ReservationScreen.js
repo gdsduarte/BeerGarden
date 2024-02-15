@@ -85,7 +85,7 @@ const BookingItem = ({booking, navigation}) => {
           <Text style={styles.pubName}>
             {formattedDate} {formattedTime}
           </Text>
-          {booking.group !== 'archived' && (
+          {booking.isBooked !== false && (
             <TouchableOpacity
               onPress={toggleQRCodeModal}
               style={styles.qrCodeIcon}>

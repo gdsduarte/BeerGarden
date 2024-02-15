@@ -2,10 +2,6 @@ import React, {useState} from 'react';
 import {View, Text, StyleSheet, FlatList} from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import MapView, {Marker} from 'react-native-maps';
-/* import usePubs from '../../hooks/usePubs';
-import useUserLocation from '../../hooks/useUserLocation';
-import useNearbyPubs from '../../hooks/useNearbyPubs';
-import useAllMenuItems from '../../hooks/useAllMenuItems'; */
 import {
   usePubs,
   useUserLocation,

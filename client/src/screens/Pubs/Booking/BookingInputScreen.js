@@ -18,14 +18,15 @@ const BookingInputScreen = ({route}) => {
     selectedDate,
     selectedHour,
     pubName,
+    pubAvatar,
     remainingSeats,
     remainingTables,
   } = route.params;
-  const [partySize, setPartySize] = useState('');
-  const [specialRequest, setSpecialRequest] = useState('');
   const navigation = useNavigation();
   const {currentUserUID} = useContext(AuthContext);
   const [reservationName, setReservationName] = useState('');
+  const [partySize, setPartySize] = useState('');
+  const [specialRequest, setSpecialRequest] = useState('');
 
   // Logic to calculate table allocation
   const calculateTableAllocation = (partySize, tables) => {
@@ -108,9 +109,10 @@ const BookingInputScreen = ({route}) => {
     // Prepare reservation data to be submitted to Firestore
     const reservationData = {
       userId: currentUserUID,
-      reservationName,
+      userName: reservationName,
       pubId,
       pubName,
+      pubAvatar,
       date: firestore.Timestamp.fromDate(
         new Date(`${selectedDate}T${selectedHour}:00`),
       ),
