@@ -10,12 +10,15 @@ import {
   RefreshControl,
   TextInput,
   FlatList,
+  Modal,
+  Button,
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import {useNavigation} from '@react-navigation/native';
 import authService from '../../services/authService';
 import useUserProfileData from '../../hooks/useUserProfileData';
 import AuthContext from '../../contexts/AuthContext';
+import {Rating} from 'react-native-ratings';
 
 const ProfileScreen = ({route}) => {
   const navigation = useNavigation();
@@ -39,10 +42,22 @@ const ProfileScreen = ({route}) => {
   const isOtherUserProfile = route.params?.isOtherUserProfile || false;
   const [activeTab, setActiveTab] = useState('pubs');
   const filteredReviews = reviews.filter(review => review.type === activeTab);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [modalSearchText, setModalSearchText] = useState('');
+  const [modalData, setModalData] = useState([]);
+  const [modalDataType, setModalDataType] = useState('');
 
   useEffect(() => {
     setLoading(profileLoading);
   }, [profileLoading]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      setModalVisible(false);
+    });
+  
+    return unsubscribe;
+  }, [navigation]);
 
   const handleLogout = () => {
     authService.signOut();
@@ -84,35 +99,46 @@ const ProfileScreen = ({route}) => {
   };
 
   // Section component to display profile data
-  const Section = ({title, data, renderItem}) => (
+  const Section = ({title, data, renderItem, dataType}) => (
     <View style={styles.commonSection}>
       <Text style={styles.sectionHeading}>{title}</Text>
-      <FlatList
-        data={data}
-        keyExtractor={item => item.id}
-        renderItem={({item}) => renderItem({item, renderItem})}
-        horizontal
-        style={styles.horizontalScroll}
-      />
+      {data && (
+        <FlatList
+          data={data.slice(0, 3)}
+          keyExtractor={item => item.id}
+          renderItem={({item}) => renderItem({item})}
+          horizontal
+          style={styles.horizontalScroll}
+        />
+      )}
+      {data && data.length > 3 && (
+        <TouchableOpacity
+          style={styles.moreButton}
+          onPress={() => {
+            setModalVisible(true);
+            setModalData(data);
+            setModalDataType(dataType);
+          }}>
+          <Text style={styles.moreButtonText}>More</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 
   // Render item for the places section
-  const renderPlacesItem = ({item}) => (
+  const renderPlacesItem = ({item, inModal}) => (
     <TouchableOpacity
-      style={styles.placeItem}
-      // Navigate to ProfileNavigation with the pubId as pubId
-      onPress={() => {
-        navigation.navigate('PubDetails', {pubId: item.pubId});
-        console.log('PubId:', item.pubId);
-      }}>
+      style={inModal ? styles.modalPlaceItem : styles.placeItem}
+      onPress={() => navigation.navigate('PubDetails', {pubId: item.pubId})}>
       <Image style={styles.placeItemImage} source={{uri: item.photoURL}} />
-      <Text style={styles.placeItemText}>{item.displayName}</Text>
+      <Text style={inModal ? styles.modalPlaceItemText : styles.placeItemText}>
+        {item.displayName}
+      </Text>
     </TouchableOpacity>
   );
 
   // Render item for the reviews section
-  const renderReviewsItem = ({item}) => {
+  const renderReviewsItem = ({item, inModal}) => {
     // Truncate the comment to limit the characters
     const truncatedComment =
       item.comment.length > 70
@@ -121,24 +147,39 @@ const ProfileScreen = ({route}) => {
 
     return (
       <TouchableOpacity
-        style={styles.reviewItem}
+        style={inModal ? styles.modalReviewItem : styles.reviewItem}
         onPress={() =>
           navigation.navigate('PubReviews', {
             pubId: item.pubId,
             reviewId: item.reviewId,
           })
         }>
+        <Image style={styles.reviewItemImage} source={{uri: item.image}} />
+        <Text style={styles.reviewContent}>{item.pubName}</Text>
         <Text style={styles.reviewTitle}>{item.displayName}</Text>
         <Text style={styles.reviewContent}>{truncatedComment}</Text>
-        <Text style={styles.reviewRating}>Rating: {item.rating}</Text>
+        <Rating
+          style={styles.reviewRating}
+          type="custom"
+          ratingCount={5}
+          readonly
+          startingValue={item.rating}
+          imageSize={15}
+          tintColor="#EFEFEF"
+          //ratingColor="yellow"
+          //type="heart"
+          //showRating
+          //ratingImage={WATER_IMAGE}
+          //ratingBackgroundColor="#c8c7c8"
+        />
       </TouchableOpacity>
     );
   };
 
   // Render item for the friends section
-  const rendeFriendsItem = ({item}) => (
+  const renderFriendsItem = ({item, inModal}) => (
     <TouchableOpacity
-      style={styles.friendItem}
+      style={inModal ? styles.modalFriendItem : styles.friendItem}
       onPress={() => navigateToUserProfile(item.id)}>
       <Image style={styles.friendAvatar} source={{uri: item.photoURL}} />
       <Text style={styles.friendName}>{item.displayName}</Text>
@@ -242,6 +283,7 @@ const ProfileScreen = ({route}) => {
           title="Places Visited"
           data={places}
           renderItem={renderPlacesItem}
+          dataType="places"
         />
         {/* Subsections for Reviews */}
         <View style={styles.tabsContainer}>
@@ -261,15 +303,124 @@ const ProfileScreen = ({route}) => {
           } Reviews`}
           data={filteredReviews}
           renderItem={renderReviewsItem}
+          dataType="reviews"
         />
-        <Section title="Friends" data={friends} renderItem={rendeFriendsItem} />
+        <Section
+          title="Friends"
+          data={friends}
+          renderItem={renderFriendsItem}
+          dataType="friends"
+        />
         <Section />
       </ScrollView>
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setModalVisible(!isModalVisible);
+        }}>
+        <View style={styles.modalContent}>
+          <View>
+            <TextInput
+              style={styles.searchBar}
+              placeholder="Search..."
+              value={modalSearchText}
+              onChangeText={text => setModalSearchText(text)}
+            />
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              data={modalData.filter(item =>
+                item.displayName
+                  .toLowerCase()
+                  .includes(modalSearchText.toLowerCase()),
+              )}
+              keyExtractor={item => item.id}
+              renderItem={({item}) => {
+                switch (modalDataType) {
+                  case 'places':
+                    return renderPlacesItem({item, inModal: true});
+                  case 'friends':
+                    return renderFriendsItem({item, inModal: true});
+                  case 'reviews':
+                    return renderReviewsItem({item, inModal: true});
+                  default:
+                    return <Text>Unknown item type</Text>;
+                }
+              }}
+            />
+          </View>
+        </View>
+        <Button
+          style={styles.closeButton}
+          title="Close"
+          onPress={() => {
+            setModalVisible(!isModalVisible);
+          }}
+        />
+      </Modal>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  modalPlaceItem: {
+    marginRight: 10,
+    width: 120,
+    height: 80,
+    borderRadius: 8,
+    backgroundColor: '#EFEFEF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalPlaceItemText: {
+    position: 'absolute',
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    bottom: 5,
+  },
+  modalReviewItem: {
+    marginRight: 10,
+    padding: 10,
+    width: 300,
+    height: 170,
+    borderRadius: 10,
+    marginBottom: 10,
+    marginTop: 10,
+    backgroundColor: '#EFEFEF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalFriendItem: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    margin: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#CCC',
+  },
+  modalContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  closeButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+  },
+  moreButton: {
+    position: 'absolute',
+    right: 20,
+    top: 10,
+  },
+  moreButtonText: {
+    color: '#355E3B',
+    fontWeight: 'bold',
+  },
   tabsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -445,7 +596,7 @@ const styles = StyleSheet.create({
     width: 150,
     height: 100,
     borderRadius: 10,
-    backgroundColor: '#CCC',
+    backgroundColor: '#EFEFEF',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -464,30 +615,40 @@ const styles = StyleSheet.create({
     color: '#fff',
     bottom: 10,
   },
+  // Review List Item
   reviewItem: {
     marginRight: 15,
-    padding: 10,
+    //padding: 10,
     width: 200,
-    height: 150,
+    height: 200,
     borderRadius: 10,
-    backgroundColor: '#CCC',
-    justifyContent: 'center',
+    backgroundColor: '#EFEFEF',
+    //justifyContent: 'center',
     //alignItems: 'center',
     borderColor: '#fff',
     borderWidth: 3,
   },
+  reviewItemImage: {
+    width: '100%',
+    height: 65,
+    overflow: 'hidden',
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
   reviewTitle: {
     fontSize: 16,
     fontWeight: 'bold',
+    paddingHorizontal: 10,
   },
   reviewContent: {
     fontSize: 14,
     marginTop: 5,
+    paddingHorizontal: 10,
   },
   reviewRating: {
-    fontSize: 14,
     marginTop: 5,
-    fontWeight: 'bold',
+    flexDirection: 'row',
+    paddingHorizontal: 10,
   },
   friendItem: {
     width: 60,
@@ -496,7 +657,7 @@ const styles = StyleSheet.create({
     margin: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#CCC',
+    backgroundColor: '#EFEFEF',
   },
   friendAvatar: {
     width: 70,
