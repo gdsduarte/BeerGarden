@@ -41,7 +41,8 @@ const ReservationDetailsScreen = ({route, navigation}) => {
   };
 
   const startChat = () => {
-    navigation.navigate('SpecificChatScreen', {pubId: booking.pubId});
+    navigation.navigate('SpecificChatScreen', {targetUserId: booking.pubId});
+    console.log('Navigating to chat with pub ID:', booking.pubId);
   };
 
   return (

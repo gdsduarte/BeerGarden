@@ -6,7 +6,7 @@
   const fetchChats = async () => {
     try {
       const result = await functions()
-      .httpsCallable('getChats')({ userId: currentUserUID });
+      .httpsCallable('getChats')({ userId: currentUserId });
       setChats(result.data);
     } catch (error) {
       console.error('Error fetching chats:', error);
@@ -14,7 +14,7 @@
   };
 
   fetchChats();
-}, [currentUserUID]); */
+}, [currentUserId]); */
 const firestoreService = require("../../../services/firestoreService");
 // const Chat = require("./model");
 

@@ -24,7 +24,7 @@ const BookingScreen = ({pubId}) => {
   );
   const [markedDates, setMarkedDates] = useState({});
   const [availability, setAvailability] = useState({});
-  const {currentUserUID} = useContext(AuthContext);
+  const {currentUserId} = useContext(AuthContext);
 
   // Update availability and marked dates when pub or reservations change
   useEffect(() => {
@@ -168,7 +168,7 @@ const BookingScreen = ({pubId}) => {
     // Filter the current user's reservations for the selected date and time slot
     const currentUserReservations = reservations.filter(
       reservation =>
-        reservation.userId === currentUserUID &&
+        reservation.userId === currentUserId &&
         reservation.date.toDate().toISOString().split('T')[0] ===
           selectedDate &&
         reservation.timeSlot === timeSlot,

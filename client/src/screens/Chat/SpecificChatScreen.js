@@ -1,59 +1,93 @@
-import React, {useState, useLayoutEffect, useRef, useContext} from 'react';
+import React, {useState, useEffect, useContext, useRef} from 'react';
 import {
   View,
   Text,
-  FlatList,
   TextInput,
   TouchableOpacity,
+  FlatList,
   StyleSheet,
   Image,
 } from 'react-native';
 import useChatMessages from '../../hooks/useChatMessages';
 import AuthContext from '../../contexts/AuthContext';
+import {findOrCreateChat, sendMessage} from '../../services/chat/chatService';
 
 const SpecificChatScreen = ({route, navigation}) => {
-  const {chatId} = route.params;
-  const {currentUserUID} = useContext(AuthContext);
-  const {messages, sendMessage} = useChatMessages(chatId);
+  const {targetUserId, chatId: initialChatId} = route.params;
+  const {currentUserId} = useContext(AuthContext);
   const [inputText, setInputText] = useState('');
   const flatListRef = useRef();
+  const {messages, refreshMessages} = useChatMessages(initialChatId);
 
-  const chatName = 'Chat Name';
-  const chatAvatar = 'https://example.com/avatar.jpg';
-
-  useLayoutEffect(() => {
+  useEffect(() => {
     navigation.setOptions({
       headerShown: true,
-      title: chatName,
+      title: 'Chat Name', // Ideally, fetch and display the chat name dynamically
       headerRight: () => (
-        <Image source={{uri: chatAvatar}} style={styles.avatar} />
+        <Image
+          source={{uri: 'https://example.com/avatar.jpg'}}
+          style={styles.avatar}
+        />
       ),
-      tabBarVisible: false,
     });
-  }, [navigation, chatName, chatAvatar]);
+  }, [navigation]);
 
-  const handleSendMessage = () => {
-    if (inputText.trim()) {
-      sendMessage({
-        sentBY: currentUserUID,
-        messageText: inputText,
-      });
-      setInputText('');
-      setTimeout(() => flatListRef.current.scrollToEnd({animated: true}), 100);
+  useEffect(() => {
+    flatListRef.current?.scrollToEnd({animated: true});
+  }, [messages]);
+
+  const handleSendMessage = async () => {
+    if (!inputText.trim()) return;
+
+    const message = {
+      messageText: inputText.trim(),
+      sentBy: currentUserId,
+    };
+
+    if (!initialChatId && targetUserId) {
+      try {
+        // Simplifying group data structure for initial creation
+        const groupData = {
+          createdBy: currentUserId,
+          members: [currentUserId, targetUserId],
+          type: 'private',
+        };
+        const newChatId = await findOrCreateChat(
+          currentUserId,
+          targetUserId,
+          message,
+          groupData,
+        );
+        // Update the chatId in the route params to ensure future messages are sent to the correct chat
+        route.params.chatId = newChatId;
+        //refreshMessages(); // Assuming this function fetches messages for the new chatId
+      } catch (error) {
+        console.error('Error initializing new chat:', error);
+      }
+    } else {
+      try {
+        await sendMessage(initialChatId || route.params.chatId, message);
+        //refreshMessages(); // Refresh messages to include the new one
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
     }
+
+    setInputText(''); // Clear input after sending
   };
 
+  // Render function for message items
   const renderMessageItem = ({item}) => (
     <View
       style={[
         styles.messageItem,
-        item.sentBy === currentUserUID
-          ? styles.otherUserMessage
-          : styles.currentUserMessage,
+        item.sentBy === currentUserId
+          ? styles.currentUserMessage
+          : styles.otherUserMessage,
       ]}>
       <Text style={styles.messageText}>{item.messageText}</Text>
       <Text style={styles.messageTime}>
-        {item.sentAt.toDate().toLocaleTimeString()}
+        {item.sentAt?.toDate().toLocaleTimeString()}
       </Text>
     </View>
   );
@@ -64,14 +98,15 @@ const SpecificChatScreen = ({route, navigation}) => {
         ref={flatListRef}
         data={messages}
         renderItem={renderMessageItem}
-        keyExtractor={item => item.id}
+        keyExtractor={(item, index) => item.id || index.toString()}
+        contentContainerStyle={styles.listContentContainer}
       />
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Type a message..."
           value={inputText}
           onChangeText={setInputText}
+          placeholder="Type a message..."
         />
         <TouchableOpacity onPress={handleSendMessage} style={styles.sendButton}>
           <Text style={styles.sendButtonText}>Send</Text>
@@ -82,6 +117,9 @@ const SpecificChatScreen = ({route, navigation}) => {
 };
 
 const styles = StyleSheet.create({
+  listContentContainer: {
+    paddingVertical: 10,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f8f1e7',

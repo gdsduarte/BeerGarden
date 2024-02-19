@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Text, Platform} from 'react-native';
+import {Text, Platform, Keyboard} from 'react-native';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {
   faHome,
@@ -10,11 +10,38 @@ import {
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import {HomeScreen} from '../screens';
-import {BookingNavigator, SearchNavigator, ChatNavigator, ProfileNavigator} from '.';
+import {
+  BookingNavigator,
+  SearchNavigator,
+  ChatNavigator,
+  ProfileNavigator,
+} from '.';
 
 const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator = () => {
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      },
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -54,11 +81,13 @@ const BottomTabNavigator = () => {
           height: Platform.OS === 'ios' ? 80 : 60,
           paddingBottom: Platform.OS === 'ios' ? 20 : 5,
           paddingTop: 10,
+          display: keyboardVisible ? 'none' : 'flex',
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: 'bold',
         },
+        keyboardHidesTabBar: true, // This line will hide the tab bar when the keyboard is open
       })}>
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Search" component={SearchNavigator} />

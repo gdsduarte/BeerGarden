@@ -77,7 +77,7 @@ const NearMeSearch = ({navigation}) => {
   );
 };
 
-const PlacesSearch = () => {
+const PlacesSearch = ({navigation}) => {
   const {pubs, loading} = usePubs();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -94,7 +94,12 @@ const PlacesSearch = () => {
       <SearchBar placeholder="Search for places..." onSearch={setSearchTerm} />
       <FlatList
         data={filteredPubs}
-        renderItem={({item}) => <Card item={item} />}
+        renderItem={({item}) => (
+          <Card
+            item={item}
+            onPress={() => navigation.navigate('PubScreen', {pubId: item.id})}
+          />
+        )}
         keyExtractor={item => item.id}
       />
     </View>

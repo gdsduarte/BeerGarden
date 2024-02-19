@@ -23,7 +23,7 @@ const BookingInputScreen = ({route}) => {
     remainingTables,
   } = route.params;
   const navigation = useNavigation();
-  const {currentUserUID} = useContext(AuthContext);
+  const {currentUserId} = useContext(AuthContext);
   const [reservationName, setReservationName] = useState('');
   const [partySize, setPartySize] = useState('');
   const [specialRequest, setSpecialRequest] = useState('');
@@ -108,7 +108,7 @@ const BookingInputScreen = ({route}) => {
 
     // Prepare reservation data to be submitted to Firestore
     const reservationData = {
-      userId: currentUserUID,
+      userId: currentUserId,
       userName: reservationName,
       pubId,
       pubName,

@@ -25,10 +25,10 @@ const ProfileScreen = ({route}) => {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const {currentUserUID} = useContext(AuthContext);
+  const {currentUserId} = useContext(AuthContext);
 
   // Determine if we're viewing the current user's profile or another user's profile
-  const userId = route.params?.userId || currentUserUID;
+  const userId = route.params?.userId || currentUserId;
 
   // Fetch the profile data based on the determined userId
   const {
@@ -200,7 +200,7 @@ const ProfileScreen = ({route}) => {
             <TouchableOpacity
               style={styles.backButton}
               onPress={() =>
-                navigation.replace('ProfileScreen', {userId: currentUserUID})
+                navigation.replace('ProfileScreen', {userId: currentUserId})
               }>
               <Text style={styles.backButtonText}>{'<'}</Text>
             </TouchableOpacity>

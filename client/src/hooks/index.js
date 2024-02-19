@@ -2,7 +2,7 @@
 export {default as useAllMenuItems} from './useAllMenuItems';
 export {default as useBookingAvailability} from './useBookingAvailability';
 export {default as useChatMessages} from './useChatMessages';
-export {default as useChats} from './useChats';
+export {default as useGroups} from './useGroups';
 export {default as useDrinkMenu} from './useDrinkMenu';
 export {default as useDrinkReviews} from './useDrinkReviews';
 export {default as useFoodMenu} from './useFoodMenu';

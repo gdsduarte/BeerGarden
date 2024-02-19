@@ -31,8 +31,8 @@ const ReservationScreen = () => {
 };
 
 const BookingsTab = ({navigation, isBooked}) => {
-  const {currentUserUID} = useContext(AuthContext);
-  const [reservations, loading] = useReservations(currentUserUID);
+  const {currentUserId} = useContext(AuthContext);
+  const [reservations, loading] = useReservations(currentUserId);
 
   if (loading) {
     return <Loading />;
