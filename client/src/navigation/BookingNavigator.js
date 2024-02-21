@@ -11,7 +11,11 @@ const Stack = createStackNavigator();
 const BookingNavigator = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="ReservationScreen" component={ReservationScreen} options={{title: 'Bookings'}} />
+      <Stack.Screen
+        name="ReservationScreen"
+        component={ReservationScreen}
+        options={{title: 'Bookings'}}
+      />
       <Stack.Screen
         name="ReservationDetailsScreen"
         component={ReservationDetailsScreen}

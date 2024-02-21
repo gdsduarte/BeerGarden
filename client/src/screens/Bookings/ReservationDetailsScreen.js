@@ -14,6 +14,7 @@ const ReservationDetailsScreen = ({route, navigation}) => {
   const {booking} = route.params;
   const isArchived = booking.isBooked === true;
   const [invitedFriends, setInvitedFriends] = useState([]);
+  
   // Convert Firestore Timestamps to JavaScript Date objects and format them
   const isValidDate = booking.date && booking.date.toDate instanceof Function;
   const bookingDate = isValidDate ? booking.date.toDate() : new Date();

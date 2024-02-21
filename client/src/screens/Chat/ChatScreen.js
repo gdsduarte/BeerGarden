@@ -16,14 +16,24 @@ const ChatScreen = () => (
 );
 
 const ChatList = ({groups, navigation}) => {
+  const {currentUserId} = useContext(AuthContext);
   const renderChatItem = ({item}) => (
     <TouchableOpacity
       style={styles.chatItem}
-      onPress={() => navigation.navigate('SpecificChat', {chatId: item.id})}>
+      onPress={() =>
+        navigation.navigate('SpecificChat', {
+          chatId: item.id,
+          currentUserId: currentUserId,
+          targetUserId: item.members.filter(
+            member => member !== currentUserId,
+          )[0],
+        })
+      }>
       <Text style={styles.chatTitle}>{item.name}</Text>
+      <Text style={styles.chatSnippet}>{item.lastMessage.messageText}</Text>
     </TouchableOpacity>
   );
-
+  
   return (
     <FlatList
       data={groups}
@@ -52,7 +62,6 @@ const GroupsChat = ({navigation}) => {
   const groupsChats = useGroups(currentUserId, 'group');
   return <ChatList groups={groupsChats} navigation={navigation} />;
 };
-
 
 const styles = StyleSheet.create({
   container: {

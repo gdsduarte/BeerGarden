@@ -10,19 +10,40 @@ import {
 } from 'react-native';
 import useChatMessages from '../../hooks/useChatMessages';
 import AuthContext from '../../contexts/AuthContext';
-import {findOrCreateChat, sendMessage} from '../../services/chat/chatService';
+import {
+  manageChatAndSendMessage,
+  findChat,
+} from '../../services/chat/chatService';
 
 const SpecificChatScreen = ({route, navigation}) => {
   const {targetUserId, chatId: initialChatId} = route.params;
   const {currentUserId} = useContext(AuthContext);
+  const [chatId, setChatId] = useState(null);
   const [inputText, setInputText] = useState('');
+  const {messages} = useChatMessages(chatId);
   const flatListRef = useRef();
-  const {messages, refreshMessages} = useChatMessages(initialChatId);
 
+  useEffect(() => {
+    // Immediately try to find an existing chat if chatId is not provided through params
+    const initChat = async () => {
+      if (!initialChatId && targetUserId) {
+        const foundChatId = await findChat(currentUserId, targetUserId);
+        if (foundChatId) {
+          setChatId(foundChatId);
+        }
+      } else {
+        setChatId(initialChatId);
+      }
+    };
+
+    initChat();
+  }, [currentUserId, targetUserId, initialChatId]);
+
+  // Navigation options
   useEffect(() => {
     navigation.setOptions({
       headerShown: true,
-      title: 'Chat Name', // Ideally, fetch and display the chat name dynamically
+      title: 'Chat Name',
       headerRight: () => (
         <Image
           source={{uri: 'https://example.com/avatar.jpg'}}
@@ -32,51 +53,29 @@ const SpecificChatScreen = ({route, navigation}) => {
     });
   }, [navigation]);
 
+  // Scroll to end when messages update
   useEffect(() => {
     flatListRef.current?.scrollToEnd({animated: true});
   }, [messages]);
 
+  // Handle sending a message
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
-    const message = {
-      messageText: inputText.trim(),
-      sentBy: currentUserId,
-    };
-
-    if (!initialChatId && targetUserId) {
-      try {
-        // Simplifying group data structure for initial creation
-        const groupData = {
-          createdBy: currentUserId,
-          members: [currentUserId, targetUserId],
-          type: 'private',
-        };
-        const newChatId = await findOrCreateChat(
-          currentUserId,
-          targetUserId,
-          message,
-          groupData,
-        );
-        // Update the chatId in the route params to ensure future messages are sent to the correct chat
-        route.params.chatId = newChatId;
-        //refreshMessages(); // Assuming this function fetches messages for the new chatId
-      } catch (error) {
-        console.error('Error initializing new chat:', error);
-      }
-    } else {
-      try {
-        await sendMessage(initialChatId || route.params.chatId, message);
-        //refreshMessages(); // Refresh messages to include the new one
-      } catch (error) {
-        console.error('Error sending message:', error);
-      }
+    try {
+      const usedChatId = await manageChatAndSendMessage(
+        currentUserId,
+        targetUserId,
+        inputText,
+      );
+      if (!chatId) setChatId(usedChatId); // Update state only if chatId was not previously set
+      setInputText(''); // Clear input after successful send
+    } catch (error) {
+      console.error('Error managing chat or sending message:', error);
     }
-
-    setInputText(''); // Clear input after sending
   };
 
-  // Render function for message items
+  // Render message item
   const renderMessageItem = ({item}) => (
     <View
       style={[
