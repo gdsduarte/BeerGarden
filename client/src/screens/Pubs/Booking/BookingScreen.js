@@ -155,6 +155,11 @@ const BookingScreen = ({pubId}) => {
     const bookedSeatsForSlot = dailyBookings[timeSlot] || 0;
     const totalSeats = pub.seatsCapacity || 0;
     const bookingLoad = bookedSeatsForSlot / totalSeats;
+    
+    console.log('DailyBookings: ',dailyBookings);
+    console.log('Booking load:', bookingLoad);
+    console.log('Booked Seats: ' ,bookedSeatsForSlot);
+    console.log('Total Seats: ' ,totalSeats);
 
     if (bookingLoad >= 1) return 'red';
     if (bookingLoad > 0.75) return 'orange';

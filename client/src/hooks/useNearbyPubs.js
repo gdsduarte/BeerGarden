@@ -34,42 +34,42 @@ const useNearbyPubs = (userLatitude, userLongitude, maxDistance) => {
       .collection('pub')
       .onSnapshot(
         querySnapshot => {
-          const list = [];
-          querySnapshot.forEach(doc => {
-            const {displayName, location, photoUrl} = doc.data();
-            const distance = calculateDistance(
-              userLatitude,
-              userLongitude,
-              location.latitude,
-              location.longitude,
-            );
-            // Filter based on max distance
-            if (distance <= maxDistance) {
-              list.push({
-                id: doc.id,
-                name: displayName,
-                latitude: location.latitude,
-                longitude: location.longitude,
-                image: photoUrl,
-                distance: distance,
-              });
-            }
-          });
+          const list = querySnapshot.docs
+            .map(doc => {
+              const { displayName, location, photoUrl } = doc.data();
+              const distance = calculateDistance(
+                userLatitude,
+                userLongitude,
+                location.latitude,
+                location.longitude,
+              );
+              return distance <= maxDistance
+                ? {
+                    id: doc.id,
+                    name: displayName,
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    image: photoUrl,
+                    distance: distance,
+                  }
+                : null;
+            })
+            .filter(Boolean);
 
           setPubs(list);
-          if (loading) {
-            setLoading(false);
-          }
+          setLoading(false);
         },
         error => {
           console.error('Error fetching pubs:', error);
+          setLoading(false);
         },
       );
 
+    // Clean-up function
     return () => unsubscribe();
-  }, [loading, userLatitude, userLongitude, maxDistance]);
+  }, [userLatitude, userLongitude, maxDistance]);
 
-  return {pubs, loading};
+  return { pubs, loading };
 };
 
 export default useNearbyPubs;
