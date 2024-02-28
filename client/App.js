@@ -17,16 +17,16 @@ enableScreens();
 const App = () => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentUserUID, setCurrentUserUID] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(user => {
       if (user) {
         setIsUserLoggedIn(true);
-        setCurrentUserUID(user.uid);
+        setCurrentUserId(user.uid);
       } else {
         setIsUserLoggedIn(false);
-        setCurrentUserUID(null);
+        setCurrentUserId(null);
       }
       setIsLoading(false);
     });
@@ -42,7 +42,7 @@ const App = () => {
       await authService.signOut();
       setIsUserLoggedIn(false);
     },
-    currentUserUID,
+    currentUserId,
   };
 
   if (isLoading) return <Loading />;

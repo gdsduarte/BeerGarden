@@ -1,11 +1,7 @@
 import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
-import {
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import {Text, TouchableOpacity, StyleSheet} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import usePubDetails from '../../hooks/usePubDetails';
 import PubNavigator from '../../navigation/PubNavigator';
@@ -17,11 +13,10 @@ import {
 } from '..';
 import Loading from '../../components/common/Loading';
 
-
 const Drawer = createDrawerNavigator();
 
 const PubScreen = ({route}) => {
-  const pubId = route?.params?.pubId;
+  const {pubId} = route.params;
   const {pub, loading, error} = usePubDetails(pubId);
   const navigation = useNavigation();
 

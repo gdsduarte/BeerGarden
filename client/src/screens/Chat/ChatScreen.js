@@ -1,25 +1,42 @@
 import React, {useContext} from 'react';
 import {Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-import useChats from '../../hooks/useChats';
+import useGroups from '../../hooks/useGroups';
 import useNearbyPubs from '../../hooks/useNearbyPubs';
 import AuthContext from '../../contexts/AuthContext';
 
 const Tab = createMaterialTopTabNavigator();
 
-const ChatList = ({chats, navigation}) => {
+const ChatScreen = () => (
+  <Tab.Navigator>
+    <Tab.Screen name="Garden" component={GardenChat} />
+    <Tab.Screen name="Friends" component={FriendsChat} />
+    <Tab.Screen name="Groups" component={GroupsChat} />
+  </Tab.Navigator>
+);
+
+const ChatList = ({groups, navigation}) => {
+  const {currentUserId} = useContext(AuthContext);
   const renderChatItem = ({item}) => (
     <TouchableOpacity
       style={styles.chatItem}
-      onPress={() => navigation.navigate('SpecificChat', {chatId: item.id})}>
-      <Text style={styles.chatTitle}>{item.title}</Text>
-      {/* other chat item details */}
+      onPress={() =>
+        navigation.navigate('SpecificChat', {
+          chatId: item.id,
+          currentUserId: currentUserId,
+          targetUserId: item.members.filter(
+            member => member !== currentUserId,
+          )[0],
+        })
+      }>
+      <Text style={styles.chatTitle}>{item.name}</Text>
+      <Text style={styles.chatSnippet}>{item.lastMessage.messageText}</Text>
     </TouchableOpacity>
   );
-
+  
   return (
     <FlatList
-      data={chats}
+      data={groups}
       renderItem={renderChatItem}
       keyExtractor={item => item.id}
     />
@@ -29,43 +46,22 @@ const ChatList = ({chats, navigation}) => {
 const GardenChat = ({navigation}) => {
   const nearbyPubs = useNearbyPubs();
 
-  const renderPubItem = ({item}) => (
-    <TouchableOpacity
-      style={styles.pubItem}
-      onPress={() => navigation.navigate('SpecificChat', {pubId: item.id})}>
-      <Text style={styles.pubTitle}>{item.name}</Text>
-      {/* Add other pub details */}
-    </TouchableOpacity>
-  );
-
-  return (
-    <FlatList
-      data={nearbyPubs}
-      renderItem={renderPubItem}
-      keyExtractor={item => item.id}
-    />
-  );
+  const {currentUserId} = useContext(AuthContext);
+  const openChats = useGroups(currentUserId, 'open');
+  return <ChatList groups={openChats} navigation={navigation} />;
 };
 
 const FriendsChat = ({navigation}) => {
-  const {currentUserUID} = useContext(AuthContext);
-  const friendsChats = useChats(currentUserUID, 'private');
-  return <ChatList chats={friendsChats} navigation={navigation} />;
+  const {currentUserId} = useContext(AuthContext);
+  const friendsChats = useGroups(currentUserId, 'private');
+  return <ChatList groups={friendsChats} navigation={navigation} />;
 };
 
 const GroupsChat = ({navigation}) => {
-  const {currentUserUID} = useContext(AuthContext);
-  const groupsChats = useChats(currentUserUID, 'group');
-  return <ChatList chats={groupsChats} navigation={navigation} />;
+  const {currentUserId} = useContext(AuthContext);
+  const groupsChats = useGroups(currentUserId, 'group');
+  return <ChatList groups={groupsChats} navigation={navigation} />;
 };
-
-const ChatScreen = () => (
-  <Tab.Navigator>
-    <Tab.Screen name="Garden" component={GardenChat} />
-    <Tab.Screen name="Friends" component={FriendsChat} />
-    <Tab.Screen name="Groups" component={GroupsChat} />
-  </Tab.Navigator>
-);
 
 const styles = StyleSheet.create({
   container: {

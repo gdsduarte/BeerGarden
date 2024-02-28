@@ -1,42 +1,52 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {
-  SearchScreen,
   PubScreen,
+  ProfileScreen,
   BookingInputScreen,
   ReservationDetailsScreen,
 } from '../screens';
 import MenuNavigator from './MenuNavigator';
-import DrinkNavigator from './DrinkNavigator';
 
 const Stack = createStackNavigator();
 
-const SearchNavigator = () => {
+const ProfileNavigator = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName="ProfileScreen">
       <Stack.Screen
-        name="SearchArea"
-        component={SearchScreen}
-        options={{title: 'Search'}}
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{headerShown: false}}
       />
       <Stack.Screen
-        name="PubScreen"
+        name="PubDetails"
+        component={PubScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="PubReviews"
         component={PubScreen}
         options={{headerShown: false}}
       />
       <Stack.Screen
         name="BookingInputScreen"
         component={BookingInputScreen}
-        options={{title: 'Booking'}}
+        options={{headerTitle: 'Booking'}}
       />
       <Stack.Screen
         name="ReservationDetailsScreen"
         component={ReservationDetailsScreen}
+        options={{headerTitle: 'Booking'}}
       />
       <Stack.Screen name="MenuNavigator" component={MenuNavigator} />
-      <Stack.Screen name="DrinkNavigator" component={DrinkNavigator} />
+      <Stack.Screen name="DrinkNavigator" component={MenuNavigator} />
+      {/* <Stack.Screen
+        name="EditProfileScreen"
+        component={EditProfileScreen}
+        options={{headerTitle: 'Edit Profile'}}
+      />  */}
     </Stack.Navigator>
   );
 };
 
-export default SearchNavigator;
+export default ProfileNavigator;

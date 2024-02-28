@@ -1,16 +1,22 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {
+  HomeScreen,
   ReservationScreen,
   ReservationDetailsScreen,
-  SpecificChatScreen,
+  SearchScreen,
 } from '../screens';
 
 const Stack = createStackNavigator();
 
-const BookingNavigator = () => {
+const HomeNavigator = () => {
   return (
     <Stack.Navigator>
+      <Stack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{headerShown: false}}
+      />
       <Stack.Screen
         name="ReservationScreen"
         component={ReservationScreen}
@@ -19,10 +25,15 @@ const BookingNavigator = () => {
       <Stack.Screen
         name="ReservationDetailsScreen"
         component={ReservationDetailsScreen}
+        options={{title: 'Reservation Details'}}
       />
-      <Stack.Screen name="SpecificChatScreen" component={SpecificChatScreen} />
+      <Stack.Screen
+        name="SearchScreen"
+        component={SearchScreen}
+        options={{title: 'Search'}}
+      />
     </Stack.Navigator>
   );
 };
 
-export default BookingNavigator;
+export default HomeNavigator;

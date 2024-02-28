@@ -1,3 +1,4 @@
+import React, {useState, useEffect, useContext} from 'react';
 import {
   View,
   Text,
@@ -7,122 +8,183 @@ import {
   ScrollView,
   SafeAreaView,
   RefreshControl,
+  TextInput,
+  FlatList,
+  Modal,
+  Button,
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
-import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import authService from '../../services/authService';
+import useUserProfileData from '../../hooks/useUserProfileData';
+import AuthContext from '../../contexts/AuthContext';
+import {Rating} from 'react-native-ratings';
 
-const ProfileScreen = () => {
-  const [isFollowing, setIsFollowing] = useState(false);
-  const currentUserId = 'user_id';
-  const userIdToFollow = 'id_of_user_to_follow'; 
+const ProfileScreen = ({route}) => {
   const navigation = useNavigation();
+  const [searchText, setSearchText] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const {currentUserId} = useContext(AuthContext);
+
+  // Determine if we're viewing the current user's profile or another user's profile
+  const userId = route.params?.userId || currentUserId;
+
+  // Fetch the profile data based on the determined userId
+  const {
+    profile,
+    places,
+    friends,
+    reviews,
+    loading: profileLoading,
+  } = useUserProfileData(userId);
+
+  const isOtherUserProfile = route.params?.isOtherUserProfile || false;
+  const [activeTab, setActiveTab] = useState('pubs');
+  const filteredReviews = reviews.filter(review => review.type === activeTab);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [modalSearchText, setModalSearchText] = useState('');
+  const [modalData, setModalData] = useState([]);
+  const [modalDataType, setModalDataType] = useState('');
+
+  useEffect(() => {
+    setLoading(profileLoading);
+  }, [profileLoading]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      setModalVisible(false);
+    });
+  
+    return unsubscribe;
+  }, [navigation]);
 
   const handleLogout = () => {
     authService.signOut();
   };
 
-  // Dummy data for places, friends, and followers
-  const places = [
-    {id: 1, name: 'Pub One', image: 'image_url_1'},
-    {id: 2, name: 'Pub Two', image: 'image_url_2'},
-  ];
+  const handleSearch = async query => {
+    // To avoid searching for the current user
+    if (!query.trim() || query === profile?.username) {
+      console.log("Can't search for yourself.");
+      return;
+    }
 
-  const friends = [
-    {id: 1, name: 'Alice', image: 'image_url_1'},
-    {id: 2, name: 'Bob', image: 'image_url_2'},
-  ];
-
-  const followers = [
-    {id: 1, name: 'Charlie', image: 'image_url_3'},
-    {id: 2, name: 'Dana', image: 'image_url_4'},
-  ];
-
-  const reviews = [
-    {
-      id: 1,
-      title: 'Great Atmosphere',
-      content: 'Loved the vibe at Pub One!',
-      rating: 5,
-    },
-    {
-      id: 2,
-      title: 'Amazing Music',
-      content: 'Pub Two had amazing live music!',
-      rating: 4,
-    },
-  ];
-
-  // Render item functions for each section
-  const renderPlaceItem = place => (
-    <View key={place.id} style={styles.placeItem}>
-      <Text style={styles.placeItemText}>{place.name}</Text>
-    </View>
-  );
-
-  const renderFriendItem = friend => (
-    <View key={friend.id} style={styles.friendItem}>
-      <Image source={{uri: friend.avatar}} style={styles.friendAvatar} />
-      <Text style={styles.friendName}>{friend.name}</Text>
-    </View>
-  );
-
-  const renderFollowerItem = follower => (
-    <View key={follower.id} style={styles.followerItem}>
-      <Image source={{uri: follower.avatar}} style={styles.followerAvatar} />
-      <Text style={styles.followerName}>{follower.name}</Text>
-    </View>
-  );
-
-  const renderReviewItem = review => (
-    <View key={review.id} style={styles.reviewItem}>
-      <Text style={styles.reviewTitle}>{review.title}</Text>
-      <Text style={styles.reviewContent}>{review.content}</Text>
-      <Text style={styles.reviewRating}>{'Rating: ' + review.rating}</Text>
-    </View>
-  );
-
-  // Section Component
-  const Section = ({title, data, renderItem}) => (
-    <View style={styles[`${title.toLowerCase()}Section`]}>
-      <Text style={styles.sectionHeading}>{title}</Text>
-      <ScrollView
-        horizontal={true}
-        showsHorizontalScrollIndicator={false}
-        style={styles.horizontalScroll}>
-        {data.map(renderItem)}
-      </ScrollView>
-    </View>
-  );
-
-  const handleFollowToggle = async () => {
-    const userRef = firestore().collection('users').doc(userIdToFollow);
-
+    setLoading(true);
     try {
-      if (isFollowing) {
-        // Unfollow logic
-        await userRef.update({
-          followers: firestore.FieldValue.arrayRemove(currentUserId),
-        });
-        setIsFollowing(false);
-      } else {
-        // Follow logic
-        await userRef.update({
-          followers: firestore.FieldValue.arrayUnion(currentUserId),
-        });
-        setIsFollowing(true);
-      }
+      const querySnapshot = await firestore()
+        .collection('user')
+        .where('username', '==', query)
+        .get();
+
+      const results = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setSearchResults(results);
     } catch (error) {
-      console.error('Error updating follow status: ', error);
+      console.error('Error searching users: ', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Function to handle message button press
-  const handleMessagePress = () => {
-    // Navigate to ChatScreen with user information
-    navigation.navigate('Chat', {userId: 'id_of_user'});
+  // Navigate to another user's profile
+  const navigateToUserProfile = userId => {
+    navigation.navigate('ProfileScreen', {
+      isOtherUserProfile: true,
+      userId: userId,
+    });
   };
+
+  // Section component to display profile data
+  const Section = ({title, data, renderItem, dataType}) => (
+    <View style={styles.commonSection}>
+      <Text style={styles.sectionHeading}>{title}</Text>
+      {data && (
+        <FlatList
+          data={data.slice(0, 3)}
+          keyExtractor={item => item.id}
+          renderItem={({item}) => renderItem({item})}
+          horizontal
+          style={styles.horizontalScroll}
+        />
+      )}
+      {data && data.length > 3 && (
+        <TouchableOpacity
+          style={styles.moreButton}
+          onPress={() => {
+            setModalVisible(true);
+            setModalData(data);
+            setModalDataType(dataType);
+          }}>
+          <Text style={styles.moreButtonText}>More</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
+  // Render item for the places section
+  const renderPlacesItem = ({item, inModal}) => (
+    <TouchableOpacity
+      style={inModal ? styles.modalPlaceItem : styles.placeItem}
+      onPress={() => navigation.navigate('PubDetails', {pubId: item.pubId})}>
+      <Image style={styles.placeItemImage} source={{uri: item.photoURL}} />
+      <Text style={inModal ? styles.modalPlaceItemText : styles.placeItemText}>
+        {item.displayName}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  // Render item for the reviews section
+  const renderReviewsItem = ({item, inModal}) => {
+    // Truncate the comment to limit the characters
+    const truncatedComment =
+      item.comment.length > 70
+        ? item.comment.substring(0, 67) + '...'
+        : item.comment;
+
+    return (
+      <TouchableOpacity
+        style={inModal ? styles.modalReviewItem : styles.reviewItem}
+        onPress={() =>
+          navigation.navigate('PubReviews', {
+            pubId: item.pubId,
+            reviewId: item.reviewId,
+          })
+        }>
+        <Image style={styles.reviewItemImage} source={{uri: item.image}} />
+        <Text style={styles.reviewContent}>{item.pubName}</Text>
+        <Text style={styles.reviewTitle}>{item.displayName}</Text>
+        <Text style={styles.reviewContent}>{truncatedComment}</Text>
+        <Rating
+          style={styles.reviewRating}
+          type="custom"
+          ratingCount={5}
+          readonly
+          startingValue={item.rating}
+          imageSize={15}
+          tintColor="#EFEFEF"
+          //ratingColor="yellow"
+          //type="heart"
+          //showRating
+          //ratingImage={WATER_IMAGE}
+          //ratingBackgroundColor="#c8c7c8"
+        />
+      </TouchableOpacity>
+    );
+  };
+
+  // Render item for the friends section
+  const renderFriendsItem = ({item, inModal}) => (
+    <TouchableOpacity
+      style={inModal ? styles.modalFriendItem : styles.friendItem}
+      onPress={() => navigateToUserProfile(item.id)}>
+      <Image style={styles.friendAvatar} source={{uri: item.photoURL}} />
+      <Text style={styles.friendName}>{item.displayName}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -130,80 +192,275 @@ const ProfileScreen = () => {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl
-            refreshing={false}
-            onRefresh={() => {}}
-          />
+          <RefreshControl refreshing={loading} onRefresh={() => {}} />
         }>
         {/* Header Section */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton}>
-            <Text style={styles.backButtonText}>{'<'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.settingsButton} onPress={handleLogout}>
-            <Text style={styles.settingsButtonText}>{'⚙️'}</Text>
-          </TouchableOpacity>
+          {isOtherUserProfile && (
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() =>
+                navigation.replace('ProfileScreen', {userId: currentUserId})
+              }>
+              <Text style={styles.backButtonText}>{'<'}</Text>
+            </TouchableOpacity>
+          )}
+          {!isOtherUserProfile && (
+            <TouchableOpacity
+              style={styles.settingsButton}
+              onPress={handleLogout}>
+              <Text style={styles.settingsButtonText}>{'⚙️'}</Text>
+            </TouchableOpacity>
+          )}
         </View>
         {/* Profile Section */}
         <View style={styles.profileSection}>
-          <Image
-            style={styles.avatar}
-            source={{uri: 'path_to_your_avatar_image'}}
-          />
-          <Text style={styles.name}>Jody Wisternoff</Text>
-          <Text style={styles.bio}>
-            Experimental electronic music pioneer. Half of duo Way Out West.
-            Boss at Anjunadeep.
-          </Text>
+          <Image style={styles.avatar} source={{uri: profile?.userAvatar}} />
+          <Text style={styles.name}>{profile?.displayName}</Text>
+          <Text style={styles.bio}>@{profile?.username}</Text>
+          <Text style={styles.bio}>{profile?.bio}</Text>
+        </View>
+        {isOtherUserProfile && (
           <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={isFollowing ? styles.unfollowButton : styles.followButton}
-              onPress={handleFollowToggle}>
-              <Text style={styles.followButtonText}>
-                {isFollowing ? 'UNFOLLOW' : 'FOLLOW'}
-              </Text>
+              style={styles.addButton}
+              onPress={() => {
+                /* Add friend logic */
+              }}>
+              <Text style={styles.addButtonText}>Add Friend</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.messageButton}
-              onPress={handleMessagePress}>
-              <Text style={styles.messageButtonText}>MESSAGE</Text>
+              onPress={() => {
+                /* Start chat logic */
+              }}>
+              <Text style={styles.messageButtonText}>Message</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        )}
+        {/* Search Bar */}
+        {!isOtherUserProfile && (
+          <View style={styles.searchBarContainer}>
+            <TextInput
+              style={styles.searchBar}
+              placeholder="Search users..."
+              value={searchText}
+              onChangeText={setSearchText}
+              onSubmitEditing={() => handleSearch(searchText)}
+            />
+          </View>
+        )}
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <FlatList
+            data={searchResults}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                style={styles.userItem}
+                onPress={() => navigateToUserProfile(item.id)}>
+                <Text style={styles.userName}>{item.username}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
         {/* Stats Section */}
         <View style={styles.statsSection}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>236</Text>
+            <Text style={styles.statNumber}>{places.length}</Text>
             <Text style={styles.statLabel}>PLACES</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>23.6k</Text>
+            <Text style={styles.statNumber}>{reviews.length}</Text>
             <Text style={styles.statLabel}>REVIEWS</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>2.8k</Text>
-            <Text style={styles.statLabel}>FOLLOWERS</Text>
+            <Text style={styles.statNumber}>{friends.length}</Text>
+            <Text style={styles.statLabel}>FRIENDS</Text>
           </View>
         </View>
-        {/* Places, Friends, Reviews, Followers Sections */}
         <Section
           title="Places Visited"
           data={places}
-          renderItem={renderPlaceItem}
+          renderItem={renderPlacesItem}
+          dataType="places"
         />
-        <Section title="Friends" data={friends} renderItem={renderFriendItem} />
-        <Section title="Reviews" data={reviews} renderItem={renderReviewItem} />
+        {/* Subsections for Reviews */}
+        <View style={styles.tabsContainer}>
+          {['pubs', 'food', 'drinks'].map(tab => (
+            <TouchableOpacity
+              key={tab}
+              style={[styles.tab, activeTab === tab && styles.activeTab]}
+              onPress={() => setActiveTab(tab)}>
+              <Text style={styles.tabText}>{tab.toUpperCase()}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        {/* Render the content based on the active tab */}
         <Section
-          title="Followers"
-          data={followers}
-          renderItem={renderFollowerItem}
+          title={`${
+            activeTab.charAt(0).toUpperCase() + activeTab.slice(1)
+          } Reviews`}
+          data={filteredReviews}
+          renderItem={renderReviewsItem}
+          dataType="reviews"
         />
+        <Section
+          title="Friends"
+          data={friends}
+          renderItem={renderFriendsItem}
+          dataType="friends"
+        />
+        <Section />
       </ScrollView>
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setModalVisible(!isModalVisible);
+        }}>
+        <View style={styles.modalContent}>
+          <View>
+            <TextInput
+              style={styles.searchBar}
+              placeholder="Search..."
+              value={modalSearchText}
+              onChangeText={text => setModalSearchText(text)}
+            />
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              data={modalData.filter(item =>
+                item.displayName
+                  .toLowerCase()
+                  .includes(modalSearchText.toLowerCase()),
+              )}
+              keyExtractor={item => item.id}
+              renderItem={({item}) => {
+                switch (modalDataType) {
+                  case 'places':
+                    return renderPlacesItem({item, inModal: true});
+                  case 'friends':
+                    return renderFriendsItem({item, inModal: true});
+                  case 'reviews':
+                    return renderReviewsItem({item, inModal: true});
+                  default:
+                    return <Text>Unknown item type</Text>;
+                }
+              }}
+            />
+          </View>
+        </View>
+        <Button
+          style={styles.closeButton}
+          title="Close"
+          onPress={() => {
+            setModalVisible(!isModalVisible);
+          }}
+        />
+      </Modal>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  modalPlaceItem: {
+    marginRight: 10,
+    width: 120,
+    height: 80,
+    borderRadius: 8,
+    backgroundColor: '#EFEFEF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalPlaceItemText: {
+    position: 'absolute',
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    bottom: 5,
+  },
+  modalReviewItem: {
+    marginRight: 10,
+    padding: 10,
+    width: 300,
+    height: 170,
+    borderRadius: 10,
+    marginBottom: 10,
+    marginTop: 10,
+    backgroundColor: '#EFEFEF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalFriendItem: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    margin: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#CCC',
+  },
+  modalContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  closeButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+  },
+  moreButton: {
+    position: 'absolute',
+    right: 20,
+    top: 10,
+  },
+  moreButtonText: {
+    color: '#355E3B',
+    fontWeight: 'bold',
+  },
+  tabsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+    //marginBottom: 20,
+  },
+  tab: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#355E3B',
+  },
+  tabText: {
+    fontWeight: 'bold',
+    color: '#355E3B',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  searchBarContainer: {
+    padding: 10,
+    alignItems: 'center',
+  },
+  searchBar: {
+    width: '70%',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    padding: 10,
+    fontSize: 16,
+  },
+  userItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  userName: {
+    fontSize: 16,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: '#f8f1e7',
@@ -274,14 +531,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: 10,
   },
-  followButton: {
+  addButton: {
     backgroundColor: '#8B4513',
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginHorizontal: 5,
   },
-  unfollowButton: {
+  unAddButton: {
     backgroundColor: '#B22222',
   },
   messageButton: {
@@ -293,7 +550,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginHorizontal: 5,
   },
-  followButtonText: {
+  addButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
@@ -329,19 +586,69 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   horizontalScroll: {
-    paddingLeft: 20,
+    //paddingLeft: 20,
+    //paddingRight: 20,
+    marginLeft: 20,
+    marginRight: 20,
   },
   placeItem: {
     marginRight: 15,
     width: 150,
     height: 100,
     borderRadius: 10,
-    backgroundColor: '#CCC',
+    backgroundColor: '#EFEFEF',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  placeItemImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+    overflow: 'hidden',
+    borderColor: '#fff',
+    borderWidth: 3,
+  },
   placeItemText: {
-    color: '#FFF',
+    position: 'absolute',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    bottom: 10,
+  },
+  // Review List Item
+  reviewItem: {
+    marginRight: 15,
+    //padding: 10,
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+    backgroundColor: '#EFEFEF',
+    //justifyContent: 'center',
+    //alignItems: 'center',
+    borderColor: '#fff',
+    borderWidth: 3,
+  },
+  reviewItemImage: {
+    width: '100%',
+    height: 65,
+    overflow: 'hidden',
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  reviewTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    paddingHorizontal: 10,
+  },
+  reviewContent: {
+    fontSize: 14,
+    marginTop: 5,
+    paddingHorizontal: 10,
+  },
+  reviewRating: {
+    marginTop: 5,
+    flexDirection: 'row',
+    paddingHorizontal: 10,
   },
   friendItem: {
     width: 60,
@@ -350,7 +657,7 @@ const styles = StyleSheet.create({
     margin: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#CCC',
+    backgroundColor: '#EFEFEF',
   },
   friendAvatar: {
     width: 70,
@@ -358,45 +665,6 @@ const styles = StyleSheet.create({
     borderRadius: 35,
   },
   friendName: {
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  reviewItem: {
-    width: 250,
-    height: 150,
-    borderRadius: 8,
-    margin: 10,
-    padding: 10,
-    backgroundColor: '#CCC',
-  },
-  reviewTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  reviewContent: {
-    fontSize: 14,
-    marginTop: 5,
-  },
-  reviewRating: {
-    fontSize: 14,
-    marginTop: 5,
-    fontWeight: 'bold',
-  },
-  followerItem: {
-    width: 60,
-    height: 60,
-    borderRadius: 35,
-    margin: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#CCC',
-  },
-  followerAvatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-  },
-  followerName: {
     fontSize: 12,
     textAlign: 'center',
   },

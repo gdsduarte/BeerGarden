@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import authService from '../../../services/authService';
 import firestoreService from '../../../services/firestoreService';
+import firestore from '@react-native-firebase/firestore';
 import styles from '../../../styles/signUpScreenStyles';
 import InputValidation from '../../../components/common/InputValidation';
 
@@ -39,7 +40,7 @@ const UserSignUpScreen = ({ navigation }) => {
     }
 
     // Check for validation messages
-    if (!(nameValidation || usernameValidation || emailValidation || passwordValidation || confirmPasswordValidation)) {
+    if ((nameValidation || usernameValidation || emailValidation || passwordValidation || confirmPasswordValidation)) {
       alert("Please correct the errors before submitting.");
       return;
     }
@@ -55,8 +56,9 @@ const UserSignUpScreen = ({ navigation }) => {
           displayName: name,
           username: username,
           email: user.email,
-          uid: user.uid,
+          userId: user.uid,
           role: 'user',
+          createdAt: firestore.FieldValue.serverTimestamp(),
         };
         await firestoreService.addUser(user.uid, userForFirestore);
         alert("User registered successfully, please confirm your email address.");

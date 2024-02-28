@@ -2,18 +2,18 @@
 import React, { createContext, useState } from 'react';
 
 const AuthContext = createContext({
-  currentUserUID: null,
-  setCurrentUserUID: () => {},
+  currentUserId: null,
+  setCurrentUserId: () => {},
 });
 
 export const AuthProvider = ({ children }) => {
-  const [currentUserUID, setCurrentUserUID] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   //const signIn = async () => { /* ... */ };
   //const signOut = async () => { /* ... */ };
 
   return (
-    <AuthContext.Provider value={{ currentUserUID, setCurrentUserUID }}>
+    <AuthContext.Provider value={{ currentUserId, setCurrentUserId }}>
       {children}
     </AuthContext.Provider>
   );

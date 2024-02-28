@@ -10,14 +10,18 @@ import {
 import QRCode from 'react-native-qrcode-svg';
 import {format} from 'date-fns';
 
-const BookingDetailsScreen = ({route, navigation}) => {
+const ReservationDetailsScreen = ({route, navigation}) => {
   const {booking} = route.params;
-  const isArchived =
-    booking.status === 'Passed' || booking.status === 'Cancelled';
+  const isArchived = booking.isBooked === true;
   const [invitedFriends, setInvitedFriends] = useState([]);
+  
   // Convert Firestore Timestamps to JavaScript Date objects and format them
-  const formattedDate = format(booking.date, 'dd/MM/yyyy');
-  const formattedTime = format(booking.date, 'HH:mm');
+  const isValidDate = booking.date && booking.date.toDate instanceof Function;
+  const bookingDate = isValidDate ? booking.date.toDate() : new Date();
+  const formattedDate = format(bookingDate, 'dd-MM-yyyy');
+  const formattedTime = format(bookingDate, 'HH:mm');
+
+  console.log('booking', booking);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({title: booking.pubName});
@@ -28,30 +32,29 @@ const BookingDetailsScreen = ({route, navigation}) => {
   };
 
   const navigateToPubScreen = () => {
-    navigation.navigate('PubScreen', {pubId: booking.pubId});
+    navigation.navigate('PubDetailsScreen', {pubId: booking.pubId});
   };
 
   const shareQRCode = () => {
-    if (!isArchived) {
-      Share.share({message: booking.qrCodeData});
+    if (isArchived) {
+      Share.share({message: booking.pubName});
     }
   };
 
   const startChat = () => {
-    console.log('Chat with the pub started');
+    navigation.navigate('SpecificChatScreen', {targetUserId: booking.pubId});
+    console.log('Navigating to chat with pub ID:', booking.pubId);
   };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={navigateToPubScreen}>
         <Image source={{uri: booking.pubAvatar}} style={styles.pubImage} />
-        {/* <Text style={styles.pubName}>{booking.pubName}</Text> */}
       </TouchableOpacity>
       <View style={styles.detailsContainer}>
         <Text style={styles.title}>{booking.name}</Text>
         <Text style={styles.detail}>Date: {formattedDate}</Text>
         <Text style={styles.detail}>Time: {formattedTime}</Text>
-        <Text style={styles.detail}>Table Number: {booking.tableNumber}</Text>
         <Text style={styles.detail}>Number of People: {booking.partySize}</Text>
         <Text style={styles.detail}>
           Special Requests: {booking.specialRequest}
@@ -69,7 +72,7 @@ const BookingDetailsScreen = ({route, navigation}) => {
             />
           ))}
         </View>
-        {!isArchived && (
+        {isArchived && (
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, styles.editButton]}
@@ -182,4 +185,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BookingDetailsScreen;
+export default ReservationDetailsScreen;

@@ -26,22 +26,7 @@ const useChatMessages = chatId => {
     return () => unsubscribe();
   }, [chatId]);
 
-  const sendMessage = async message => {
-    try {
-      await firestore()
-        .collection('chat')
-        .doc(chatId)
-        .collection('messages')
-        .add({
-          ...message,
-          sentAt: firestore.FieldValue.serverTimestamp(),
-        });
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
-  };
-
-  return {messages, sendMessage};
+  return {messages, setMessages};
 };
 
 export default useChatMessages;

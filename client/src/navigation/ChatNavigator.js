@@ -5,7 +5,7 @@ import {ChatScreen, SpecificChatScreen} from '../screens';
 const Stack = createStackNavigator();
 
 function ChatNavigator({navigation}) {
-  React.useLayoutEffect(() => {
+  /* React.useLayoutEffect(() => {
     const unsubscribe = navigation.addListener('state', e => {
       const routeName = e.data.state?.routes[e.data.state.index]?.name;
       const showTabBar = routeName !== 'SpecificChat';
@@ -14,7 +14,7 @@ function ChatNavigator({navigation}) {
     });
 
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation]); */
 
   return (
     <Stack.Navigator>
