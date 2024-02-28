@@ -9,12 +9,12 @@ import {
   faCalendarAlt,
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
-import {HomeScreen} from '../screens';
 import {
   BookingNavigator,
   SearchNavigator,
   ChatNavigator,
   ProfileNavigator,
+  HomeNavigator,
 } from '.';
 
 const Tab = createBottomTabNavigator();
@@ -87,9 +87,9 @@ const BottomTabNavigator = () => {
           fontSize: 12,
           fontWeight: 'bold',
         },
-        keyboardHidesTabBar: true, // This line will hide the tab bar when the keyboard is open
+        keyboardHidesTabBar: true,
       })}>
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Home" component={HomeNavigator} />
       <Tab.Screen name="Search" component={SearchNavigator} />
       <Tab.Screen name="Chat" component={ChatNavigator} />
       <Tab.Screen name="Booking" component={BookingNavigator} />

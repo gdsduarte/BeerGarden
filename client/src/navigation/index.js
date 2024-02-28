@@ -7,3 +7,4 @@ export {default as MenuNavigator} from './MenuNavigator';
 export {default as PubNavigator} from './PubNavigator';
 export {default as SearchNavigator} from './SearchNavigator';
 export {default as ProfileNavigator} from './ProfileNavigator';
+export {default as HomeNavigator} from './HomeNavigator';

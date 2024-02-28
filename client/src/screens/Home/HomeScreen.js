@@ -1,4 +1,5 @@
-import React from 'react';
+import React, {useState, useContext} from 'react';
+import {StatusBar} from 'react-native';
 import {
   View,
   Text,
@@ -6,243 +7,337 @@ import {
   FlatList,
   Image,
   ScrollView,
-  Carousel
+  TextInput,
+  Dimensions,
+  TouchableOpacity,
 } from 'react-native';
-
-const featuredPubs = [
-  {id: 'p1', name: 'Pub 1', image: 'https://picsum.photos/220'},
-  {id: 'p2', name: 'Pub 2', image: 'https://picsum.photos/420'},
-  {id: 'p3', name: 'Pub 3', image: 'https://picsum.photos/620'},
-  {id: 'p4', name: 'Pub 4', image: 'https://picsum.photos/820'},
-  {id: 'p5', name: 'Pub 5', image: 'https://picsum.photos/1020'},
-];
-const featuredBeers = [
-  {id: 'be1', name: 'Beer 1', image: 'https://picsum.photos/320'},
-  {id: 'be2', name: 'Beer 2', image: 'https://picsum.photos/520'},
-  {id: 'be3', name: 'Beer 3', image: 'https://picsum.photos/720'},
-  {id: 'be4', name: 'Beer 4', image: 'https://picsum.photos/920'},
-];
-const upcomingBookings = [
-  {
-    id: 'b1',
-    pubName: 'The Crafty Fox',
-    date: '2023-06-18',
-    time: '18:30',
-    partySize: 4,
-    status: 'Confirmed',
-    thumbnail: 'https://via.placeholder.com/100x100?text=Pub+1',
-  },
-  {
-    id: 'b2',
-    pubName: 'The Hopping Hare',
-    date: '2023-06-20',
-    time: '19:00',
-    partySize: 2,
-    status: 'Pending',
-    thumbnail: 'https://via.placeholder.com/100x100?text=Pub+2',
-  },
-];
-const discovery = [
-  {
-    id: 'd1',
-    name: 'Craft Beer Co.',
-    description: 'A cozy place for craft beer lovers.',
-    image: 'https://via.placeholder.com/150',
-  },
-];
-
-const promotions = [
-  {
-    id: 'p1',
-    title: 'Happy Hour',
-    details: 'Get 2 for 1 beers this Friday!',
-    image: 'https://via.placeholder.com/150',
-  },
-];
-
-const activity = [
-  {
-    id: 'a1',
-    user: 'John Doe',
-    action: 'checked in',
-    location: 'The Brew Spot',
-    image: 'https://via.placeholder.com/150',
-  },
-];
+import Icon from 'react-native-vector-icons/FontAwesome';
+import Carousel, {Pagination} from 'react-native-snap-carousel';
+import {useNavigation} from '@react-navigation/native';
+import AuthContext from '../../contexts/AuthContext';
+import useEvents from '../../hooks/useEvents';
+import useFeaturedPubs from '../../hooks/useFeaturedPubs';
+import useFeaturedBeers from '../../hooks/useFeaturedBeers';
+import useReservations from '../../hooks/useReservations';
+import useRecentPubs from '../../hooks/useRecentPubs';
 
 const HomeScreen = () => {
+  const navigation = useNavigation();
+  const {currentUserId} = useContext(AuthContext);
+  const {events: premiumEvents, loadingEvents: loadingPremiumEvents} = useEvents(true);
+  const {events: allEvents, loadingEvents: loadingAllEvents} = useEvents();
+  const {featuredPubs, loadingPubs} = useFeaturedPubs();
+  const {featuredBeers, loadingBeers} = useFeaturedBeers();
+  const [reservations, loading] = useReservations(currentUserId);
+  const {recentPubs, loadingRecentPubs} = useRecentPubs();
+  const [searchBarBackground, setSearchBarBackground] = useState('transparent');
+  const [activeSlide, setActiveSlide] = useState(0);
 
-  const renderCarouselPubs = ({item}) => (
-    <View style={styles.carouselItemPubs}>
-      <Image source={{uri: item.image}} style={styles.carouselImage} />
-      <Text style={styles.carouselText}>{item.name}</Text>
+  const handleScroll = event => {
+    const yOffset = event.nativeEvent.contentOffset.y;
+    if (yOffset > 300) {
+      setSearchBarBackground('white');
+    } else {
+      setSearchBarBackground('transparent');
+    }
+  };
+  const pagination = () => {
+    return (
+      <Pagination
+        dotsLength={premiumEvents.length}
+        activeDotIndex={activeSlide}
+        containerStyle={{
+          paddingVertical: 8,
+          marginTop: '-9%',
+        }}
+        dotStyle={{
+          width: 50,
+          height: 5,
+          borderRadius: 5,
+          marginHorizontal: 8,
+          backgroundColor: 'rgba(255, 255, 255, 0.92)',
+        }}
+        inactiveDotStyle={{
+          backgroundColor: 'rgba(255, 255, 255, 0.4)',
+          width: 40,
+          height: 4,
+          borderRadius: 4,
+          marginHorizontal: 6,
+        }}
+        inactiveDotScale={0.6}
+      />
+    );
+  };
+
+  const renderEvents = ({item, index}) => {
+    return (
+      <View style={styles.eventItem}>
+        <Image source={{uri: item.eventImage}} style={styles.eventImage} />
+        <Text style={styles.eventName}>{item.eventName}</Text>
+        <Text style={styles.eventDescription}>{item.description}</Text>
+      </View>
+    );
+  };
+
+  const renderFeaturedPub = ({item}) => (
+    <View style={styles.pubItem}>
+      <Image source={{uri: item.photoUrl}} style={styles.pubImage} />
+      <Text style={styles.pubName}>{item.displayName}</Text>
     </View>
   );
 
-  const renderCarouselBeers = ({item}) => (
-    <View style={styles.carouselItemBeers}>
-      <Image source={{uri: item.image}} style={styles.carouselImage} />
-      <Text style={styles.carouselText}>{item.name}</Text>
+  const renderFeaturedBeer = ({item}) => (
+    <View style={styles.beerItem}>
+      <Image source={{uri: item.image}} style={styles.beerImage} />
+      <Text style={styles.beerName}>{item.name}</Text>
     </View>
   );
 
-  const renderBookingItem = ({item}) => (
-    <View style={styles.bookingItem}>
-      <Image source={{uri: item.thumbnail}} style={styles.bookingThumbnail} />
-      <Text style={styles.bookingName}>{item.pubName}</Text>
-      <Text style={styles.bookingDetails}>{item.date}</Text>
-      <Text style={styles.bookingInfo}>{item.time}</Text>
-      <Text style={styles.bookingInfo}>{item.partySize} people</Text>
-      <Text style={styles.bookingStatus}>{item.status}</Text>
+  const renderBooking = ({item}) => {
+    return (
+      <View style={styles.bookingItem}>
+        <Image source={{uri: item.pubAvatar}} style={styles.bookingThumbnail} />
+        <View style={styles.bookingInfo}>
+          <Text style={styles.bookingName}>{item.pubName}</Text>
+          <Text style={styles.bookingDetails}>
+            {item.date.toDateString()} at {item.date.toLocaleTimeString()}
+          </Text>
+          <Text style={styles.bookingStatus}>{item.status}</Text>
+        </View>
+      </View>
+    );
+  };
+
+  const renderDiscover = ({item}) => (
+    <View style={styles.pubItem}>
+      <Image source={{uri: item.photoUrl}} style={styles.pubImage} />
+      <Text style={styles.pubName}>{item.displayName}</Text>
     </View>
   );
 
-  const renderDiscoveryItem = ({item}) => (
-    <View style={styles.card}>
-      <Image source={{uri: item.image}} style={styles.cardImage} />
-      <Text style={styles.cardTitle}>{item.name}</Text>
-      <Text style={styles.cardDescription}>{item.description}</Text>
-    </View>
-  );
-
-  const renderPromotionItem = ({item}) => (
-    <View style={styles.card}>
-      <Image source={{uri: item.image}} style={styles.cardImage} />
-      <Text style={styles.cardTitle}>{item.title}</Text>
-      <Text style={styles.cardDescription}>{item.details}</Text>
-    </View>
-  );
-
-  const renderActivityItem = ({item}) => (
-    <View style={styles.activityItem}>
-      <Image source={{uri: item.image}} style={styles.activityImage} />
-      <Text
-        style={
-          styles.activityText
-        }>{`${item.user} ${item.action} at ${item.location}`}</Text>
+  const renderPromotion = ({item}) => (
+    <View style={styles.promotionItem}>
+      <Image source={{uri: item.eventImage}} style={styles.promotionImage} />
+      <Text style={styles.promotionName}>{item.eventName}</Text>
+      <Text style={styles.promotionDescription}>{item.description}</Text>
     </View>
   );
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.headerTitle}>Welcome to Beer Garden!</Text>
-      {/* Featured Pubs Section */}
-      <Text style={styles.sectionTitle}>Featured Pubs</Text>
-      <FlatList
-        horizontal
-        data={featuredPubs}
-        renderItem={renderCarouselPubs}
-        keyExtractor={item => item.id}
-        showsHorizontalScrollIndicator={false}
-        style={styles.carousel}
+    <View style={styles.container}>
+      <StatusBar
+        barStyle={
+          searchBarBackground === 'white' ? 'dark-content' : 'light-content'
+        }
       />
-      {/* Featured Beers Section */}
-      <Text style={styles.sectionTitle}>Featured Beers</Text>
-      <FlatList
-        horizontal
-        data={featuredBeers}
-        renderItem={renderCarouselBeers}
-        keyExtractor={item => item.id}
-        showsHorizontalScrollIndicator={false}
-        style={styles.carousel}
-      />
-      {/* Upcoming Bookings Section */}
-      <Text style={styles.sectionTitle}>Upcoming Bookings</Text>
-      <FlatList
-        data={upcomingBookings}
-        renderItem={renderBookingItem}
-        keyExtractor={item => item.id}
-        style={styles.bookingsPreview}
-      />
-      {/* Discovery Section */}
-      <Text style={styles.sectionTitle}>Discovery</Text>
-      <FlatList
-        horizontal
-        data={discovery}
-        renderItem={renderDiscoveryItem}
-        keyExtractor={item => item.id}
-        style={styles.discoveryPreview}
-      />
-      {/* Promotions and Events */}
-      <Text style={styles.sectionTitle}>Promotions and Events</Text>
-      <FlatList
-        horizontal
-        data={promotions}
-        renderItem={renderPromotionItem}
-        keyExtractor={item => item.id}
-        style={styles.promotionPreview}
-      />
-      {/* User Activity Feed */}
-      <Text style={styles.sectionTitle}>Activity</Text>
-      <FlatList
-        data={activity}
-        renderItem={renderActivityItem}
-        keyExtractor={item => item.id}
-        style={styles.activityPreview}
-      />
-    </ScrollView>
+      <View style={[styles.searchBar, {backgroundColor: searchBarBackground}]}>
+        <Icon
+          name="search"
+          size={20}
+          color={searchBarBackground === 'white' ? 'black' : 'white'}
+          style={styles.searchIcon}
+        />
+        <TextInput
+          placeholder="Search"
+          placeholderTextColor={
+            searchBarBackground === 'white' ? 'black' : 'white'
+          }
+          style={[
+            styles.searchInput,
+            {
+              color: searchBarBackground === 'white' ? 'black' : 'white',
+              borderColor: searchBarBackground === 'white' ? '#ccc' : 'white',
+            },
+          ]}
+        />
+      </View>
+      <ScrollView
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        style={styles.scrollView}>
+        {/* Event Section */}
+        {loadingPremiumEvents ? (
+          <Text>Loading events...</Text>
+        ) : (
+          <Carousel
+            data={premiumEvents}
+            renderItem={renderEvents}
+            sliderWidth={Dimensions.get('window').width}
+            itemWidth={Dimensions.get('window').width}
+            onSnapToItem={index => setActiveSlide(index)}
+            loop={true}
+            /* autoplay={true}
+            autoplayDelay={500}
+            autoplayInterval={3000} */
+            inactiveSlideOpacity={1}
+            inactiveSlideScale={1}
+            scrollInterpolator={undefined}
+            slideInterpolatedStyle={undefined}
+            useScrollView={true}
+          />
+        )}
+        {pagination()}
+        <Text style={styles.sectionTitle}>Featured Pubs</Text>
+        {loadingPubs ? (
+          <Text>Loading...</Text>
+        ) : (
+          <FlatList
+            horizontal
+            data={featuredPubs}
+            renderItem={renderFeaturedPub}
+            keyExtractor={item => item.id}
+            showsHorizontalScrollIndicator={false}
+            pagingEnabled={true}
+            style={styles.featuredPubs}
+          />
+        )}
+        {/* Featured Beers Section */}
+        <Text style={styles.sectionTitle}>Featured Beers</Text>
+        {loadingBeers ? (
+          <Text>Loading featured beers...</Text>
+        ) : (
+          <FlatList
+            horizontal
+            data={featuredBeers}
+            renderItem={renderFeaturedBeer}
+            keyExtractor={item => item.id}
+            showsHorizontalScrollIndicator={false}
+            style={styles.featuredPubs}
+          />
+        )}
+        {/* Bookings Section */}
+        <View style={styles.bookingsHeader}>
+          <Text style={styles.sectionTitle}>Upcoming Bookings</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('ReservationScreen')}>
+            <Text style={styles.moreButton}>More</Text>
+          </TouchableOpacity>
+        </View>
+        {loading ? (
+          <Text>Loading bookings...</Text>
+        ) : (
+          <FlatList
+            data={reservations.slice(0, 2)}
+            renderItem={renderBooking}
+            keyExtractor={item => item.id}
+            style={styles.bookingsSection}
+          />
+        )}
+        {/* Discovery Section */}
+        <View style={styles.bookingsHeader}>
+          <Text style={styles.sectionTitle}>New Pubs</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('SearchScreen')}>
+            <Text style={styles.moreButton}>More</Text>
+          </TouchableOpacity>
+        </View>
+        {loadingRecentPubs ? (
+          <Text>Loading discover...</Text>
+        ) : (
+          <FlatList
+            horizontal
+            data={recentPubs}
+            renderItem={renderDiscover}
+            keyExtractor={item => item.id}
+            showsHorizontalScrollIndicator={false}
+            pagingEnabled={true}
+            style={styles.featuredPubs}
+          />
+        )}
+        {/* Promotions and Events */}
+        <View style={styles.bookingsHeader}>
+          <Text style={styles.sectionTitle}>Promotions and Events</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('')}>
+            <Text style={styles.moreButton}>More</Text>
+          </TouchableOpacity>
+        </View>
+        {loadingAllEvents ? (
+          <Text>Loading events...</Text>
+        ) : (
+          <FlatList
+            horizontal
+            data={allEvents}
+            renderItem={renderPromotion}
+            keyExtractor={item => item.id}
+            showsHorizontalScrollIndicator={false}
+            style={styles.featuredPubs}
+          />
+        )}
+        {/* User Activity Feed */}
+        <Text style={styles.sectionTitle}></Text>
+        {/* <FlatList
+          // data={activity}
+          // renderItem={renderActivityItem}
+          keyExtractor={item => item.id}
+          style={styles.activityPreview}
+        /> */}
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingTop: 60,
-    flex: 1,
-    backgroundColor: '#f8f1e7',
-    paddingVertical: 16,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#3E3B36',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#3E3B36',
+  featuredPubs: {
     paddingLeft: 16,
     paddingTop: 16,
-    paddingBottom: 8,
   },
-  carousel: {
-    paddingLeft: 16,
-    paddingRight: 16,
-    paddingTop: 16,
-  },
-  carouselItemPubs: {
+  pubItem: {
     width: 350,
     height: 200,
     marginRight: 10,
     borderRadius: 10,
     overflow: 'hidden',
   },
-  carouselItemBeers: {
+  pubImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  pubName: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  beerItem: {
     width: 100,
     height: 100,
     marginRight: 10,
     borderRadius: 10,
     overflow: 'hidden',
   },
-  carouselImage: {
+  beerImage: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
-  carouselText: {
+  beerName: {
     position: 'absolute',
     bottom: 10,
     left: 10,
-    color: '#fff',
+    color: 'white',
     fontWeight: 'bold',
     fontSize: 18,
   },
-  bookingsPreview: {
-    paddingHorizontal: 16,
+  bookingsSection: {
+    paddingLeft: 16,
+    paddingRight: 16,
+  },
+  bookingsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingRight: 16,
+    paddingTop: 10,
+  },
+  moreButton: {
+    fontSize: 16,
+    color: '#007bff',
   },
   bookingItem: {
-    height: 150,
+    height: 100,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -277,65 +372,98 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#4CAF50',
   },
-  discoveryPreview: {
+  promotionItem: {
+    width: 350,
     height: 200,
-    paddingLeft: 16,
-    paddingRight: 16,
-    paddingTop: 16,
+    marginRight: 10,
+    borderRadius: 10,
+    overflow: 'hidden',
   },
-  promotionPreview: {
-    height: 200,
-    paddingLeft: 16,
-    paddingRight: 16,
-    paddingTop: 16,
-  },
-  activityPreview: {
-    paddingHorizontal: 16,
-  },
-  card: {
-    margin: 10,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cardImage: {
+  promotionImage: {
     width: '100%',
-    height: 120,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
+    height: '100%',
+    resizeMode: 'cover',
   },
-  cardTitle: {
+  promotionName: {
+    position: 'absolute',
+    bottom: 50,
+    left: 10,
+    color: 'white',
     fontWeight: 'bold',
-    fontSize: 16,
-    marginTop: 5,
-    marginHorizontal: 10,
-    color: '#3e3e3e',
+    fontSize: 18,
   },
-  cardDescription: {
+  promotionDescription: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    color: 'white',
     fontSize: 14,
-    margin: 10,
-    marginBottom: 15,
-    color: '#5c5c5c',
   },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
+  eventItem: {
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').width / 1,
+    overflow: 'hidden',
+    backgroundColor: 'yellow',
   },
-  activityImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  eventImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  eventName: {
+    position: 'absolute',
+    bottom: 90,
+    left: 10,
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  eventDescription: {
+    position: 'absolute',
+    bottom: 50,
+    left: 10,
+    color: 'white',
+    fontSize: 16,
+  },
+  searchIcon: {
     marginRight: 10,
   },
-  activityText: {
+  container: {
     flex: 1,
-    fontSize: 14,
-    color: '#5c5c5c',
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 90,
+    paddingHorizontal: 10,
+    paddingTop: 30,
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  searchInput: {
+    width: '80%',
+    height: 40,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: '#f8f1e7',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#3E3B36',
+    paddingLeft: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
 });
 
