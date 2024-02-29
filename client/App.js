@@ -6,9 +6,8 @@ import auth from '@react-native-firebase/auth';
 import {decode, encode} from 'base-64';
 import authService from './src/services/authService';
 import AuthContext from './src/contexts/AuthContext';
-import LoginNavigator from './src/navigation/LoginNavigator';
 import Loading from './src/components/common/Loading';
-import BottomTabNavigator from './src/navigation/BottomTabNavigator';
+import {LoginNavigator, BottomTabNavigator} from './src/navigation';
 
 if (!global.btoa) global.btoa = encode;
 if (!global.atob) global.atob = decode;
@@ -47,22 +46,6 @@ const App = () => {
 
   if (isLoading) return <Loading />;
 
-  /* return (
-    <AuthContext.Provider value={authContext}>
-      <NavigationContext.Provider
-        value={{tabBarVisible: true, setTabBarVisibility: () => {}}}>
-        <StatusBar
-          translucent
-          backgroundColor="transparent"
-          barStyle="dark-content"
-        />
-        <NavigationContainer>
-          {isUserLoggedIn ? <BottomTabNavigator /> : <LoginNavigator />}
-        </NavigationContainer>
-      </NavigationContext.Provider>
-    </AuthContext.Provider>
-  ); */
-
   return (
     <AuthContext.Provider value={authContext}>
       <NavigationContainer
@@ -72,7 +55,6 @@ const App = () => {
           backgroundColor="transparent"
           barStyle="dark-content"
         />
-        {/* Your navigators go here */}
         {isUserLoggedIn ? <BottomTabNavigator /> : <LoginNavigator />}
       </NavigationContainer>
     </AuthContext.Provider>
