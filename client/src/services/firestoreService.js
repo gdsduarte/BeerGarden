@@ -3,13 +3,14 @@ import firebase from '@react-native-firebase/app';
 import '@react-native-firebase/firestore';
 
 const firestoreService = {
-  checkUsernameExists: async username => {
+
+  checkUsernameExists: async (username) => {
     const userRef = firebase.firestore().collection('user');
     const snapshot = await userRef.where('username', '==', username).get();
     return !snapshot.empty;
   },
 
-  checkEmailExists: async email => {
+  checkEmailExists: async (email) => {
     const userRef = firebase.firestore().collection('user');
     const snapshot = await userRef.where('email', '==', email).get();
     return !snapshot.empty;
@@ -25,12 +26,12 @@ const firestoreService = {
     }
   },
 
-  getUser: async uid => {
+  getUser: async (uid) => {
     try {
       const db = firebase.firestore();
       const docRef = await db.collection('user').doc(uid).get();
       if (docRef.exists) {
-        return {id: docRef.id, ...docRef.data()};
+        return { id: docRef.id, ...docRef.data() };
       } else {
         return null;
       }
@@ -40,7 +41,7 @@ const firestoreService = {
     }
   },
 
-  addPub: async pub => {
+  addPub: async (pub) => {
     try {
       const db = firebase.firestore();
       const docRef = await db.collection('pubs').add(pub);
@@ -67,7 +68,7 @@ const firestoreService = {
       const db = firebase.firestore();
       const doc = await db.collection(collection).doc(docId).get();
       if (doc.exists) {
-        return {id: doc.id, ...doc.data()};
+        return { id: doc.id, ...doc.data() };
       } else {
         return null;
       }
@@ -77,11 +78,11 @@ const firestoreService = {
     }
   },
 
-  getDocuments: async collection => {
+  getDocuments: async (collection) => {
     try {
       const db = firebase.firestore();
       const snapshot = await db.collection(collection).get();
-      return snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
       console.error(`Error getting documents from ${collection}:`, error);
       throw error;
@@ -110,3 +111,4 @@ const firestoreService = {
 };
 
 export default firestoreService;
+

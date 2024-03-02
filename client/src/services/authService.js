@@ -2,7 +2,52 @@
 import auth from '@react-native-firebase/auth';
 
 const authService = {
-  resetPassword: async email => {
+
+  getCurrentUser: () => {
+    const user = auth().currentUser;
+    return user;
+  },
+
+  checkUserAuthentication: (callback) => {
+    const unsubscribe = auth().onAuthStateChanged(callback);
+    return unsubscribe;
+  },
+
+  /* checkEmailVerified: (callback) => {
+    const unsubscribe = auth().onIdTokenChanged(callback);
+    return unsubscribe;
+  }, */
+
+  signUp: async (email, password) => {
+    try {
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+      return userCredential;
+    } catch (error) {
+      console.error('Error signing up:', error);
+      throw error;
+    }
+  },
+
+  signIn: async (email, password) => {
+    try {
+      const userCredential = await auth().signInWithEmailAndPassword(email, password);
+      return userCredential;
+    } catch (error) {
+      console.error('Error signing in:', error);
+      throw error;
+    }
+  },
+
+  signOut: async () => {
+    try {
+      await auth().signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    }
+  },
+
+  resetPassword: async (email) => {
     try {
       await auth().sendPasswordResetEmail(email);
     } catch (error) {
@@ -11,46 +56,33 @@ const authService = {
     }
   },
 
-  sendEmailVerification: async () => {
+  signInWithGoogle: async () => {
     try {
-      const user = auth().currentUser;
-      if (user) {
-        await user.sendEmailVerification();
-      } else {
-        throw new Error('No authenticated user found.');
-      }
+      const provider = new auth.GoogleAuthProvider();
+      const userCredential = await auth().signInWithPopup(provider);
+      return userCredential.user;
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+      throw error;
+    }
+  },
+
+  sendEmailVerification: async (user) => {
+    try {
+      await user.sendEmailVerification();
+      return user;
     } catch (error) {
       console.error('Error sending email verification:', error);
       throw error;
     }
   },
 
-  updateProfile: async data => {
+  updateProfile: async (user, data) => {
     try {
-      const user = auth().currentUser;
-      if (user) {
-        await user.updateProfile(data);
-      } else {
-        throw new Error('No authenticated user found.');
-      }
+      await user.updateProfile(data);
+      return user;
     } catch (error) {
       console.error('Error updating profile:', error);
-      throw error;
-    }
-  },
-
-  // Example method for signing in with Google for React Native
-  // This requires setting up @react-native-google-signin/google-signin
-  signInWithGoogle: async () => {
-    // Implementation for React Native will differ from web
-    // Ensure you have the correct setup for Google Sign-In in React Native
-    try {
-      // Example placeholder for the actual Google sign-in process in React Native
-      // const { idToken } = await GoogleSignin.signIn();
-      // const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-      // return await auth().signInWithCredential(googleCredential);
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
       throw error;
     }
   },

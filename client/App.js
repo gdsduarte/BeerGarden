@@ -1,48 +1,63 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {enableScreens} from 'react-native-screens';
 import {StatusBar} from 'react-native';
-import {AuthProvider, useAuth} from './src/contexts/AuthContext';
+import auth from '@react-native-firebase/auth';
+import {decode, encode} from 'base-64';
+import authService from './src/services/authService';
+import AuthContext from './src/contexts/AuthContext';
 import Loading from './src/components/common/Loading';
-import {
-  LoginNavigator,
-  BottomTabNavigator,
-  OwnerBottomTabNavigator,
-} from './src/navigation';
+import {LoginNavigator, BottomTabNavigator} from './src/navigation';
 
+if (!global.btoa) global.btoa = encode;
+if (!global.atob) global.atob = decode;
 enableScreens();
 
-const AppContent = () => {
-  const {isUserLoggedIn, userRole, isLoading} = useAuth();
+const App = () => {
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged(user => {
+      if (user) {
+        setIsUserLoggedIn(true);
+        setCurrentUserId(user.uid);
+      } else {
+        setIsUserLoggedIn(false);
+        setCurrentUserId(null);
+      }
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const authContext = {
+    signIn: async () => {
+      await authService.signIn();
+      setIsUserLoggedIn(true);
+    },
+    signOut: async () => {
+      await authService.signOut();
+      setIsUserLoggedIn(false);
+    },
+    currentUserId,
+  };
 
   if (isLoading) return <Loading />;
 
-  // Conditionally render navigators based on login status and user role
-  if (isUserLoggedIn) {
-    switch (userRole) {
-      case 'owner':
-        return <OwnerBottomTabNavigator />;
-      case 'user':
-      default:
-        return <BottomTabNavigator />;
-    }
-  } else {
-    return <LoginNavigator />;
-  }
-};
-
-const App = () => {
   return (
-    <AuthProvider>
-      <NavigationContainer>
+    <AuthContext.Provider value={authContext}>
+      <NavigationContainer
+        value={{tabBarVisible: true, setTabBarVisibility: () => {}}}>
         <StatusBar
           translucent
           backgroundColor="transparent"
           barStyle="dark-content"
         />
-        <AppContent />
+        {isUserLoggedIn ? <BottomTabNavigator /> : <LoginNavigator />}
       </NavigationContainer>
-    </AuthProvider>
+    </AuthContext.Provider>
   );
 };
 
