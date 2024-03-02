@@ -20,7 +20,7 @@ import {
 
 const Tab = createBottomTabNavigator();
 
-const BusinessBottomTabNavigator = () => {
+const OwnerBottomTabNavigator = () => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
@@ -99,4 +99,4 @@ const BusinessBottomTabNavigator = () => {
   );
 };
 
-export default BusinessBottomTabNavigator;
+export default OwnerBottomTabNavigator;
