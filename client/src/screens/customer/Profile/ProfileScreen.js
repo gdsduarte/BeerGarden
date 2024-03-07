@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import {useNavigation} from '@react-navigation/native';
-import authService from '../../../services/authService';
 import {useUserProfileData} from '../../../hooks';
 import AuthContext from '../../../contexts/AuthContext';
 import {Rating} from 'react-native-ratings';
@@ -26,6 +25,7 @@ const ProfileScreen = ({route}) => {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const {currentUserId} = useContext(AuthContext);
+  const {signOut} = useContext(AuthContext);
 
   // Determine if we're viewing the current user's profile or another user's profile
   const userId = route.params?.userId || currentUserId;
@@ -60,7 +60,7 @@ const ProfileScreen = ({route}) => {
   }, [navigation]);
 
   const handleLogout = () => {
-    authService.signOut();
+    signOut();
   };
 
   const handleSearch = async query => {

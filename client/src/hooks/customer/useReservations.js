@@ -10,7 +10,7 @@ const useReservations = userId => {
     const now = new Date();
     const unsubscribe = firestore()
       .collection('reservations')
-      .where('userId', '==', userId)
+      .where('members', 'array-contains', userId)
       .orderBy('createdAt', 'desc')
       .onSnapshot(
         querySnapshot => {

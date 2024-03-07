@@ -61,7 +61,7 @@ const BookingInputScreen = ({route}) => {
     // Check for any possible way to fit remaining party size in a single table
     if (remainingPartySize > 0) {
       const singleTableFit = tableSizes.find(
-        ({size, count}) =>
+        ({size, count, type}) =>
           size >= remainingPartySize && (allocationMap[type] || count) > 0,
       );
       if (singleTableFit) {
@@ -108,9 +108,9 @@ const BookingInputScreen = ({route}) => {
 
     // Prepare reservation data to be submitted to Firestore
     const reservationData = {
-      userId: currentUserId,
+      //userId: currentUserId,
       userName: reservationName,
-      pubId,
+      //pubId,
       pubName,
       pubAvatar,
       date: firestore.Timestamp.fromDate(
@@ -127,6 +127,7 @@ const BookingInputScreen = ({route}) => {
         (acc, count) => acc + count,
         0,
       ),
+      members: [currentUserId, pubId],
     };
 
     console.log('tableAllocation:', tableAllocation);

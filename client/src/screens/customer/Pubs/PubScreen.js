@@ -29,6 +29,11 @@ const PubScreen = ({route}) => {
       screenOptions={{
         headerShown: true,
         headerTitle: pub.displayName,
+        drawerStyle: {
+          backgroundColor: '#f8f1e7',
+          width: '40%',
+        },
+        //drawerType: 'slide',
         headerRight: () => (
           <TouchableOpacity
             onPress={() => navigation.goBack()}

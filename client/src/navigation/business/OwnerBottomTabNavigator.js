@@ -4,23 +4,24 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Text, Platform, Keyboard} from 'react-native';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {
-  faHome,
-  faSearch,
-  faComments,
   faCalendarAlt,
-  faUser,
+  faTableColumns,
+  faComments,
+  faUtensils,
+  faEllipsis
 } from '@fortawesome/free-solid-svg-icons';
 import {
-  BookingNavigator,
   SearchNavigator,
   ChatNavigator,
   ProfileNavigator,
-  HomeNavigator,
 } from '..';
+import {DashboardScreen, BookingsScreen} from '../../screens';
+import MenuScreen from '../../screens/business/MenuScreen';
+import MenuScreenTab from '../../navigation/business/MenuScreenTab';
 
 const Tab = createBottomTabNavigator();
 
-const BusinessBottomTabNavigator = () => {
+const OwnerBottomTabNavigator = () => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
@@ -48,16 +49,16 @@ const BusinessBottomTabNavigator = () => {
       screenOptions={({route}) => ({
         tabBarIcon: ({focused, color, size}) => {
           let icon;
-          if (route.name === 'Home') {
-            icon = faHome;
-          } else if (route.name === 'Search') {
-            icon = faSearch;
+          if (route.name === 'Dashboard') {
+            icon = faTableColumns;
+          } else if (route.name === 'Bookings') {
+            icon = faCalendarAlt;
           } else if (route.name === 'Chat') {
             icon = faComments;
-          } else if (route.name === 'Booking') {
-            icon = faCalendarAlt;
-          } else if (route.name === 'Profile') {
-            icon = faUser;
+          } else if (route.name === 'Menu') {
+            icon = faUtensils;
+          } else if (route.name === 'More') {
+            icon = faEllipsis;
           }
 
           return (
@@ -73,7 +74,7 @@ const BusinessBottomTabNavigator = () => {
             {route.name}
           </Text>
         ),
-        headerShown: false,
+        //headerShown: false,
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopColor: 'transparent',
@@ -90,13 +91,13 @@ const BusinessBottomTabNavigator = () => {
         },
         keyboardHidesTabBar: true,
       })}>
-      <Tab.Screen name="Home" component={HomeNavigator} />
-      <Tab.Screen name="Search" component={SearchNavigator} />
+      <Tab.Screen name="Dashboard" component={DashboardScreen} />
+      <Tab.Screen name="Bookings" component={BookingsScreen} />
+      <Tab.Screen name="Menu" component={MenuScreenTab} />
       <Tab.Screen name="Chat" component={ChatNavigator} />
-      <Tab.Screen name="Booking" component={BookingNavigator} />
-      <Tab.Screen name="Profile" component={ProfileNavigator} />
+      <Tab.Screen name="More" component={ProfileNavigator} />
     </Tab.Navigator>
   );
 };
 
-export default BusinessBottomTabNavigator;
+export default OwnerBottomTabNavigator;

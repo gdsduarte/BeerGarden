@@ -38,3 +38,9 @@ export {default as DrinkReviewsScreen} from './customer/Pubs/Drinks/DrinkReviews
 // Booking Routes
 export {default as BookingScreen} from './customer/Pubs/Booking/BookingScreen';
 export {default as BookingInputScreen} from './customer/Pubs/Booking/BookingInputScreen';
+
+// Business Routes
+export {default as DashboardScreen} from './business/DashboardScreen';
+
+// Business Reservations Routes
+export {default as BookingsScreen} from './business/BookingsScreen';

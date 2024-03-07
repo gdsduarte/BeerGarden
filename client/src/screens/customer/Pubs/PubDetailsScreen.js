@@ -20,7 +20,7 @@ const PubDetailsScreen = ({pubId}) => {
     <ScrollView style={styles.container}>
       <Image source={{uri: pub.photoUrl}} style={styles.image} />
       <Text style={styles.name}>{pub.displayName}</Text>
-      <Text style={styles.description}>{pub.description}</Text>
+      <Text style={styles.bio}>{pub.bio}</Text>
     </ScrollView>
   );
 };
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
   },
-  description: {
+  bio: {
     fontSize: 16,
     paddingHorizontal: 10,
   },
