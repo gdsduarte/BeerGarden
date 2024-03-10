@@ -3,19 +3,28 @@ import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import {useNavigation} from '@react-navigation/native';
 import {format} from 'date-fns';
-import Loading from '../../../../components/common/Loading';
-import AuthContext from '../../../../contexts/AuthContext';
-import {useBookingAvailability, usePubDetails} from '../../../../hooks';
+import Loading from '@components/common/Loading';
+import AuthContext from '@contexts/AuthContext';
+import {useBookingAvailability, usePubDetails} from '@hooks';
+import {
+  calculateAvailability,
+  getUpdatedMarkedDates,
+  isClosedOnSelectedDay,
+  getSlotColor,
+} from '@utils/useReservationUtils';
 
-const BookingScreen = ({pubId}) => {
+const BookingScreen = ({route, pubId: propPubId}) => {
   const navigation = useNavigation();
+  const {updating, bookingDetails} = route?.params || {};
+  const pubId = route?.params?.pubId || propPubId;
   const startDate = new Date().toISOString().split('T')[0];
   const endDate = new Date(new Date().setMonth(new Date().getMonth() + 3))
     .toISOString()
     .split('T')[0];
-
   const {pub, loading: pubDetailsLoading} = usePubDetails(pubId);
-  const [selectedDate, setSelectedDate] = useState(startDate);
+  const [selectedDate, setSelectedDate] = useState(
+    updating ? bookingDetails.date : startDate,
+  );
   const {reservations, loading: availabilityLoading} = useBookingAvailability(
     pubId,
     startDate,
@@ -34,46 +43,6 @@ const BookingScreen = ({pubId}) => {
       setMarkedDates(updatedMarkedDates);
     }
   }, [pub, reservations]);
-
-  // Logic to calculate availability based on reservations
-  const calculateAvailability = reservations => {
-    const availability = {};
-    reservations.forEach(reservation => {
-      const date = reservation.date.toDate().toISOString().split('T')[0];
-      const timeSlot = reservation.timeSlot;
-      availability[date] = availability[date] || {};
-      availability[date][timeSlot] = availability[date][timeSlot] || 0;
-      availability[date][timeSlot] += reservation.partySize;
-    });
-    console.log(availability);
-    return availability;
-  };
-
-  // Logic to update marked dates based on availability of reservations
-  const getUpdatedMarkedDates = (pub, availability) => {
-    let updatedMarkedDates = {};
-    Object.keys(availability).forEach(date => {
-      const bookingLoad = calculateBookingLoadForDate(
-        date,
-        availability,
-        pub.seatsCapacity,
-      );
-      updatedMarkedDates[date] = {
-        customStyles: getCustomStylesBasedOnLoad(bookingLoad),
-      };
-    });
-    return updatedMarkedDates;
-  };
-
-  // Logic to calculate booking load for a given date
-  const calculateBookingLoadForDate = (date, availability, totalSeats) => {
-    const dailyBookings = availability[date] || {};
-    const totalBookedSeats = Object.values(dailyBookings).reduce(
-      (acc, curr) => acc + curr,
-      0,
-    );
-    return totalBookedSeats / totalSeats;
-  };
 
   // Logic to navigate to BookingInputScreen with some data
   const navigateToBookingInputScreen = timeSlot => {
@@ -109,66 +78,18 @@ const BookingScreen = ({pubId}) => {
     console.log('Navigating with remainingTables:', remainingTables);
   };
 
-  // Logic to get custom styles based on booking load for a given date
-  const getCustomStylesBasedOnLoad = bookingLoad => {
-    let backgroundColor, textColor;
-    if (bookingLoad >= 1) {
-      backgroundColor = 'red';
-      textColor = 'white';
-    } else if (bookingLoad > 0.75) {
-      backgroundColor = 'orange';
-      textColor = 'black';
-    } else if (bookingLoad > 0.5) {
-      backgroundColor = 'yellow';
-      textColor = 'black';
-    } else {
-      backgroundColor = 'green';
-      textColor = 'white';
-    }
-    return {container: {backgroundColor}, text: {color: textColor}};
-  };
-
   const onDayPress = day => {
     setSelectedDate(day.dateString);
   };
 
-  // Logic to check if the pub is closed on the selected day
-  const isClosedOnSelectedDay = () => {
-    const dayOfWeek = new Date(selectedDate).getDay();
-    const days = [
-      'sunday',
-      'monday',
-      'tuesday',
-      'wednesday',
-      'thursday',
-      'friday',
-      'saturday',
-    ];
-    const dayName = days[dayOfWeek];
-    return pub.openingHours[dayName]?.toLowerCase() === 'closed';
-  };
-
-  // Logic to get color for a given time slot based on availability
-  const getSlotColor = timeSlot => {
-    const dailyBookings = availability[selectedDate] || {};
-    const bookedSeatsForSlot = dailyBookings[timeSlot] || 0;
-    const totalSeats = pub.seatsCapacity || 0;
-    const bookingLoad = bookedSeatsForSlot / totalSeats;
-
-    console.log('DailyBookings: ', dailyBookings);
-    console.log('Booking load:', bookingLoad);
-    console.log('Booked Seats: ', bookedSeatsForSlot);
-    console.log('Total Seats: ', totalSeats);
-
-    if (bookingLoad >= 1) return 'red';
-    if (bookingLoad > 0.75) return 'orange';
-    if (bookingLoad > 0.5) return 'yellow';
-    if (bookingLoad > 0) return 'green';
-    return '#f0f0f0';
-  };
-
   // TimeSlotItem component to render each time slot
   const TimeSlotItem = ({timeSlot}) => {
+    const slotColor = getSlotColor(
+      timeSlot,
+      selectedDate,
+      availability || {},
+      pub || {seatsCapacity: 0},
+    );
     // Filter the current user's reservations for the selected date and time slot
     const currentUserReservations = reservations.filter(
       reservation =>
@@ -182,19 +103,31 @@ const BookingScreen = ({pubId}) => {
 
     return (
       <TouchableOpacity
-        style={[styles.hourItem, {backgroundColor: getSlotColor(timeSlot)}]}
+        style={[styles.hourItem, {backgroundColor: slotColor}]}
         onPress={() => {
           if (hasUserReservation) {
-            // Ensure there is at least one reservation before navigating
-            if (currentUserReservations.length > 0) {
+            if (updating === true) {
+              // close the screen immediately
+              /* navigation.navigate('ReservationDetailsScreen', {
+                booking: bookingDetails,
+              }); */
+              return;
+            } else {
               navigation.navigate('ReservationDetailsScreen', {
                 booking: currentUserReservations[0],
               });
-              console.log('Reservation:', currentUserReservations[0]);
-              console.log('HasReservation:', hasUserReservation);
             }
+            console.log('Reservation:', currentUserReservations[0]);
+            console.log('HasReservation:', hasUserReservation);
+          } else if (updating === true) {
+            navigation.navigate('ReservationDetailsScreen', {
+              booking: bookingDetails,
+              selectedDate,
+              selectedHour: timeSlot,
+            });
+            console.log('New date:', selectedDate);
+            console.log('New time:', timeSlot);
           } else {
-            // Navigate to booking input screen if no existing user reservation for this slot
             navigateToBookingInputScreen(timeSlot);
           }
         }}>
@@ -218,17 +151,18 @@ const BookingScreen = ({pubId}) => {
           [selectedDate]: {selected: true, selectedColor: '#5AC8FA'},
         }}
       />
-      {/* set the selectedDate on the 06/12/2024 format */}
       <Text style={styles.formTitle}>
-        Available Hours for {format(selectedDate, 'dd-MM-yyyy')}
+        Available Hours for {format(new Date(selectedDate), 'dd-MM-yyyy')}
       </Text>
       {pubDetailsLoading || availabilityLoading ? (
         <Loading />
-      ) : isClosedOnSelectedDay() ? (
+      ) : !pub ? (
+        <Text style={styles.closedDayText}>Loading pub details...</Text>
+      ) : isClosedOnSelectedDay(selectedDate, pub) ? (
         <Text style={styles.closedDayText}>The pub is closed on this day.</Text>
       ) : (
         <FlatList
-          data={Object.keys(pub.bookingSlots || {}).sort()}
+          data={Object.keys(pub?.bookingSlots || {}).sort()}
           renderItem={({item}) => <TimeSlotItem timeSlot={item} />}
           keyExtractor={item => item}
           numColumns={2}
@@ -251,6 +185,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    textAlign: 'center',
   },
   hourItem: {
     width: '48%',

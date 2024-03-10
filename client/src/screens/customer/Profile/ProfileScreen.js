@@ -11,13 +11,12 @@ import {
   TextInput,
   FlatList,
   Modal,
-  Button,
 } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
 import {useNavigation} from '@react-navigation/native';
 import {useUserProfileData} from '../../../hooks';
 import AuthContext from '../../../contexts/AuthContext';
 import {Rating} from 'react-native-ratings';
+import {useUsers} from '../../../hooks';
 
 const ProfileScreen = ({route}) => {
   const navigation = useNavigation();
@@ -26,6 +25,7 @@ const ProfileScreen = ({route}) => {
   const [loading, setLoading] = useState(false);
   const {currentUserId} = useContext(AuthContext);
   const {signOut} = useContext(AuthContext);
+  const {searchUsers} = useUsers();
 
   // Determine if we're viewing the current user's profile or another user's profile
   const userId = route.params?.userId || currentUserId;
@@ -46,6 +46,7 @@ const ProfileScreen = ({route}) => {
   const [modalSearchText, setModalSearchText] = useState('');
   const [modalData, setModalData] = useState([]);
   const [modalDataType, setModalDataType] = useState('');
+  const [isSearchModalVisible, setSearchModalVisible] = useState(false);
 
   useEffect(() => {
     setLoading(profileLoading);
@@ -55,7 +56,7 @@ const ProfileScreen = ({route}) => {
     const unsubscribe = navigation.addListener('blur', () => {
       setModalVisible(false);
     });
-  
+
     return unsubscribe;
   }, [navigation]);
 
@@ -63,31 +64,10 @@ const ProfileScreen = ({route}) => {
     signOut();
   };
 
-  const handleSearch = async query => {
-    // To avoid searching for the current user
-    if (!query.trim() || query === profile?.username) {
-      console.log("Can't search for yourself.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const querySnapshot = await firestore()
-        .collection('user')
-        .where('username', '==', query)
-        .get();
-
-      const results = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setSearchResults(results);
-    } catch (error) {
-      console.error('Error searching users: ', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleSearch = () => {
+    if (!searchText.trim()) return;
+    const results = searchUsers(searchText);
+    setSearchResults(results);
   };
 
   // Navigate to another user's profile
@@ -238,31 +218,13 @@ const ProfileScreen = ({route}) => {
             </TouchableOpacity>
           </View>
         )}
-        {/* Search Bar */}
+        {/* Trigger Search Modal */}
         {!isOtherUserProfile && (
-          <View style={styles.searchBarContainer}>
-            <TextInput
-              style={styles.searchBar}
-              placeholder="Search users..."
-              value={searchText}
-              onChangeText={setSearchText}
-              onSubmitEditing={() => handleSearch(searchText)}
-            />
-          </View>
-        )}
-        {/* Search Results */}
-        {searchResults.length > 0 && (
-          <FlatList
-            data={searchResults}
-            keyExtractor={item => item.id}
-            renderItem={({item}) => (
-              <TouchableOpacity
-                style={styles.userItem}
-                onPress={() => navigateToUserProfile(item.id)}>
-                <Text style={styles.userName}>{item.username}</Text>
-              </TouchableOpacity>
-            )}
-          />
+          <TouchableOpacity
+            style={styles.searchButton} // Define this style
+            onPress={() => setSearchModalVisible(true)}>
+            <Text style={styles.searchButtonText}>Search Users</Text>
+          </TouchableOpacity>
         )}
         {/* Stats Section */}
         <View style={styles.statsSection}>
@@ -313,6 +275,48 @@ const ProfileScreen = ({route}) => {
         />
         <Section />
       </ScrollView>
+      {/* Search Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true} // Enable transparency to allow underlying content to be partially visible
+        visible={isSearchModalVisible}
+        onRequestClose={() => setSearchModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <TextInput
+              style={styles.searchBar}
+              placeholder="Search users..."
+              value={searchText}
+              onChangeText={setSearchText}
+              onSubmitEditing={handleSearch}
+              autoFocus={true}
+            />
+            <FlatList
+              data={searchResults}
+              keyExtractor={item => item.id}
+              renderItem={({item}) => (
+                <TouchableOpacity
+                  style={styles.userItem}
+                  onPress={() => {
+                    setSearchModalVisible(false);
+                    navigateToUserProfile(item.id);
+                  }}>
+                  <Text style={styles.userName}>{item.username}</Text>
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => {
+                setSearchModalVisible(false);
+                setSearchText('');
+                setSearchResults([]);
+              }}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <Modal
         animationType="slide"
         transparent={false}
@@ -351,19 +355,55 @@ const ProfileScreen = ({route}) => {
             />
           </View>
         </View>
-        <Button
+        <TouchableOpacity
           style={styles.closeButton}
-          title="Close"
-          onPress={() => {
-            setModalVisible(!isModalVisible);
-          }}
-        />
+          onPress={() => setModalVisible(!isModalVisible)}>
+          <Text style={styles.closeButtonText}>Close</Text>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    alignItems: 'center',
+    //backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: '90%',
+    backgroundColor: 'white',
+    borderRadius: 20, // Optional: for rounded corners
+    padding: 20,
+    /* shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5, */
+  },
+  closeButtonText: {
+    color: '#355E3B',
+    fontWeight: 'bold',
+  },
+  searchButton: {
+    backgroundColor: '#355E3B',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginHorizontal: 5,
+    marginVertical: 10,
+  },
+  searchButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
   modalPlaceItem: {
     marginRight: 10,
     width: 120,
@@ -409,7 +449,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    bottom: 20,
+    top: 20,
     right: 20,
   },
   moreButton: {

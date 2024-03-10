@@ -4,6 +4,8 @@ import {
   ReservationScreen,
   ReservationDetailsScreen,
   SpecificChatScreen,
+  BookingScreen,
+  BookingInputScreen,
 } from '../../screens';
 
 const Stack = createStackNavigator();
@@ -20,7 +22,20 @@ const BookingNavigator = () => {
         name="ReservationDetailsScreen"
         component={ReservationDetailsScreen}
       />
-      <Stack.Screen name="SpecificChatScreen" component={SpecificChatScreen} />
+      <Stack.Screen 
+        name="SpecificChatScreen" 
+        component={SpecificChatScreen}
+      />
+      <Stack.Screen 
+        name="BookingScreen" 
+        component={BookingScreen}
+        options={{title: 'Update Booking'}}
+      />
+      <Stack.Screen 
+        name="BookingInputScreen" 
+        component={BookingInputScreen}
+        options={{title: 'Update Booking'}}
+      />
     </Stack.Navigator>
   );
 };

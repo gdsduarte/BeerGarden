@@ -9,8 +9,9 @@ import {
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import {useNavigation} from '@react-navigation/native';
-import AuthContext from '../../../../contexts/AuthContext';
+import AuthContext from '@contexts/AuthContext';
 import {format} from 'date-fns';
+import {calculateTableAllocation} from '@utils/useReservationUtils';
 
 const BookingInputScreen = ({route}) => {
   const {
@@ -27,56 +28,6 @@ const BookingInputScreen = ({route}) => {
   const [reservationName, setReservationName] = useState('');
   const [partySize, setPartySize] = useState('');
   const [specialRequest, setSpecialRequest] = useState('');
-
-  // Logic to calculate table allocation
-  const calculateTableAllocation = (partySize, tables) => {
-    // Ensure tables is an object to prevent the TypeError
-    const safeTables = tables || {};
-
-    // Convert tables object into an array of [tableSize, count] and sort by table size descending
-    const tableSizes = Object.entries(safeTables)
-      .map(([type, count]) => ({
-        size: parseInt(type.split('-')[0], 10),
-        count,
-        type,
-      }))
-      .sort((a, b) => b.size - a.size);
-
-    let remainingPartySize = partySize;
-    const allocationMap = {};
-
-    // Iterate through table sizes and allocate party size to tables
-    for (const {size, count, type} of tableSizes) {
-      if (remainingPartySize <= 0) break;
-
-      let neededTables = Math.floor(remainingPartySize / size);
-      if (neededTables > count) neededTables = count;
-
-      if (neededTables > 0) {
-        allocationMap[type] = (allocationMap[type] || 0) + neededTables;
-        remainingPartySize -= neededTables * size;
-      }
-    }
-
-    // Check for any possible way to fit remaining party size in a single table
-    if (remainingPartySize > 0) {
-      const singleTableFit = tableSizes.find(
-        ({size, count, type}) =>
-          size >= remainingPartySize && (allocationMap[type] || count) > 0,
-      );
-      if (singleTableFit) {
-        allocationMap[singleTableFit.type] =
-          (allocationMap[singleTableFit.type] || 0) + 1;
-        remainingPartySize = 0;
-      }
-    }
-
-    if (remainingPartySize > 0) {
-      return null;
-    }
-
-    return allocationMap;
-  };
 
   // Logic to handle reservation submission for the selected pub
   const handleReservationSubmit = async () => {
@@ -98,19 +49,9 @@ const BookingInputScreen = ({route}) => {
       return;
     }
 
-    /* if (!tableAllocation) {
-      Alert.alert(
-        'Table Allocation Error',
-        'We are unable to allocate tables based on the selected party size and the available tables. Please adjust your party size or select a different time slot.',
-      );
-      return;
-    } */
-
     // Prepare reservation data to be submitted to Firestore
     const reservationData = {
-      //userId: currentUserId,
       userName: reservationName,
-      //pubId,
       pubName,
       pubAvatar,
       date: firestore.Timestamp.fromDate(
@@ -147,7 +88,7 @@ const BookingInputScreen = ({route}) => {
     <View style={styles.container}>
       <Text style={styles.title}>Make a Reservation</Text>
       <Text>Pub: {pubName}</Text>
-      <Text>Date: {format(selectedDate, 'dd-MM-yyyy')}</Text>
+      <Text>Date: {format(selectedDate, 'dd/MM/yyyy')}</Text>
       <Text>Time: {selectedHour}</Text>
       <TextInput
         style={styles.input}

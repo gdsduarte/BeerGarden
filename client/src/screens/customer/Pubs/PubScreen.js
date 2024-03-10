@@ -46,10 +46,10 @@ const PubScreen = ({route}) => {
         {() => <PubNavigator pubId={pubId} />}
       </Drawer.Screen>
       <Drawer.Screen name="Menu">
-        {() => <FoodMenuScreen pubId={pubId} />}
+        {() => <FoodMenuScreen pubId={pubId} image={pub.photoUrl} />}
       </Drawer.Screen>
       <Drawer.Screen name="Drinks">
-        {() => <DrinkMenuScreen pubId={pubId} />}
+        {() => <DrinkMenuScreen pubId={pubId} image={pub.photoUrl} />}
       </Drawer.Screen>
       <Drawer.Screen name="Booking">
         {() => <BookingScreen pubId={pubId} />}

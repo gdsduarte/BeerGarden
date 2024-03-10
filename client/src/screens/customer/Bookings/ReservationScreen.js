@@ -59,7 +59,6 @@ const BookingsList = ({bookings, navigation}) => (
 
 const BookingItem = ({booking, navigation}) => {
   const [isQRCodeVisible, setQRCodeVisible] = useState(false);
-  // Format the date and time for display
   const formattedDate = format(booking.date, 'dd/MM/yyyy');
   const formattedTime = format(booking.date, 'HH:mm');
 
