@@ -21,6 +21,7 @@ const BookingNavigator = () => {
       <Stack.Screen
         name="ReservationDetailsScreen"
         component={ReservationDetailsScreen}
+        options={{title: 'Booking Details'}}
       />
       <Stack.Screen 
         name="SpecificChatScreen" 

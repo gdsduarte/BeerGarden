@@ -1,18 +1,16 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   FlatList,
-  Modal,
   Image,
 } from 'react-native';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-import QRCode from 'react-native-qrcode-svg';
-import {useReservations} from '../../../hooks';
-import AuthContext from '../../../contexts/AuthContext';
-import Loading from '../../../components/common/Loading';
+import {useReservations} from '@hooks';
+import AuthContext from '@contexts/AuthContext';
+import Loading from '@components/common/Loading';
 import {format} from 'date-fns';
 
 const Tab = createMaterialTopTabNavigator();
@@ -58,19 +56,14 @@ const BookingsList = ({bookings, navigation}) => (
 );
 
 const BookingItem = ({booking, navigation}) => {
-  const [isQRCodeVisible, setQRCodeVisible] = useState(false);
   const formattedDate = format(booking.date, 'dd/MM/yyyy');
   const formattedTime = format(booking.date, 'HH:mm');
 
-  const toggleQRCodeModal = () => {
-    setQRCodeVisible(!isQRCodeVisible);
-  };
+  console.log('Booking:', booking);
 
   const onBookingPress = () => {
     navigation.navigate('ReservationDetailsScreen', {booking});
   };
-
-  const qrCodeData = `bookingId:${booking.id}`;
 
   return (
     <View style={styles.container}>
@@ -84,33 +77,9 @@ const BookingItem = ({booking, navigation}) => {
           <Text style={styles.pubName}>
             {formattedDate} {formattedTime}
           </Text>
-          {booking.isBooked !== false && (
-            <TouchableOpacity
-              onPress={toggleQRCodeModal}
-              style={styles.qrCodeIcon}>
-              <QRCode value={qrCodeData} size={30} />
-            </TouchableOpacity>
-          )}
         </View>
         <Text style={styles.bookingTitle}>{booking.userName}</Text>
         <Text style={styles.bookingDetail}>Status: {booking.status}</Text>
-        <Modal
-          visible={isQRCodeVisible}
-          transparent={false}
-          onRequestClose={toggleQRCodeModal}>
-          <View style={styles.fullScreenModal}>
-            <Text style={styles.modalTitle}>{booking.userName}</Text>
-            <Text style={styles.bookingDetail}>
-              Date: {formattedDate} Time: {formattedTime}
-            </Text>
-            <QRCode value={qrCodeData} size={200} />
-            <TouchableOpacity
-              onPress={toggleQRCodeModal}
-              style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
       </TouchableOpacity>
     </View>
   );

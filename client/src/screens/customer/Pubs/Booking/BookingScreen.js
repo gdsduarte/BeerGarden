@@ -2,7 +2,6 @@ import React, {useState, useEffect, useContext} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import {useNavigation} from '@react-navigation/native';
-import {format} from 'date-fns';
 import Loading from '@components/common/Loading';
 import AuthContext from '@contexts/AuthContext';
 import {useBookingAvailability, usePubDetails} from '@hooks';
@@ -93,7 +92,7 @@ const BookingScreen = ({route, pubId: propPubId}) => {
     // Filter the current user's reservations for the selected date and time slot
     const currentUserReservations = reservations.filter(
       reservation =>
-        reservation.userId === currentUserId &&
+        reservation.members.includes(currentUserId) &&
         reservation.date.toDate().toISOString().split('T')[0] ===
           selectedDate &&
         reservation.timeSlot === timeSlot,
@@ -107,10 +106,6 @@ const BookingScreen = ({route, pubId: propPubId}) => {
         onPress={() => {
           if (hasUserReservation) {
             if (updating === true) {
-              // close the screen immediately
-              /* navigation.navigate('ReservationDetailsScreen', {
-                booking: bookingDetails,
-              }); */
               return;
             } else {
               navigation.navigate('ReservationDetailsScreen', {
@@ -151,9 +146,9 @@ const BookingScreen = ({route, pubId: propPubId}) => {
           [selectedDate]: {selected: true, selectedColor: '#5AC8FA'},
         }}
       />
-      <Text style={styles.formTitle}>
+      {/* <Text style={styles.formTitle}>
         Available Hours for {format(new Date(selectedDate), 'dd-MM-yyyy')}
-      </Text>
+      </Text> */}
       {pubDetailsLoading || availabilityLoading ? (
         <Loading />
       ) : !pub ? (

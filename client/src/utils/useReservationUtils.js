@@ -62,7 +62,7 @@ const getCustomStylesBasedOnLoad = bookingLoad => {
     backgroundColor = 'green';
     textColor = 'white';
   }
-  return { container: { backgroundColor }, text: { color: textColor } };
+  return {container: {backgroundColor}, text: {color: textColor}};
 };
 
 /**
@@ -101,7 +101,6 @@ export const isClosedOnSelectedDay = (selectedDate, pub) => {
   const dayName = days[dayOfWeek];
   return pub.openingHours[dayName]?.toLowerCase() === 'closed';
 };
-
 
 /**
  * Utility for calculating table allocation.

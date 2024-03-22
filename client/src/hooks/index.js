@@ -24,5 +24,6 @@ export {default as useUserLocation} from './customer/useUserLocation';
 export {default as useUserProfileData} from './customer/useUserProfileData';
 export {default as useUsers} from './customer/useUsers';
 export {default as useValidation} from './customer/useValidation';
+export {default as useReservationActions} from './customer/useReservationActions';
 
 // Bussines hooks for fetching data from Firestore

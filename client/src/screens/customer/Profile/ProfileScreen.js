@@ -39,6 +39,8 @@ const ProfileScreen = ({route}) => {
     loading: profileLoading,
   } = useUserProfileData(userId);
 
+  console.log('Profile:', profile);
+
   const isOtherUserProfile = route.params?.isOtherUserProfile || false;
   const [activeTab, setActiveTab] = useState('pubs');
   const filteredReviews = reviews.filter(review => review.type === activeTab);
@@ -84,14 +86,14 @@ const ProfileScreen = ({route}) => {
       <Text style={styles.sectionHeading}>{title}</Text>
       {data && (
         <FlatList
-          data={data.slice(0, 3)}
+          data={data.slice(0, 5)}
           keyExtractor={item => item.id}
           renderItem={({item}) => renderItem({item})}
           horizontal
           style={styles.horizontalScroll}
         />
       )}
-      {data && data.length > 3 && (
+      {data && data.length > 4 && (
         <TouchableOpacity
           style={styles.moreButton}
           onPress={() => {
@@ -110,7 +112,7 @@ const ProfileScreen = ({route}) => {
     <TouchableOpacity
       style={inModal ? styles.modalPlaceItem : styles.placeItem}
       onPress={() => navigation.navigate('PubDetails', {pubId: item.pubId})}>
-      <Image style={styles.placeItemImage} source={{uri: item.photoURL}} />
+      <Image style={styles.placeItemImage} source={{uri: item.photoUrl}} />
       <Text style={inModal ? styles.modalPlaceItemText : styles.placeItemText}>
         {item.displayName}
       </Text>
@@ -161,7 +163,7 @@ const ProfileScreen = ({route}) => {
     <TouchableOpacity
       style={inModal ? styles.modalFriendItem : styles.friendItem}
       onPress={() => navigateToUserProfile(item.id)}>
-      <Image style={styles.friendAvatar} source={{uri: item.photoURL}} />
+      <Image style={styles.friendAvatar} source={{uri: item.photoUrl}} />
       <Text style={styles.friendName}>{item.displayName}</Text>
     </TouchableOpacity>
   );
@@ -195,7 +197,7 @@ const ProfileScreen = ({route}) => {
         </View>
         {/* Profile Section */}
         <View style={styles.profileSection}>
-          <Image style={styles.avatar} source={{uri: profile?.userAvatar}} />
+          <Image style={styles.avatar} source={{uri: profile?.photoUrl}} />
           <Text style={styles.name}>{profile?.displayName}</Text>
           <Text style={styles.bio}>@{profile?.username}</Text>
           <Text style={styles.bio}>{profile?.bio}</Text>
@@ -278,7 +280,7 @@ const ProfileScreen = ({route}) => {
       {/* Search Modal */}
       <Modal
         animationType="slide"
-        transparent={true} // Enable transparency to allow underlying content to be partially visible
+        transparent={true}
         visible={isSearchModalVisible}
         onRequestClose={() => setSearchModalVisible(false)}>
         <View style={styles.modalOverlay}>
@@ -377,7 +379,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '90%',
     backgroundColor: 'white',
-    borderRadius: 20, // Optional: for rounded corners
+    borderRadius: 20,
     padding: 20,
     /* shadowColor: '#000',
     shadowOffset: {

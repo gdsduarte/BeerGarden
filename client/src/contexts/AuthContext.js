@@ -13,22 +13,22 @@ const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-const fetchUserRole = async (uid) => {
+const fetchUserRole = async uid => {
   // Attempt to fetch from the 'users' collection first
   let doc = await firestore().collection('users').doc(uid).get();
   if (doc.exists) {
-    return { role: 'user', data: doc.data() }; // Assuming 'user' is the role
+    return {role: 'user', data: doc.data()}; // Assuming 'user' is the role
   } else {
     // If not found, attempt to fetch from the 'pubs' collection
     doc = await firestore().collection('pubs').doc(uid).get();
     if (doc.exists) {
-      return { role: 'pub', data: doc.data() }; // Assuming 'pub' is the role for pub owners
+      return {role: 'pub', data: doc.data()}; // Assuming 'pub' is the role for pub owners
     }
   }
-  return { role: null, data: null }; // Default to null if not found in both
+  return {role: null, data: null}; // Default to null if not found in both
 };
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({children}) => {
   const [state, setState] = useState({
     isLoading: true,
     isUserLoggedIn: false,
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []); */
 
-  const onAuthStateChanged = useCallback(async (user) => {
+  const onAuthStateChanged = useCallback(async user => {
     if (user) {
       // Attempt to fetch the user document from either the 'users' or 'pubs' collection
       let doc = await firestore().collection('user').doc(user.uid).get();
@@ -76,10 +76,9 @@ export const AuthProvider = ({ children }) => {
       });
     } else {
       // User is not logged in
-      setState((s) => ({ ...s, isLoading: false, isUserLoggedIn: false }));
+      setState(s => ({...s, isLoading: false, isUserLoggedIn: false}));
     }
   }, []);
-
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
