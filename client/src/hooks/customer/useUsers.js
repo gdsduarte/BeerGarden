@@ -1,5 +1,4 @@
-/* eslint-disable prettier/prettier */
-import { useState, useEffect, useCallback } from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
 const useUsers = () => {
@@ -33,18 +32,23 @@ const useUsers = () => {
     return !snapshot.empty; // Returns true if username exists, false otherwise
   }, []);
 
-  // Add a function for searching users by partial username
-  const searchUsers = useCallback((searchText) => {
-    // Lowercase the search text to make the search case-insensitive
-    const loweredSearchText = searchText.toLowerCase();
-    // Filter the loaded users based on the search text
-    const filteredUsers = users.filter(user => 
-      user.username.toLowerCase().includes(loweredSearchText)
-    );
-    return filteredUsers;
-  }, [users]);
+  console.log('Users:', users);
 
-  return { users, loadingUsers, checkUsernameExists, searchUsers };
+  // Function for searching users by partial username
+  const searchUsers = useCallback(
+    searchText => {
+      // Lowercase the search text to make the search case-insensitive
+      const loweredSearchText = searchText.toLowerCase();
+      // Filter the loaded users based on the search text
+      const filteredUsers = users.filter(user =>
+        user.username?.toLowerCase().includes(loweredSearchText),
+      );
+      return filteredUsers;
+    },
+    [users],
+  );
+
+  return {users, loadingUsers, checkUsernameExists, searchUsers};
 };
 
 export default useUsers;

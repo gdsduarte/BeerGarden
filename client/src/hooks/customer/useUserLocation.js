@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {useState, useEffect} from 'react';
 import Geolocation from '@react-native-community/geolocation';
 

@@ -35,3 +35,14 @@ export const fetchUserDetailsById = async id => {
     console.error('Failed to fetch user details:', error);
   }
 };
+
+export const fetchPubDetailsById = async id => {
+  try {
+    const pubDoc = await firestore().collection('pub').doc(id).get();
+    if (pubDoc.exists) {
+      return pubDoc.data();
+    }
+  } catch (error) {
+    console.error('Failed to fetch pub details:', error);
+  }
+};

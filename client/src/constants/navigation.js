@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 export const ROUTES = {
   HOME: 'Home',
   PROFILE: 'Profile',

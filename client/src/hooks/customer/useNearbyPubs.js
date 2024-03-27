@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
@@ -36,7 +35,7 @@ const useNearbyPubs = (userLatitude, userLongitude, maxDistance) => {
         querySnapshot => {
           const list = querySnapshot.docs
             .map(doc => {
-              const { displayName, location, photoUrl } = doc.data();
+              const {displayName, location, photoUrl, groupId} = doc.data();
               const distance = calculateDistance(
                 userLatitude,
                 userLongitude,
@@ -51,6 +50,7 @@ const useNearbyPubs = (userLatitude, userLongitude, maxDistance) => {
                     longitude: location.longitude,
                     image: photoUrl,
                     distance: distance,
+                    group: groupId,
                   }
                 : null;
             })
@@ -65,11 +65,10 @@ const useNearbyPubs = (userLatitude, userLongitude, maxDistance) => {
         },
       );
 
-    // Clean-up function
     return () => unsubscribe();
   }, [userLatitude, userLongitude, maxDistance]);
 
-  return { pubs, loading };
+  return {pubs, loading};
 };
 
 export default useNearbyPubs;

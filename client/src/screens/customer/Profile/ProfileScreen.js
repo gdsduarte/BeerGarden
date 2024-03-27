@@ -8,25 +8,21 @@ import {
   ScrollView,
   SafeAreaView,
   RefreshControl,
-  TextInput,
   FlatList,
-  Modal,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {useUserProfileData} from '../../../hooks';
-import AuthContext from '../../../contexts/AuthContext';
+import {useUserProfileData} from '@hooks';
+import AuthContext from '@contexts/AuthContext';
 import {Rating} from 'react-native-ratings';
-import {useUsers} from '../../../hooks';
+import ReviewsModal from '@components/profile/ReviewsModal';
+import SearchUserModal from '@components/profile/SearchUserModal';
 
 const ProfileScreen = ({route}) => {
   const navigation = useNavigation();
-  const [searchText, setSearchText] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const {currentUserId} = useContext(AuthContext);
   const {signOut} = useContext(AuthContext);
-  const {searchUsers} = useUsers();
-
+  
   // Determine if we're viewing the current user's profile or another user's profile
   const userId = route.params?.userId || currentUserId;
 
@@ -44,32 +40,27 @@ const ProfileScreen = ({route}) => {
   const isOtherUserProfile = route.params?.isOtherUserProfile || false;
   const [activeTab, setActiveTab] = useState('pubs');
   const filteredReviews = reviews.filter(review => review.type === activeTab);
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [modalSearchText, setModalSearchText] = useState('');
+
+  //const [isModalVisible, setModalVisible] = useState(false);
   const [modalData, setModalData] = useState([]);
   const [modalDataType, setModalDataType] = useState('');
-  const [isSearchModalVisible, setSearchModalVisible] = useState(false);
+  const [isReviewsModalVisible, setReviewsModalVisible] = useState(false);
+  const [isSearchUserModalVisible, setSearchUserModalVisible] = useState(false);
 
   useEffect(() => {
     setLoading(profileLoading);
   }, [profileLoading]);
 
-  useEffect(() => {
+  /* useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
       setModalVisible(false);
     });
 
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation]); */
 
   const handleLogout = () => {
     signOut();
-  };
-
-  const handleSearch = () => {
-    if (!searchText.trim()) return;
-    const results = searchUsers(searchText);
-    setSearchResults(results);
   };
 
   // Navigate to another user's profile
@@ -97,7 +88,7 @@ const ProfileScreen = ({route}) => {
         <TouchableOpacity
           style={styles.moreButton}
           onPress={() => {
-            setModalVisible(true);
+            setReviewsModalVisible(true);
             setModalData(data);
             setModalDataType(dataType);
           }}>
@@ -224,7 +215,7 @@ const ProfileScreen = ({route}) => {
         {!isOtherUserProfile && (
           <TouchableOpacity
             style={styles.searchButton} // Define this style
-            onPress={() => setSearchModalVisible(true)}>
+            onPress={() => setSearchUserModalVisible(true)}>
             <Text style={styles.searchButtonText}>Search Users</Text>
           </TouchableOpacity>
         )}
@@ -277,92 +268,20 @@ const ProfileScreen = ({route}) => {
         />
         <Section />
       </ScrollView>
-      {/* Search Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isSearchModalVisible}
-        onRequestClose={() => setSearchModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <TextInput
-              style={styles.searchBar}
-              placeholder="Search users..."
-              value={searchText}
-              onChangeText={setSearchText}
-              onSubmitEditing={handleSearch}
-              autoFocus={true}
-            />
-            <FlatList
-              data={searchResults}
-              keyExtractor={item => item.id}
-              renderItem={({item}) => (
-                <TouchableOpacity
-                  style={styles.userItem}
-                  onPress={() => {
-                    setSearchModalVisible(false);
-                    navigateToUserProfile(item.id);
-                  }}>
-                  <Text style={styles.userName}>{item.username}</Text>
-                </TouchableOpacity>
-              )}
-            />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => {
-                setSearchModalVisible(false);
-                setSearchText('');
-                setSearchResults([]);
-              }}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-      <Modal
-        animationType="slide"
-        transparent={false}
-        visible={isModalVisible}
-        onRequestClose={() => {
-          setModalVisible(!isModalVisible);
-        }}>
-        <View style={styles.modalContent}>
-          <View>
-            <TextInput
-              style={styles.searchBar}
-              placeholder="Search..."
-              value={modalSearchText}
-              onChangeText={text => setModalSearchText(text)}
-            />
-            <FlatList
-              showsVerticalScrollIndicator={false}
-              data={modalData.filter(item =>
-                item.displayName
-                  .toLowerCase()
-                  .includes(modalSearchText.toLowerCase()),
-              )}
-              keyExtractor={item => item.id}
-              renderItem={({item}) => {
-                switch (modalDataType) {
-                  case 'places':
-                    return renderPlacesItem({item, inModal: true});
-                  case 'friends':
-                    return renderFriendsItem({item, inModal: true});
-                  case 'reviews':
-                    return renderReviewsItem({item, inModal: true});
-                  default:
-                    return <Text>Unknown item type</Text>;
-                }
-              }}
-            />
-          </View>
-        </View>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => setModalVisible(!isModalVisible)}>
-          <Text style={styles.closeButtonText}>Close</Text>
-        </TouchableOpacity>
-      </Modal>
+      <ReviewsModal
+        isModalVisible={isReviewsModalVisible}
+        setModalVisible={setReviewsModalVisible}
+        modalData={modalData}
+        modalDataType={modalDataType}
+        renderPlacesItem={renderPlacesItem}
+        renderFriendsItem={renderFriendsItem}
+        renderReviewsItem={renderReviewsItem}
+      />
+      <SearchUserModal
+        isSearchModalVisible={isSearchUserModalVisible}
+        setSearchModalVisible={setSearchUserModalVisible}
+        navigateToUserProfile={navigateToUserProfile}
+      />
     </SafeAreaView>
   );
 };
@@ -371,7 +290,6 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     alignItems: 'center',
-    //backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
     position: 'absolute',
@@ -381,14 +299,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 20,
-    /* shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5, */
   },
   closeButtonText: {
     color: '#355E3B',

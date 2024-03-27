@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import firestore from '@react-native-firebase/firestore';
 
 const db = firestore();
@@ -19,9 +18,12 @@ const manageChatAndSendMessage = async (
   currentUserId,
   targetUserId,
   inputText,
+  chatType,
 ) => {
   if (!currentUserId || !targetUserId) {
-    console.error("manageChatAndSendMessage: 'currentUserId' or 'targetUserId' is undefined");
+    console.error(
+      "manageChatAndSendMessage: 'currentUserId' or 'targetUserId' is undefined",
+    );
     return; // Prevent further execution if critical IDs are missing
   }
 
@@ -30,12 +32,11 @@ const manageChatAndSendMessage = async (
   // Ensure targetUserId is checked again for safety
   if (!chatId && targetUserId) {
     // If no chat found, create a new one
-    chatId = await createChat(currentUserId, targetUserId, {
+    chatId = await createGroup(currentUserId, targetUserId, {
       groupId: groupsRef.doc().id,
       createdBy: currentUserId,
       members: [currentUserId, targetUserId],
-      type: 'private',
-      createdAt: serverTimestamp(),
+      type: chatType,
       modifiedAt: serverTimestamp(),
     });
   }
@@ -48,12 +49,13 @@ const manageChatAndSendMessage = async (
       sentAt: serverTimestamp(),
     });
   } else {
-    console.error("manageChatAndSendMessage: 'chatId' or 'inputText' is invalid");
+    console.error(
+      "manageChatAndSendMessage: 'chatId' or 'inputText' is invalid",
+    );
   }
 
   return chatId; // Return chatId for any further operations
 };
-
 
 // Sends a message to a private chat, creating the chat if it does not exist
 const findChat = async (currentUserId, targetUserID, groupData) => {
@@ -84,24 +86,35 @@ const findChat = async (currentUserId, targetUserID, groupData) => {
 };
 
 // Creates a new chat group
-const createChat = async (currentUserId, targetUserID, groupData) => {
-  const newChatRef = groupsRef.doc();
-  await newChatRef.set(groupData);
-  console.log('New private chat created:', newChatRef.id);
-  return newChatRef.id; // Return the new chat ID
+const createGroup = async (currentUserId, targetUserID, groupData) => {
+  try {
+    const newChatRef = groupsRef.doc();
+    await newChatRef.set({
+      ...groupData,
+      createdAt: serverTimestamp(),
+    });
+    console.log('New group chat created:', newChatRef.id);
+    return newChatRef.id;
+  } catch (error) {
+    handleError(error, 'Error creating group');
+    return null;
+  }
 };
 
 // Send a message to a specific chat
 const sendMessage = async (chatId, message) => {
   try {
-    await chatsRef.doc(chatId).collection('messages').add({
-      ...message,
-      sentAt: serverTimestamp(),
-    });
+    await chatsRef
+      .doc(chatId)
+      .collection('messages')
+      .add({
+        ...message,
+        sentAt: serverTimestamp(),
+      });
 
     // Update the last message in the chat's group document
     await groupsRef.doc(chatId).update({
-      lastMessage: { ...message, sentAt: serverTimestamp() },
+      lastMessage: {...message, sentAt: serverTimestamp()},
       modifiedAt: serverTimestamp(),
     });
 
@@ -126,10 +139,50 @@ const updateMessage = async (chatId, messageId, updates) => {
   }
 };
 
-// Delete a specific message from a chat
 const deleteMessage = async (chatId, messageId) => {
   try {
-    await chatsRef.doc(chatId).collection('messages').doc(messageId).delete();
+    const messagesRef = chatsRef.doc(chatId).collection('messages');
+    const messageToDeleteRef = messagesRef.doc(messageId);
+
+    // Start a batch
+    const batch = db.batch();
+
+    // Delete the specified message
+    batch.delete(messageToDeleteRef);
+
+    // Fetch the last two messages to determine if the deleted one is the last
+    const lastMessages = await messagesRef
+      .orderBy('sentAt', 'desc')
+      .limit(2)
+      .get();
+
+    if (!lastMessages.empty) {
+      let lastMessageData = null;
+      const lastMessageId = lastMessages.docs[0].id;
+
+      // If the message being deleted is the last message
+      if (lastMessageId === messageId) {
+        // If there's another message, use it as the last message
+        if (lastMessages.docs.length > 1) {
+          const newLastMessage = lastMessages.docs[1];
+          lastMessageData = {
+            ...newLastMessage.data(),
+            sentAt: newLastMessage.data().sentAt,
+          };
+        }
+
+        // Update or clear the lastMessage field in the group
+        const groupRef = groupsRef.doc(chatId);
+        if (lastMessageData) {
+          batch.update(groupRef, {lastMessage: lastMessageData});
+        } else {
+          batch.update(groupRef, {lastMessage: firestore.FieldValue.delete()});
+        }
+      }
+    }
+
+    // Commit the batch
+    await batch.commit();
 
     console.log('Message deleted successfully');
   } catch (error) {
@@ -137,11 +190,38 @@ const deleteMessage = async (chatId, messageId) => {
   }
 };
 
+const addMemberToGroup = async (groupId, memberId) => {
+  try {
+    await groupsRef.doc(groupId).update({
+      members: firestore.FieldValue.arrayUnion(memberId),
+    });
+
+    console.log('Member added to group:', memberId);
+  } catch (error) {
+    handleError(error, 'Error adding member to group');
+  }
+};
+
+const removeMemberFromGroup = async (groupId, memberId) => {
+  console.log(`Removing member from group - Group ID: ${groupId}, Member ID: ${memberId}`);
+  try {
+    await groupsRef.doc(groupId).update({
+      members: firestore.FieldValue.arrayRemove(memberId),
+    });
+
+    console.log('Member removed from group:', memberId);
+  } catch (error) {
+    handleError(error, 'Error removing member from group');
+  }
+};
+
 export {
   manageChatAndSendMessage,
   findChat,
-  createChat,
+  createGroup,
   sendMessage,
   updateMessage,
   deleteMessage,
+  addMemberToGroup,
+  removeMemberFromGroup,
 };

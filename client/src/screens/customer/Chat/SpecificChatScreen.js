@@ -7,53 +7,64 @@ import {
   FlatList,
   StyleSheet,
   Image,
+  TouchableWithoutFeedback,
+  Alert,
 } from 'react-native';
-import {useChatMessages} from '../../../hooks';
-import AuthContext from '../../../contexts/AuthContext';
+import {useChatMessages} from '@hooks';
+import AuthContext from '@contexts/AuthContext';
 import {
   manageChatAndSendMessage,
   findChat,
-} from '../../../services/chat/chatService';
+  sendMessage,
+  deleteMessage,
+} from '@services/chat/chatService';
+import GroupInfoModal from '@components/chats/GroupInfoModal';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 
 const SpecificChatScreen = ({route, navigation}) => {
-  const {targetUserId, chatId: initialChatId} = route.params;
+  const {targetUserId, chatId: initialChatId, groupData: initialGroupData} = route.params;
   const {currentUserId} = useContext(AuthContext);
-  const [chatId, setChatId] = useState(null);
+  const [chatId, setChatId] = useState(initialChatId);
   const [inputText, setInputText] = useState('');
   const {messages} = useChatMessages(chatId);
   const flatListRef = useRef();
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  // State to manage updates to groupData
+  const [updatedGroupData, setUpdatedGroupData] = useState(initialGroupData);
+
+  const handleMemberChange = (updatedMemberIds) => {
+    setUpdatedGroupData(prevData => ({
+      ...prevData,
+      members: updatedMemberIds,
+    }));
+  };  
 
   useEffect(() => {
-    // Immediately try to find an existing chat if chatId is not provided through params
     const initChat = async () => {
-      if (!initialChatId && targetUserId) {
+      if (!chatId && targetUserId) {
         const foundChatId = await findChat(currentUserId, targetUserId);
         if (foundChatId) {
           setChatId(foundChatId);
         }
-      } else {
-        setChatId(initialChatId);
       }
     };
 
     initChat();
-  }, [currentUserId, targetUserId, initialChatId]);
+  }, [currentUserId, targetUserId, chatId]);
 
-  // Navigation options
   useEffect(() => {
     navigation.setOptions({
       headerShown: true,
       title: 'Chat Name',
       headerRight: () => (
-        <Image
-          source={{uri: 'https://example.com/avatar.jpg'}}
-          style={styles.avatar}
-        />
+        <TouchableOpacity onPress={() => setModalVisible(true)} style={{marginRight: 10}}>
+          <Icon name="users-cog" size={24} color="#000" />
+        </TouchableOpacity>
       ),
     });
   }, [navigation]);
 
-  // Scroll to end when messages update
   useEffect(() => {
     flatListRef.current?.scrollToEnd({animated: true});
   }, [messages]);
@@ -63,32 +74,86 @@ const SpecificChatScreen = ({route, navigation}) => {
     if (!inputText.trim()) return;
 
     try {
-      const usedChatId = await manageChatAndSendMessage(
-        currentUserId,
-        targetUserId,
-        inputText,
-      );
-      if (!chatId) setChatId(usedChatId); // Update state only if chatId was not previously set
+      const {chatType, chatId} = route.params;
+
+      console.log('Route ', route.params);
+
+      // Construct the message object
+      const message = {
+        messageText: inputText.trim(),
+        sentBy: currentUserId,
+      };
+
+      if (chatType === 'open' || chatType === 'group') {
+        // Directly send the message to the garden chatId
+        await sendMessage(chatId, message);
+      } else {
+        // Handle private and group chats as before
+        const usedChatId = await manageChatAndSendMessage(
+          currentUserId,
+          targetUserId,
+          inputText,
+          chatType,
+        );
+        if (!chatId) setChatId(usedChatId);
+      }
+
       setInputText(''); // Clear input after successful send
     } catch (error) {
-      console.error('Error managing chat or sending message:', error);
+      console.error('Error sending message222:', error);
+    }
+  };
+
+  // Handle long press on a message to delete it
+  const handleLongPress = message => {
+    // Check if the current user is the sender of the message
+    if (message.sentBy === currentUserId) {
+      Alert.alert(
+        'Delete Message',
+        'Are you sure you want to delete this message?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {text: 'Delete', onPress: () => deleteMessageHandler(message.id)},
+        ],
+      );
+    } else {
+      // Optionally, inform the user they can only delete their own messages
+      Alert.alert(
+        'Cannot Delete Message',
+        'You can only delete messages you sent.',
+      );
+    }
+  };
+
+  // Delete message function
+  const deleteMessageHandler = async messageId => {
+    try {
+      await deleteMessage(chatId, messageId);
+      // Optionally, refresh messages or handle UI feedback
+    } catch (error) {
+      console.error('Error deleting message:', error);
     }
   };
 
   // Render message item
   const renderMessageItem = ({item}) => (
-    <View
-      style={[
-        styles.messageItem,
-        item.sentBy === currentUserId
-          ? styles.currentUserMessage
-          : styles.otherUserMessage,
-      ]}>
-      <Text style={styles.messageText}>{item.messageText}</Text>
-      <Text style={styles.messageTime}>
-        {item.sentAt?.toDate().toLocaleTimeString()}
-      </Text>
-    </View>
+    <TouchableWithoutFeedback onLongPress={() => handleLongPress(item)}>
+      <View
+        style={[
+          styles.messageItem,
+          item.sentBy === currentUserId
+            ? styles.currentUserMessage
+            : styles.otherUserMessage,
+        ]}>
+        <Text style={styles.messageText}>{item.messageText}</Text>
+        <Text style={styles.messageTime}>
+          {item.sentAt?.toDate().toLocaleTimeString()}
+        </Text>
+      </View>
+    </TouchableWithoutFeedback>
   );
 
   return (
@@ -111,6 +176,13 @@ const SpecificChatScreen = ({route, navigation}) => {
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
       </View>
+      <GroupInfoModal
+        chatTypes={['group']}
+        isVisible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        groupData={updatedGroupData} // Pass the state that reflects updates
+        onMemberChange={handleMemberChange} // Ensure you implement this prop in GroupInfoModal to handle changes
+      />
     </View>
   );
 };

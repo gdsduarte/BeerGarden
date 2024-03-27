@@ -10,6 +10,14 @@ import {
   OwnerBottomTabNavigator,
 } from './src/navigation';
 
+import { LogBox } from 'react-native';
+
+// Ignore log notification by message
+LogBox.ignoreLogs(['Warning: ...']);
+
+//Ignore all log notifications
+LogBox.ignoreAllLogs();
+
 enableScreens();
 
 const AppContent = () => {

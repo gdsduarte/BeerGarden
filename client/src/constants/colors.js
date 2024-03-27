@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 export default {
   primary: '#355E3B',
   accent: '#8B4513',
