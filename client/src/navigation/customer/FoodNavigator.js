@@ -1,10 +1,10 @@
 import React from 'react';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-import {FoodDetailScreen, FoodReviewsScreen} from '../../screens';
+import {FoodDetailScreen, FoodReviewsScreen} from '@screens';
 
 const Tab = createMaterialTopTabNavigator();
 
-const MenuNavigator = ({route, navigation}) => {
+const FoodNavigator = ({route, navigation}) => {
   const item = route.params?.params?.item;
 
   return (
@@ -19,4 +19,4 @@ const MenuNavigator = ({route, navigation}) => {
   );
 };
 
-export default MenuNavigator;
+export default FoodNavigator;

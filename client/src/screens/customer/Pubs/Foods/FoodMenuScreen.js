@@ -8,11 +8,11 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import FoodCard from '../../../../components/common/FoodCard';
-import {useFoodMenu} from '../../../../hooks';
+import FoodCard from '@components/common/FoodCard';
+import {useFoodMenu} from '@hooks';
 import {useNavigation} from '@react-navigation/native';
-import Loading from '../../../../components/common/Loading';
-import {useAuth} from '../../../../contexts/AuthContext';
+import Loading from '@components/common/Loading';
+import {useAuth} from '@contexts/AuthContext';
 
 const CategoryTabs = ({categories, onSelectCategory, currentCategory}) => {
   return (
@@ -92,10 +92,11 @@ const FoodMenuScreen = ({pubId, image}) => {
   if (loading) return <Loading />;
 
   const handlePress = item => {
-    navigation.navigate('MenuNavigator', {
+    navigation.navigate('FoodNavigator', {
       screen: 'FoodDetails',
       params: {item},
     });
+    console.log('Pressed item:', item);
   };
 
   const renderItem = ({item}) => (

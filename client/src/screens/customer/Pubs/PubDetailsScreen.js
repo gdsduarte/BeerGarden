@@ -1,7 +1,7 @@
 import React from 'react';
 import {Text, Image, ScrollView, StyleSheet, Alert} from 'react-native';
-import {usePubDetails} from '../../../hooks';
-import Loading from '../../../components/common/Loading';
+import {usePubDetails} from '@hooks';
+import Loading from '@components/common/Loading';
 import {useNavigation} from '@react-navigation/native';
 
 const PubDetailsScreen = ({pubId}) => {
@@ -20,7 +20,7 @@ const PubDetailsScreen = ({pubId}) => {
     <ScrollView style={styles.container}>
       <Image source={{uri: pub.photoUrl}} style={styles.image} />
       <Text style={styles.name}>{pub.displayName}</Text>
-      <Text style={styles.bio}>{pub.bio}</Text>
+      <Text style={styles.bio}>{pub.description}</Text>
     </ScrollView>
   );
 };

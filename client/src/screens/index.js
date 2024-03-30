@@ -22,7 +22,9 @@ export {default as ReservationDetailsScreen} from './customer/Bookings/Reservati
 // Pub Routes
 export {default as PubScreen} from './customer/Pubs/PubScreen';
 export {default as PubDetailsScreen} from './customer/Pubs/PubDetailsScreen';
-export {default as PubReviewsScreen} from './customer/Pubs/PubReviewsScreen';
+export {default as PubEventsScreen} from './customer/Pubs/Events/PubEventsScreen';
+export {default as PubEventDetailsScreen} from './customer/Pubs/Events/PubEventDetailsScreen';
+export {default as PubReviewsScreen} from './customer/Pubs/Reviews/PubReviewsScreen';
 export {default as ContactScreen} from './customer/Pubs/ContactScreen';
 
 // Food Routes

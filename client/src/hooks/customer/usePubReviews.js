@@ -1,8 +1,7 @@
-/* eslint-disable prettier/prettier */
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
-const useReviews = pubId => {
+const usePubReviews = pubId => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -10,6 +9,7 @@ const useReviews = pubId => {
     const unsubscribe = firestore()
       .collection('pubReviews')
       .where('pubId', '==', pubId)
+      .orderBy('createdAt', 'desc')
       .onSnapshot(
         querySnapshot => {
           const reviewsArray = querySnapshot.docs.map(doc => ({
@@ -31,4 +31,4 @@ const useReviews = pubId => {
   return {reviews, loading};
 };
 
-export default useReviews;
+export default usePubReviews;

@@ -3,15 +3,15 @@ import {useNavigation} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import {Text, TouchableOpacity, StyleSheet} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {usePubDetails} from '../../../hooks';
-import {PubNavigator} from '../../../navigation';
+import {usePubDetails} from '@hooks';
+import {PubNavigator} from '@navigation';
 import {
   FoodMenuScreen,
   DrinkMenuScreen,
   BookingScreen,
   ContactScreen,
-} from '../..';
-import Loading from '../../../components/common/Loading';
+} from '@screens';
+import Loading from '@components/common/Loading';
 
 const Drawer = createDrawerNavigator();
 

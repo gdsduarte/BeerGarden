@@ -5,8 +5,9 @@ import {
   PubScreen,
   BookingInputScreen,
   ReservationDetailsScreen,
-} from '../../screens';
-import MenuNavigator from './MenuNavigator';
+  PubEventDetailsScreen,
+} from '@screens';
+import FoodNavigator from './FoodNavigator';
 import DrinkNavigator from './DrinkNavigator';
 
 const Stack = createStackNavigator();
@@ -33,8 +34,13 @@ const SearchNavigator = () => {
         name="ReservationDetailsScreen"
         component={ReservationDetailsScreen}
       />
-      <Stack.Screen name="MenuNavigator" component={MenuNavigator} />
+      <Stack.Screen name="FoodNavigator" component={FoodNavigator} />
       <Stack.Screen name="DrinkNavigator" component={DrinkNavigator} />
+      <Stack.Screen
+        name="PubEventDetails"
+        component={PubEventDetailsScreen}
+        options={{title: 'Event Details'}}
+      />
     </Stack.Navigator>
   );
 };

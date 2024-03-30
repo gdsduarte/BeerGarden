@@ -26,8 +26,6 @@ const CreateGroupModal = ({visible, onClose, friends}) => {
   const [selectedFriends, setSelectedFriends] = useState([]);
   const [filteredFriends, setFilteredFriends] = useState(friends);
 
-  console.log('Selected Friends: ', selectedFriends);
-
   useEffect(() => {
     // Filter friends based on the search query
     if (searchQuery.trim() !== '') {
@@ -183,6 +181,7 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
     position: 'absolute',
@@ -190,7 +189,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '90%',
     backgroundColor: 'white',
-    borderRadius: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 20,
   },
   closeButtonText: {

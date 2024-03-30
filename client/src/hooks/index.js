@@ -19,10 +19,12 @@ export {default as usePubDetails} from './customer/usePubDetails';
 export {default as usePubs} from './customer/usePubs';
 export {default as useRecentPubs} from './customer/useRecentPubs';
 export {default as useReservations} from './customer/useReservations';
-export {default as useReviews} from './customer/useReviews';
+export {default as usePubReviews} from './customer/usePubReviews';
 export {default as useUserLocation} from './customer/useUserLocation';
 export {default as useUserProfileData} from './customer/useUserProfileData';
 export {default as useUsers} from './customer/useUsers';
 export {default as useValidation} from './customer/useValidation';
+export {default as usePubEvents} from './customer/usePubEvents';
+export {default as usePubEventDetails} from './customer/usePubEventDetails';
 
 // Bussines hooks for fetching data from Firestore

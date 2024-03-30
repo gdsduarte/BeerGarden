@@ -1,26 +1,25 @@
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
-const useDrinkMenu = pubId => {
-  const [drinkItems, setDrinkItems] = useState([]);
+const usePubEvents = pubId => {
+  const [pubEvents, setPubEvents] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = firestore()
-      .collection('drinks')
+      .collection('event')
       .where('pubId', '==', pubId)
-      .orderBy('name')
       .onSnapshot(
         querySnapshot => {
-          const items = querySnapshot.docs.map(doc => ({
+          const eventsArray = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
           }));
-          setDrinkItems(items);
+          setPubEvents(eventsArray);
           setLoading(false);
         },
         error => {
-          console.error(error);
+          console.error('Error fetching Events:', error);
           setLoading(false);
         },
       );
@@ -28,7 +27,7 @@ const useDrinkMenu = pubId => {
     return () => unsubscribe();
   }, [pubId]);
 
-  return {drinkItems, loading};
+  return {pubEvents, loading};
 };
 
-export default useDrinkMenu;
+export default usePubEvents;

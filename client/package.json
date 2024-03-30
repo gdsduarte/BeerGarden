@@ -29,6 +29,7 @@
     "@react-navigation/material-top-tabs": "^6.6.5",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/stack": "^6.3.18",
+    "@testing-library/react-hooks": "^7.0.2",
     "base-64": "^1.0.0",
     "date-fns": "^3.2.0",
     "firebase": "^10.4.0",

@@ -24,7 +24,7 @@ const FoodMenuScreen = ({pubId}) => {
   }
 
   const handlePress = item => {
-    navigation.navigate('MenuNavigator', {
+    navigation.navigate('FoodNavigator', {
       screen: 'FoodDetails',
       params: {item},
     });

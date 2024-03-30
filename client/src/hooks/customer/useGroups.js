@@ -10,7 +10,7 @@ const useGroups = (userId, chatType) => {
       .collection('group')
       .where('members', 'array-contains', userId)
       .where('type', '==', chatType)
-      .orderBy('modifiedAt')
+      .orderBy('modifiedAt', 'desc')
       .onSnapshot(
         querySnapshot => {
           const fetchedGoups = querySnapshot.docs.map(doc => ({

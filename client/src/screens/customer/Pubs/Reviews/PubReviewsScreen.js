@@ -8,7 +8,7 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import {useFoodReviews} from '@hooks';
+import {usePubReviews} from '@hooks';
 import {Rating} from 'react-native-ratings';
 import Loading from '@components/common/Loading';
 import ReviewModal from '@components/pubs/ReviewModal';
@@ -16,13 +16,13 @@ import {format} from 'date-fns';
 import AuthContext from '@contexts/AuthContext';
 import {deleteReview} from '@services/Reviews/reviewService';
 
-const PubReviewsScreen = ({item}) => {
+const PubReviewsScreen = ({pubId}) => {
   const {currentUserId} = useContext(AuthContext);
-  const {reviews, loading} = useFoodReviews(item.id);
+  const {reviews, loading} = usePubReviews(pubId);
   const [modalVisible, setModalVisible] = useState(false);
   const [editableReview, setEditableReview] = useState(null);
 
-  console.log('PubReviewsScreen:', reviews);
+  const formattedDate = format(new Date(), 'dd/MM/yyyy');
 
   // Determine the default type from the first review (if reviews are loaded)
   const type = reviews.length > 0 ? reviews[0].type : undefined;
@@ -118,10 +118,9 @@ const PubReviewsScreen = ({item}) => {
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}
         review={editableReview}
-        pubId={item.pubId}
+        pubId={pubId}
         userId={currentUserId}
         type={type}
-        itemId={item.id}
       />
     </View>
   );

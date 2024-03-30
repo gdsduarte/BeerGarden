@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
@@ -6,30 +5,30 @@ const useDrinkReviews = itemId => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  console.log('Item 222:', itemId);
+  console.log('Review 222:', reviews);
+
   useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const reviewsRef = firestore()
-          .collection('drinkReviews')
-          .where('itemId', '==', itemId);
-        const snapshot = await reviewsRef.get();
+    const unsubscribe = firestore()
+      .collection('drinkReviews')
+      .where('itemId', '==', itemId)
+      .orderBy('createdAt', 'desc')
+      .onSnapshot(
+        querySnapshot => {
+          const reviewsArray = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setReviews(reviewsArray);
+          setLoading(false);
+        },
+        error => {
+          console.error('Error fetching reviews:', error);
+          setLoading(false);
+        },
+      );
 
-        const fetchedReviews = [];
-        snapshot.forEach(doc => {
-          fetchedReviews.push({id: doc.id, ...doc.data()});
-        });
-
-        setReviews(fetchedReviews);
-      } catch (error) {
-        console.error('Error fetching reviews:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (itemId) {
-      fetchReviews();
-    }
+    return () => unsubscribe();
   }, [itemId]);
 
   return {reviews, loading};

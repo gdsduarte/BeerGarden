@@ -30,16 +30,21 @@ const GroupInfoModal = ({isVisible, onClose, groupData, onMemberChange}) => {
   // In GroupInfoModal component
   useEffect(() => {
     const fetchUpdatedMembersDetails = async () => {
-      const membersDetailsPromise = groupData.members.map(memberId =>
-        fetchUserDetailsById(memberId),
-      );
-      const membersDetails = await Promise.all(membersDetailsPromise);
-      setAllMembers(membersDetails);
-      setFilteredMembers(membersDetails);
+      // Check if groupData and groupData.members exist before proceeding
+      if (groupData && groupData.members) {
+        const membersDetailsPromise = groupData.members.map(memberId =>
+          fetchUserDetailsById(memberId),
+        );
+        const membersDetails = await Promise.all(membersDetailsPromise);
+        setAllMembers(membersDetails);
+        setFilteredMembers(membersDetails);
+      }
     };
 
-    fetchUpdatedMembersDetails();
-  }, [groupData.members]); 
+    if (groupData && groupData.members) {
+      fetchUpdatedMembersDetails();
+    }
+  }, [groupData]);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -52,7 +57,7 @@ const GroupInfoModal = ({isVisible, onClose, groupData, onMemberChange}) => {
     }
   }, [searchQuery]);
 
-  const handleMemberAdded = (newMemberId) => {
+  const handleMemberAdded = newMemberId => {
     const updatedMembers = [...groupData.members, newMemberId];
     onMemberChange(updatedMembers);
   };
@@ -102,11 +107,18 @@ const GroupInfoModal = ({isVisible, onClose, groupData, onMemberChange}) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           {/* Group Info Display */}
-          <Image style={styles.groupPhoto} source={{uri: groupData.photoUrl}} />
-          <Text style={styles.modalText}>{groupData.name}</Text>
-          <Text style={styles.modalText}>
-            {groupData.members.length} members
-          </Text>
+          {groupData && groupData.members && (
+            <>
+              <Image
+                style={styles.groupPhoto}
+                source={{uri: groupData.photoUrl}}
+              />
+              <Text style={styles.modalText}>{groupData.name}</Text>
+              <Text style={styles.modalText}>
+                {groupData.members.length} members
+              </Text>
+            </>
+          )}
 
           {/* Action Buttons */}
           <Button title="Add Friend" onPress={handleOpenFriendSelection} />
@@ -176,6 +188,7 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
     position: 'absolute',
@@ -183,7 +196,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '90%',
     backgroundColor: 'white',
-    borderRadius: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 20,
   },
   closeButtonText: {

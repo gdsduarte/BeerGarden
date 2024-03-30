@@ -64,7 +64,6 @@ const findChat = async (currentUserId, targetUserID, groupData) => {
   try {
     const querySnapshot = await groupsRef
       .where('members', 'array-contains', currentUserId)
-      //.where('type', '==', 'private')
       .get();
 
     const existingChat = querySnapshot.docs.find(doc => {
@@ -102,7 +101,7 @@ const createGroup = async (currentUserId, targetUserID, groupData) => {
 };
 
 // Send a message to a specific chat
-const sendMessage = async (chatId, message) => {
+const sendMessage = async (chatId, message, chatType) => {
   try {
     await chatsRef
       .doc(chatId)
@@ -112,11 +111,13 @@ const sendMessage = async (chatId, message) => {
         sentAt: serverTimestamp(),
       });
 
-    // Update the last message in the chat's group document
-    await groupsRef.doc(chatId).update({
-      lastMessage: {...message, sentAt: serverTimestamp()},
-      modifiedAt: serverTimestamp(),
-    });
+    // Update the last message in the chat's group document only for group and private
+    if (chatType === 'group' || chatType === 'private') {
+      await groupsRef.doc(chatId).update({
+        lastMessage: {...message, sentAt: serverTimestamp()},
+        modifiedAt: serverTimestamp(),
+      });
+    }
 
     console.log('Message sent to chat:', chatId);
   } catch (error) {
@@ -203,7 +204,9 @@ const addMemberToGroup = async (groupId, memberId) => {
 };
 
 const removeMemberFromGroup = async (groupId, memberId) => {
-  console.log(`Removing member from group - Group ID: ${groupId}, Member ID: ${memberId}`);
+  console.log(
+    `Removing member from group - Group ID: ${groupId}, Member ID: ${memberId}`,
+  );
   try {
     await groupsRef.doc(groupId).update({
       members: firestore.FieldValue.arrayRemove(memberId),

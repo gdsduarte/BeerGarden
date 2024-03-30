@@ -32,11 +32,11 @@ const ChatScreen = ({navigation, item}) => {
   const userId = currentUserId;
   const {friends, loading} = useUserProfileData(userId);
   const [modalVisible, setModalVisible] = useState(false);
-  const [groupModalVisible, setGroupModalVisible] = useState(false); 
+  const [groupModalVisible, setGroupModalVisible] = useState(false);
 
   useEffect(() => {
     let headerRight = null;
-  
+
     switch (activeTab) {
       case 'Friends':
         headerRight = () => (
@@ -66,9 +66,9 @@ const ChatScreen = ({navigation, item}) => {
         headerRight = null;
         break;
     }
-  
-    navigation.setOptions({ headerRight });
-  }, [activeTab, navigation]);  
+
+    navigation.setOptions({headerRight});
+  }, [activeTab, navigation]);
 
   if (loading) return <Loading />;
 
@@ -108,65 +108,49 @@ const ChatScreen = ({navigation, item}) => {
   );
 };
 
-const ChatItem = ({
-  item,
-  navigation,
-  fetchAdditionalDetails,
-  currentUserId,
-}) => {
-  const [userDetails, setUserDetails] = useState(null);
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  return distance;
+}
 
-  useEffect(() => {
-    if (fetchAdditionalDetails) {
-      const targetUserId = item.members.find(
-        member => member !== currentUserId,
-      );
-      fetchUserDetailsById(targetUserId).then(setUserDetails);
-    }
-  }, [item, fetchAdditionalDetails, currentUserId]);
-
-  return (
-    <TouchableOpacity
-      style={styles.chatItem}
-      onPress={() =>
-        navigation.navigate('SpecificChat', {
-          chatId: item.id,
-          currentUserId,
-          targetUserId: userDetails ? userDetails.id : item.id,
-          chatType: item.type,
-          groupData: item,
-        })
-      }>
-      <>
-        <Image
-          source={{
-            uri:
-              fetchAdditionalDetails && userDetails
-                ? userDetails.photoUrl
-                : item.photoUrl,
-          }}
-          style={styles.avatar}
-        />
-        <View style={styles.chatDetails}>
-          <Text style={styles.chatTitle}>
-            {fetchAdditionalDetails && userDetails
-              ? userDetails.displayName
-              : item.name}
-          </Text>
-          <Text style={styles.chatSnippet}> {item.lastMessage?.messageText} </Text>
-        </View>
-      </>
-    </TouchableOpacity>
-  );
-};
-
-const PubChatItem = ({item, navigation}) => {
+const PubChatItem = ({item, navigation, userLocation}) => {
   const [pubDetails, setPubDetails] = useState(null);
   const {currentUserId} = useContext(AuthContext);
+
+  console.log('PubChatItem:', item);
 
   useEffect(() => {
     fetchPubDetailsById(item.pubId).then(setPubDetails);
   }, [item.pubId]);
+
+  // Calculate distance and convert to a suitable format (meters or kilometers)
+  let distance = '';
+  if (pubDetails && userLocation) {
+    const distanceInKm = calculateDistance(
+      userLocation.latitude,
+      userLocation.longitude,
+      pubDetails.location.latitude,
+      pubDetails.location.longitude,
+    );
+    if (distanceInKm < 1) {
+      // Convert to meters and show without decimal places for distances less than 1 km
+      const distanceInMeters = Math.round(distanceInKm * 1000);
+      distance = `${distanceInMeters}m away`;
+    } else {
+      // For distances 1 km or more, show in kilometers with one decimal place
+      distance = `${distanceInKm.toFixed(1)}km away`;
+    }
+  }
 
   return (
     <TouchableOpacity
@@ -176,12 +160,82 @@ const PubChatItem = ({item, navigation}) => {
           chatId: item.id,
           currentUserId,
           chatType: item.chatType,
+          displayName: pubDetails?.displayName,
         })
       }>
       <Image source={{uri: pubDetails?.photoUrl}} style={styles.avatar} />
       <View style={styles.chatDetails}>
         <Text style={styles.chatTitle}>{pubDetails?.displayName}</Text>
-        <Text style={styles.chatSnippet}>Open chat with the pub</Text>
+        <Text style={styles.chatSnippet}>Open chat</Text>
+        {distance && <Text style={styles.chatSnippet}>{distance}</Text>}
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const FriendChatItem = ({item, navigation, currentUserId}) => {
+  const [userDetails, setUserDetails] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    const targetUserId = item.members.find(member => member !== currentUserId);
+    fetchUserDetailsById(targetUserId).then(details => {
+      setUserDetails(details);
+      setLoading(false);
+    });
+  }, [item, currentUserId]);
+
+  const handlePress = () => {
+    const targetUserId = item.members.find(member => member !== currentUserId);
+    if (loading) return;
+    navigation.navigate('SpecificChat', {
+      chatId: item.id,
+      currentUserId,
+      targetUserId,
+      chatType: item.type,
+      groupData: item,
+      displayName: userDetails?.displayName,
+    });
+  };
+
+  return (
+    <TouchableOpacity style={styles.chatItem} onPress={handlePress}>
+      <>
+        <Image
+          source={{uri: userDetails ? userDetails.photoUrl : item.photoUrl}}
+          style={styles.avatar}
+        />
+        <View style={styles.chatDetails}>
+          <Text style={styles.chatTitle}>
+            {userDetails ? userDetails.displayName : item.name}
+          </Text>
+          <Text style={styles.chatSnippet}>
+            {item.lastMessage?.messageText}
+          </Text>
+        </View>
+      </>
+    </TouchableOpacity>
+  );
+};
+
+const GroupChatItem = ({item, navigation, currentUserId}) => {
+  return (
+    <TouchableOpacity
+      style={styles.chatItem}
+      onPress={() =>
+        navigation.navigate('SpecificChat', {
+          chatId: item.id,
+          currentUserId,
+          chatType: item.type,
+          groupData: item,
+          displayName: item.name,
+        })
+      }>
+      <Image source={{uri: item.photoUrl}} style={styles.avatar} />
+      <View style={styles.chatDetails}>
+        <Text style={styles.chatTitle}>{item.name}</Text>
+        <Text style={styles.chatSnippet}>{item.lastMessage?.messageText}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -190,17 +244,24 @@ const PubChatItem = ({item, navigation}) => {
 const ChatList = ({groups, navigation, fetchAdditionalDetails}) => {
   const {currentUserId} = useContext(AuthContext);
 
+  const renderItem = ({item}) => {
+    if (fetchAdditionalDetails) {
+      return (
+        <FriendChatItem
+          item={item}
+          navigation={navigation}
+          currentUserId={currentUserId}
+        />
+      );
+    } else {
+      return <GroupChatItem item={item} navigation={navigation} />;
+    }
+  };
+
   return (
     <FlatList
       data={groups}
-      renderItem={({item}) => (
-        <ChatItem
-          item={item}
-          navigation={navigation}
-          fetchAdditionalDetails={fetchAdditionalDetails}
-          currentUserId={currentUserId}
-        />
-      )}
+      renderItem={renderItem}
       keyExtractor={item => item.id}
     />
   );
@@ -214,19 +275,35 @@ const GardenChat = ({navigation}) => {
     0.1, // 0.1 km = 100 meters
   );
 
-  const nearbyPubChats = pubs.map(pub => ({
-    id: pub.group,
-    pubId: pub.id,
-    chatType: 'open',
-  }));
+  // Calculate distance for each pub and sort them
+  let sortedPubs = pubs
+    .map(pub => ({
+      ...pub,
+      distance: calculateDistance(
+        location?.latitude,
+        location?.longitude,
+        pub.latitude,
+        pub.longitude,
+      ),
+    }))
+    .sort((a, b) => a.distance - b.distance);
 
   if (loading) return <Loading />;
 
   return (
     <FlatList
-      data={nearbyPubChats}
+      data={sortedPubs.map(pub => ({
+        ...pub,
+        id: pub.group,
+        pubId: pub.id,
+        chatType: 'open',
+      }))}
       renderItem={({item}) => (
-        <PubChatItem item={item} navigation={navigation} />
+        <PubChatItem
+          item={item}
+          navigation={navigation}
+          userLocation={location}
+        />
       )}
       keyExtractor={item => item.id}
     />

@@ -8,11 +8,11 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import FoodCard from '../../../../components/common/FoodCard';
-import {useDrinkMenu} from '../../../../hooks';
+import FoodCard from '@components/common/FoodCard';
+import {useDrinkMenu} from '@hooks';
 import {useNavigation} from '@react-navigation/native';
-import Loading from '../../../../components/common/Loading';
-import {useAuth} from '../../../../contexts/AuthContext';
+import Loading from '@components/common/Loading';
+import {useAuth} from '@contexts/AuthContext';
 
 const CategoryTabs = ({categories, onSelectCategory, currentCategory}) => {
   return (
@@ -44,21 +44,30 @@ const DrinkMenuScreen = ({pubId, image}) => {
   // Dynamically extract and order categories with predefined ones first
   const categories = useMemo(() => {
     const predefinedOrder = [
-      'Appetizers',
-      'Soups',
-      'Salads',
-      'Main Course',
-      'Pasta',
-      'Pizzas',
-      'Sandwiches',
-      'Burgers',
-      'Vegetarian',
-      'Vegan',
-      'Seafood',
-      'Sides',
-      'Kids’ Menu',
-      'Desserts',
+      'Beer',
+      'Wine',
+      'Cocktails',
+      'Mocktails',
+      'Soft Drinks',
+      'Hot Drinks',
+      'Drinks',
+      'Spirits',
+      'Liquors',
+      'Shots',
+      'Others',
+      'Non-Alcoholic',
+      'Alcoholic',
+      'Cold Drinks',
       'Specials',
+      'Special Offers',
+      'Happy Hour',
+      'Promotions',
+      'Deals',
+      'Discounts',
+      'Offers',
+      'Seasonal',
+      'Limited Time',
+      'New Arrivals',
     ];
     const categorySet = new Set(drinkItems.map(item => item.category));
     const unorderedCategories = Array.from(categorySet);
@@ -92,7 +101,7 @@ const DrinkMenuScreen = ({pubId, image}) => {
   if (loading) return <Loading />;
 
   const handlePress = item => {
-    navigation.navigate('MenuNavigator', {
+    navigation.navigate('DrinkNavigator', {
       screen: 'DrinkDetails',
       params: {item},
     });

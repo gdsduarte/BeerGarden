@@ -22,7 +22,11 @@ import GroupInfoModal from '@components/chats/GroupInfoModal';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
 const SpecificChatScreen = ({route, navigation}) => {
-  const {targetUserId, chatId: initialChatId, groupData: initialGroupData} = route.params;
+  const {
+    targetUserId,
+    chatId: initialChatId,
+    groupData: initialGroupData,
+  } = route.params;
   const {currentUserId} = useContext(AuthContext);
   const [chatId, setChatId] = useState(initialChatId);
   const [inputText, setInputText] = useState('');
@@ -30,15 +34,17 @@ const SpecificChatScreen = ({route, navigation}) => {
   const flatListRef = useRef();
   const [isModalVisible, setModalVisible] = useState(false);
 
+  console.log('Route: ', route.params);
+
   // State to manage updates to groupData
   const [updatedGroupData, setUpdatedGroupData] = useState(initialGroupData);
 
-  const handleMemberChange = (updatedMemberIds) => {
+  const handleMemberChange = updatedMemberIds => {
     setUpdatedGroupData(prevData => ({
       ...prevData,
       members: updatedMemberIds,
     }));
-  };  
+  };
 
   useEffect(() => {
     const initChat = async () => {
@@ -54,16 +60,21 @@ const SpecificChatScreen = ({route, navigation}) => {
   }, [currentUserId, targetUserId, chatId]);
 
   useEffect(() => {
+    const {chatType, displayName} = route.params;
+
     navigation.setOptions({
       headerShown: true,
-      title: 'Chat Name',
-      headerRight: () => (
-        <TouchableOpacity onPress={() => setModalVisible(true)} style={{marginRight: 10}}>
-          <Icon name="users-cog" size={24} color="#000" />
-        </TouchableOpacity>
-      ),
+      title: displayName || 'Chat',
+      headerRight: () =>
+        chatType === 'group' ? (
+          <TouchableOpacity
+            onPress={() => setModalVisible(true)}
+            style={{marginRight: 10}}>
+            <Icon name="users-cog" size={24} color="#000" />
+          </TouchableOpacity>
+        ) : null,
     });
-  }, [navigation]);
+  }, [navigation, route.params]);
 
   useEffect(() => {
     flatListRef.current?.scrollToEnd({animated: true});
@@ -76,8 +87,6 @@ const SpecificChatScreen = ({route, navigation}) => {
     try {
       const {chatType, chatId} = route.params;
 
-      console.log('Route ', route.params);
-
       // Construct the message object
       const message = {
         messageText: inputText.trim(),
@@ -86,7 +95,7 @@ const SpecificChatScreen = ({route, navigation}) => {
 
       if (chatType === 'open' || chatType === 'group') {
         // Directly send the message to the garden chatId
-        await sendMessage(chatId, message);
+        await sendMessage(chatId, message, chatType);
       } else {
         // Handle private and group chats as before
         const usedChatId = await manageChatAndSendMessage(
@@ -180,8 +189,8 @@ const SpecificChatScreen = ({route, navigation}) => {
         chatTypes={['group']}
         isVisible={isModalVisible}
         onClose={() => setModalVisible(false)}
-        groupData={updatedGroupData} // Pass the state that reflects updates
-        onMemberChange={handleMemberChange} // Ensure you implement this prop in GroupInfoModal to handle changes
+        groupData={updatedGroupData}
+        onMemberChange={handleMemberChange}
       />
     </View>
   );

@@ -7,7 +7,7 @@ export {default as ChatNavigator} from './customer/ChatNavigator';
 export {default as DrinkNavigator} from './customer/DrinkNavigator';
 export {default as HomeNavigator} from './customer/HomeNavigator';
 export {default as LoginNavigator} from './customer/LoginNavigator';
-export {default as MenuNavigator} from './customer/MenuNavigator';
+export {default as FoodNavigator} from './customer/FoodNavigator';
 export {default as ProfileNavigator} from './customer/ProfileNavigator';
 export {default as PubNavigator} from './customer/PubNavigator';
 export {default as SearchNavigator} from './customer/SearchNavigator';

@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
@@ -7,29 +6,26 @@ const useFoodReviews = itemId => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const reviewsRef = firestore()
-          .collection('foodReviews')
-          .where('itemId', '==', itemId);
-        const snapshot = await reviewsRef.get();
+    const unsubscribe = firestore()
+      .collection('foodReviews')
+      .where('itemId', '==', itemId)
+      .orderBy('createdAt', 'desc')
+      .onSnapshot(
+        querySnapshot => {
+          const reviewsArray = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setReviews(reviewsArray);
+          setLoading(false);
+        },
+        error => {
+          console.error('Error fetching reviews:', error);
+          setLoading(false);
+        },
+      );
 
-        const fetchedReviews = [];
-        snapshot.forEach(doc => {
-          fetchedReviews.push({id: doc.id, ...doc.data()});
-        });
-
-        setReviews(fetchedReviews);
-      } catch (error) {
-        console.error('Error fetching reviews:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (itemId) {
-      fetchReviews();
-    }
+    return () => unsubscribe();
   }, [itemId]);
 
   return {reviews, loading};

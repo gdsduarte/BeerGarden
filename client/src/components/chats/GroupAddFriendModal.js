@@ -57,12 +57,10 @@ const GroupAddFriendModal = ({visible, onClose, friends, groupData, onMemberAdde
     try {
       await addMemberToGroup(groupData.id, selectedFriendId);
       Alert.alert('Friend added to group');
-      // Now call the callback function to notify the parent component
       onMemberAdded(selectedFriendId);
     } catch (error) {
       console.error('Failed to add friend:', error);
     }
-    // It might be beneficial to move these reset states to the `onClose` prop method or ensure they are called after updates are propagated
     onClose();
     setSearchQuery('');
     setSelectedFriends([]);
@@ -124,6 +122,7 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
     position: 'absolute',
@@ -131,7 +130,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '90%',
     backgroundColor: 'white',
-    borderRadius: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 20,
   },
   closeButtonText: {
