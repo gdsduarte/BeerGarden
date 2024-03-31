@@ -24,48 +24,51 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return c * r;
 }
 
+// Fetch and filter pubs by distance
+export async function fetchPubsNearLocation(latitude, longitude, maxDistance) {
+  try {
+    const querySnapshot = await firestore().collection('pub').get();
+    const pubs = querySnapshot.docs
+      .map(doc => {
+        const {displayName, location, photoUrl, groupId} = doc.data();
+        const distance = calculateDistance(
+          latitude,
+          longitude,
+          location.latitude,
+          location.longitude,
+        );
+        return distance <= maxDistance
+          ? {
+              id: doc.id,
+              name: displayName,
+              latitude: location.latitude,
+              longitude: location.longitude,
+              image: photoUrl,
+              distance: distance,
+              group: groupId,
+            }
+          : null;
+      })
+      .filter(Boolean);
+    return pubs;
+  } catch (error) {
+    console.error('Error fetching pubs:', error);
+    return [];
+  }
+}
+
 const useNearbyPubs = (userLatitude, userLongitude, maxDistance) => {
   const [pubs, setPubs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = firestore()
-      .collection('pub')
-      .onSnapshot(
-        querySnapshot => {
-          const list = querySnapshot.docs
-            .map(doc => {
-              const {displayName, location, photoUrl, groupId} = doc.data();
-              const distance = calculateDistance(
-                userLatitude,
-                userLongitude,
-                location.latitude,
-                location.longitude,
-              );
-              return distance <= maxDistance
-                ? {
-                    id: doc.id,
-                    name: displayName,
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    image: photoUrl,
-                    distance: distance,
-                    group: groupId,
-                  }
-                : null;
-            })
-            .filter(Boolean);
-
-          setPubs(list);
-          setLoading(false);
-        },
-        error => {
-          console.error('Error fetching pubs:', error);
-          setLoading(false);
-        },
-      );
-
-    return () => unsubscribe();
+    setLoading(true);
+    fetchPubsNearLocation(userLatitude, userLongitude, maxDistance).then(
+      pubs => {
+        setPubs(pubs);
+        setLoading(false);
+      },
+    );
   }, [userLatitude, userLongitude, maxDistance]);
 
   return {pubs, loading};
