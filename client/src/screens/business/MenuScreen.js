@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-//import { MenuItem } from './MenuItem'; // Component to render each menu item
-//import { fetchMenuItems, deleteMenuItem } from '../services/menuService'; // Adjust path and implementation
+//import { MenuItem } from './MenuItem';
+//import { fetchMenuItems, deleteMenuItem } from '../services/menuService';
 
-const MenuScreen = ({ type }) => { // 'type' would be either 'drinks' or 'foods'
+const MenuScreen = ({ type }) => {
   const [menuItems, setMenuItems] = useState([]);
 
   useEffect(() => {
@@ -28,13 +28,9 @@ const MenuScreen = ({ type }) => { // 'type' would be either 'drinks' or 'foods'
           <MenuItem item={item} onDelete={handleDelete} />
         )}
       />
-      {/* Add buttons for adding/updating items here */}
     </View>
   );
 };
-
-// Define `DrinkMenuScreen` and `FoodMenuScreen` based on `MenuTypeScreen`
-// by passing the appropriate 'type' prop
 
 const styles = StyleSheet.create({
   container: {

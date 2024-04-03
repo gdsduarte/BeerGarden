@@ -6,7 +6,7 @@ import {
   BookingInputScreen,
   ReservationDetailsScreen,
   BookingScreen,
-  PubEventDetailsScreen,
+  PubEventsDetailsScreen,
 } from '@screens';
 import FoodNavigator from './FoodNavigator';
 import DrinkNavigator from './DrinkNavigator';
@@ -49,8 +49,8 @@ const ProfileNavigator = () => {
       <Stack.Screen name="FoodNavigator" component={FoodNavigator} />
       <Stack.Screen name="DrinkNavigator" component={DrinkNavigator} />
       <Stack.Screen
-        name="PubEventDetails"
-        component={PubEventDetailsScreen}
+        name="PubEventsDetails"
+        component={PubEventsDetailsScreen}
         options={{title: 'Event Details'}}
       />
       {/* <Stack.Screen

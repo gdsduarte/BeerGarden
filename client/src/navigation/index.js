@@ -14,3 +14,5 @@ export {default as SearchNavigator} from './customer/SearchNavigator';
 
 // Business hooks for fetching data from Firestore
 export {default as OwnerBottomTabNavigator} from './business/OwnerBottomTabNavigator';
+export {default as PubChatNavigator} from './business/PubChatNavigator';
+export {default as PubBookingNavigator} from './business/PubBookingNavigator';

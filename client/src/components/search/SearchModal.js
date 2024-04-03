@@ -1,12 +1,5 @@
 /**
- * FriendSelectionModal component is a modal that allows the user to select a friend to chat with.
- * 
- * It contains the following features:
- * - The user can search for friends to chat with, and the friends are displayed in a list.
- * - The user can select friends to chat with by clicking on the friend's name.
- * - The user can close the modal by clicking the "Close" button.
- * - The modal is displayed when the user clicks on the "New Chat" button in the Chats screen.
- * - The user can search for friends by typing in the search bar.
+ * SearchModal is a modal that displays a search bar and a list of pubs that match the search query.
  */
 
 import React, {useState, useEffect} from 'react';
@@ -18,25 +11,22 @@ import {
   StyleSheet,
   TextInput,
   FlatList,
+  Image,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
-const FriendSelectionModal = ({visible, onClose, friends, userId}) => {
+const SearchModal = ({visible, onClose, pubs}) => {
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredFriends, setFilteredFriends] = useState(friends);
+  const [filteredPubs, setFilteredPubs] = useState(pubs);
 
-  // Filter friends based on the search query
   useEffect(() => {
-    if (searchQuery.trim() !== '') {
-      const filtered = friends.filter(friend =>
-        friend.displayName.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-      setFilteredFriends(filtered);
-    } else {
-      setFilteredFriends(friends);
-    }
-  }, [searchQuery, friends]);
+    setFilteredPubs(
+      pubs.filter(pub =>
+        pub.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    );
+  }, [searchQuery, pubs]);
 
   return (
     <Modal
@@ -48,26 +38,25 @@ const FriendSelectionModal = ({visible, onClose, friends, userId}) => {
         <View style={styles.modalContainer}>
           <TextInput
             style={styles.searchBar}
-            placeholder="Search for friends..."
+            placeholder="Search for pubs..."
             onChangeText={setSearchQuery}
             value={searchQuery}
           />
           <FlatList
-            data={filteredFriends}
+            data={filteredPubs}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({item}) => (
               <TouchableOpacity
-                style={styles.friendItem}
+                style={styles.pubItem}
                 onPress={() => {
-                  navigation.navigate('SpecificChat', {
-                    currentUserId: userId,
-                    targetUserId: item.userId,
-                  });
-                  console.log('Current user ID:', userId);
-                  console.log('Target user ID:', item.userId);
-                  onClose();
+                  navigation.navigate('PubScreen', {pubId: item.id});
+                  onClose(); // Close the modal
                 }}>
-                <Text>{item.displayName}</Text>
+                <Image source={{uri: item.image}} style={styles.cardImage} />
+                  <Text style={styles.cardText}>{item.name}</Text>
+                  <Text style={styles.cardText}>{`${item.distance.toFixed(
+                    1,
+                  )} km`}</Text>
               </TouchableOpacity>
             )}
           />
@@ -117,21 +106,20 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
   },
-  friendItem: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+  pubItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
   },
-  selectedFriendItem: {
-    backgroundColor: '#f0f0f0',
+  cardImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
-  input: {
-    width: '70%',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 20,
-    padding: 10,
+  cardText: {
     fontSize: 16,
+    marginLeft: 10,
   },
 });
 
-export default FriendSelectionModal;
+export default SearchModal;

@@ -175,6 +175,7 @@ const PubChatItem = ({item, navigation, userLocation}) => {
 
 const FriendChatItem = ({item, navigation, currentUserId}) => {
   const [userDetails, setUserDetails] = useState(null);
+  const [pubDetails, setPubDetails] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -182,6 +183,10 @@ const FriendChatItem = ({item, navigation, currentUserId}) => {
     const targetUserId = item.members.find(member => member !== currentUserId);
     fetchUserDetailsById(targetUserId).then(details => {
       setUserDetails(details);
+      setLoading(false);
+    });
+    fetchPubDetailsById(targetUserId).then(details => {
+      setPubDetails(details);
       setLoading(false);
     });
   }, [item, currentUserId]);
@@ -195,24 +200,23 @@ const FriendChatItem = ({item, navigation, currentUserId}) => {
       targetUserId,
       chatType: item.type,
       groupData: item,
-      displayName: userDetails?.displayName,
+      displayName: pubDetails?.displayName || userDetails?.displayName,
     });
   };
 
   return (
     <TouchableOpacity style={styles.chatItem} onPress={handlePress}>
       <>
-        <Image
-          source={{uri: userDetails ? userDetails.photoUrl : item.photoUrl}}
-          style={styles.avatar}
-        />
+        {pubDetails ? (
+          <Image source={{uri: pubDetails.photoUrl}} style={styles.avatar} />
+        ) : (
+          <Image source={{uri: userDetails?.photoUrl}} style={styles.avatar} />
+        )}
         <View style={styles.chatDetails}>
           <Text style={styles.chatTitle}>
-            {userDetails ? userDetails.displayName : item.name}
+            {pubDetails ? pubDetails.displayName : userDetails?.displayName}
           </Text>
-          <Text style={styles.chatSnippet}>
-            {item.lastMessage?.messageText}
-          </Text>
+          <Text style={styles.chatSnippet}>{item.lastMessage?.messageText}</Text>
         </View>
       </>
     </TouchableOpacity>

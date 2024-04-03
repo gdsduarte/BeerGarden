@@ -1,4 +1,17 @@
-/* eslint-disable prettier/prettier */
+/**
+ * Auth Context Manager is responsible for managing the auth state of the application.
+ * 
+ * It contains the following features:
+ * - The Auth Provider Component is responsible for managing the auth state.
+ * - The Custom Hook useAuth is used to access the Auth Context.
+ * - The Auth Provider Component is used to wrap the application with the Auth Context.
+ * - The Auth State Change Handler is used to handle the current user's auth state.
+ * - The Firestore Auth State Listener is used to listen for changes in the auth state.
+ * - The Sign-Up Method is used to sign up a new user with email and password.
+ * - The Sign-In Method is used to sign in a user with email and password.
+ * - The Sign-Out Method is used to sign out the current user.
+ */
+
 import React, {
   createContext,
   useState,
@@ -9,56 +22,23 @@ import React, {
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
+// Auth Context Manager
 const AuthContext = createContext();
 
+// Custom Hook to use the Auth Context
 export const useAuth = () => useContext(AuthContext);
 
-const fetchUserRole = async uid => {
-  // Attempt to fetch from the 'users' collection first
-  let doc = await firestore().collection('users').doc(uid).get();
-  if (doc.exists) {
-    return {role: 'user', data: doc.data()}; // Assuming 'user' is the role
-  } else {
-    // If not found, attempt to fetch from the 'pubs' collection
-    doc = await firestore().collection('pubs').doc(uid).get();
-    if (doc.exists) {
-      return {role: 'pub', data: doc.data()}; // Assuming 'pub' is the role for pub owners
-    }
-  }
-  return {role: null, data: null}; // Default to null if not found in both
-};
-
+// Auth Provider Component is responsible for managing the auth state
 export const AuthProvider = ({children}) => {
   const [state, setState] = useState({
     isLoading: true,
     isUserLoggedIn: false,
     currentUserId: null,
     userRole: null,
-    userData: null, // Store additional user data fetched from Firestore
+    userData: null,
   });
 
-  /* const onAuthStateChanged = useCallback(async (user) => {
-    if (user) {
-      const { role, data } = await fetchUserRole(user.uid);
-      setState({
-        isLoading: false,
-        isUserLoggedIn: true,
-        currentUserId: user.uid,
-        userRole: role,
-        userData: data,
-      });
-    } else {
-      setState((s) => ({
-        ...s,
-        isLoading: false,
-        isUserLoggedIn: false,
-        currentUserId: null,
-        userRole: null,
-        userData: null,
-      }));
-    }
-  }, []); */
-
+  // Auth State Change Handler for current user
   const onAuthStateChanged = useCallback(async user => {
     if (user) {
       // Attempt to fetch the user document from either the 'users' or 'pubs' collection
@@ -71,7 +51,7 @@ export const AuthProvider = ({children}) => {
         isLoading: false,
         isUserLoggedIn: true,
         currentUserId: user.uid,
-        userRole: userData.role, // Use the role from the document
+        userRole: userData.role,
         userData,
       });
     } else {
@@ -80,9 +60,10 @@ export const AuthProvider = ({children}) => {
     }
   }, []);
 
+  // Firestore Auth State Listener
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
+    return subscriber;
   }, [onAuthStateChanged]);
 
   // Sign-Up Method

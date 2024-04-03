@@ -1,4 +1,3 @@
-
 import React, {useState, useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Text, Platform, Keyboard} from 'react-native';
@@ -8,15 +7,10 @@ import {
   faTableColumns,
   faComments,
   faUtensils,
-  faEllipsis
+  faEllipsis,
 } from '@fortawesome/free-solid-svg-icons';
-import {
-  SearchNavigator,
-  ChatNavigator,
-  ProfileNavigator,
-} from '..';
-import {DashboardScreen, BookingsScreen} from '../../screens';
-import MenuScreen from '../../screens/business/MenuScreen';
+import {ProfileNavigator, PubChatNavigator, PubBookingNavigator} from '..';
+import {DashboardScreen} from '@screens';
 import MenuScreenTab from '../../navigation/business/MenuScreenTab';
 
 const Tab = createBottomTabNavigator();
@@ -92,9 +86,17 @@ const OwnerBottomTabNavigator = () => {
         keyboardHidesTabBar: true,
       })}>
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
-      <Tab.Screen name="Bookings" component={BookingsScreen} />
       <Tab.Screen name="Menu" component={MenuScreenTab} />
-      <Tab.Screen name="Chat" component={ChatNavigator} />
+      <Tab.Screen
+        name="Bookings"
+        component={PubBookingNavigator}
+        options={{headerShown: false}}
+      />
+      <Tab.Screen
+        name="Chat"
+        component={PubChatNavigator}
+        options={{headerShown: false}}
+      />
       <Tab.Screen name="More" component={ProfileNavigator} />
     </Tab.Navigator>
   );

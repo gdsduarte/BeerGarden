@@ -20,6 +20,7 @@ import {
   GestureHandlerRootView,
   PanGestureHandler,
 } from 'react-native-gesture-handler';
+import SearchModal from '@components/search/SearchModal';
 
 const SearchScreen = ({navigation}) => {
   const userLocation = useUserLocation();
@@ -37,7 +38,6 @@ const SearchScreen = ({navigation}) => {
   const [currentRegion, setCurrentRegion] = useState(null);
   const autocompleteRef = useRef(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-
 
   useEffect(() => {
     if (userLocation.location && pubs.length) {
@@ -212,16 +212,7 @@ const SearchScreen = ({navigation}) => {
         ))}
       </MapView>
       <TouchableOpacity
-        style={{
-          position: 'absolute',
-          // Adjust the position according to your layout
-          top: 70,
-          right: 10,
-          padding: 10,
-          backgroundColor: '#fff',
-          borderRadius: 20,
-          zIndex: 20, // Ensure it's above other map elements
-        }}
+        style={styles.location}
         onPress={() => {
           if (userLocation.location) {
             // Center the map on the user's location
@@ -281,47 +272,25 @@ const SearchScreen = ({navigation}) => {
           loop={true}
         />
       </View>
-      <Modal
-        animationType="slide"
-        transparent={false}
+      <SearchModal
         visible={isModalVisible}
-        onRequestClose={() => {
-          setIsModalVisible(!isModalVisible);
-        }}>
-        <View style={{marginTop: 22}}>
-          <View>
-            <TouchableOpacity
-              onPress={() => setIsModalVisible(false)}
-              style={{padding: 10}}>
-              <Text>Close</Text>
-            </TouchableOpacity>
-            <FlatList
-              data={sortedPubs.filter(pub =>
-                pub.name.toLowerCase().includes(searchQuery.toLowerCase()),
-              )}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({item}) => (
-                <TouchableOpacity
-                  style={styles.card}
-                  onPress={() =>
-                    navigation.navigate('PubScreen', {pubId: item.id})
-                  }>
-                  <Image source={{uri: item.image}} style={styles.cardImage} />
-                  <Text style={styles.cardText}>{item.name}</Text>
-                  <Text style={styles.cardText}>{`${item.distance.toFixed(
-                    1,
-                  )} km`}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setIsModalVisible(false)}
+        pubs={sortedPubs}
+      />
     </GestureHandlerRootView>
   );
 };
 
 const styles = StyleSheet.create({
+  location: {
+    position: 'absolute',
+    top: 70,
+    right: 10,
+    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    zIndex: 20,
+  },
   swipeUpBar: {
     alignSelf: 'center',
     height: 30,

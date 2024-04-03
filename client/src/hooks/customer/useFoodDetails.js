@@ -33,37 +33,3 @@ const useFoodDetails = pubId => {
 };
 
 export default useFoodDetails;
-
-/* import {useState, useEffect} from 'react';
-import firestore from '@react-native-firebase/firestore';
-
-const useFoodMenu = pubId => {
-  const [foodItems, setFoodItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchFoodDetails = async () => {
-      try {
-        const foodRef = firestore().collection('foods').doc(pubId);
-        const doc = await foodRef.get();
-        if (doc.exists) {
-          setFoodItems({id: doc.id, ...doc.data()});
-        } else {
-          console.error('No such food found!');
-        }
-      } catch (error) {
-        console.error('Error fetching food details:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (pubId) {
-      fetchFoodDetails();
-    }
-  }, [pubId]);
-
-  return {foodItems, loading};
-};
-
-export default useFoodMenu; */

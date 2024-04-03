@@ -1,3 +1,16 @@
+/**
+ * GroupInfoModal is a modal component that displays the details of a group chat.
+ *
+ * It contains the following features:
+ * - The user can view the group name, group photo, and the number of members in the group.
+ * - The user can add a friend to the group by clicking the "Add Friend" button.
+ * - The user can search for members in the group by typing in the search bar.
+ * - The user can remove a member from the group by clicking the "Remove" button.
+ * - The user can leave the group by clicking the "Leave Group" button.
+ * - The user can close the modal by clicking the "Close" button.
+ * - The modal is displayed when the user clicks on the group chat in the Chats screen.
+ */
+
 import React, {useState, useEffect, useContext} from 'react';
 import {
   Modal,
@@ -27,7 +40,7 @@ const GroupInfoModal = ({isVisible, onClose, groupData, onMemberChange}) => {
   const userId = currentUserId;
   const {friends, loading} = useUserProfileData(userId);
 
-  // In GroupInfoModal component
+  // Fetch the details of all members in the group
   useEffect(() => {
     const fetchUpdatedMembersDetails = async () => {
       // Check if groupData and groupData.members exist before proceeding
@@ -46,6 +59,7 @@ const GroupInfoModal = ({isVisible, onClose, groupData, onMemberChange}) => {
     }
   }, [groupData]);
 
+  // Filter members based on search query
   useEffect(() => {
     if (!searchQuery) {
       setFilteredMembers(allMembers);
@@ -57,15 +71,18 @@ const GroupInfoModal = ({isVisible, onClose, groupData, onMemberChange}) => {
     }
   }, [searchQuery]);
 
+  // Function to handle adding a new member to the group
   const handleMemberAdded = newMemberId => {
     const updatedMembers = [...groupData.members, newMemberId];
     onMemberChange(updatedMembers);
   };
 
+  // Function to handle removing a member from the group
   const handleOpenFriendSelection = () => {
     setShowAddFriendModal(true);
   };
 
+  // Function to remove a member from the group
   const handleRemoveFriend = async memberId => {
     try {
       await removeMemberFromGroup(groupData.id, memberId);
@@ -86,14 +103,13 @@ const GroupInfoModal = ({isVisible, onClose, groupData, onMemberChange}) => {
     }
   };
 
-  // alert to ask if the user is sure they want to leave the group
+  // Alert to ask if the user is sure they want to leave the group
   const handleLeaveGroup = async () => {
     Alert.alert('Leave Group', 'Are you sure you want to leave the group?', [
       {
         text: 'Cancel',
         style: 'cancel',
       },
-      // Example adjustment for handleLeaveGroup
       {text: 'Leave', onPress: () => handleRemoveFriend(currentUserId)},
     ]);
   };
@@ -106,7 +122,6 @@ const GroupInfoModal = ({isVisible, onClose, groupData, onMemberChange}) => {
       onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
-          {/* Group Info Display */}
           {groupData && groupData.members && (
             <>
               <Image
@@ -119,19 +134,13 @@ const GroupInfoModal = ({isVisible, onClose, groupData, onMemberChange}) => {
               </Text>
             </>
           )}
-
-          {/* Action Buttons */}
           <Button title="Add Friend" onPress={handleOpenFriendSelection} />
-
-          {/* Search Bar */}
           <TextInput
             style={styles.searchBar}
             onChangeText={setSearchQuery}
             value={searchQuery}
             placeholder="Search member..."
           />
-
-          {/* Members List */}
           <FlatList
             data={filteredMembers}
             keyExtractor={item => item.userId}
@@ -157,11 +166,7 @@ const GroupInfoModal = ({isVisible, onClose, groupData, onMemberChange}) => {
               </TouchableOpacity>
             )}
           />
-
-          {/* Action Buttons */}
           <Button title="Leave Group" onPress={handleLeaveGroup} />
-
-          {/* Close Modal */}
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => {

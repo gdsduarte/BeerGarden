@@ -1,3 +1,7 @@
+/**
+ * SearchUserModal is a modal component that allows users to search for other users by username.
+ */
+
 import React, {useState} from 'react';
 import {
   Modal,

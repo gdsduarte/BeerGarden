@@ -16,7 +16,7 @@ const PubEventsScreen = ({pubId}) => {
   }
 
   const handlePress = eventId => {
-    navigation.navigate('PubEventDetails', {eventId});
+    navigation.navigate('PubEventsDetails', {eventId});
   };
  
   return (

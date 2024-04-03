@@ -1,3 +1,17 @@
+/**
+ * CreateGroupModal component is a modal that allows the user to create a new group chat.
+ * 
+ * It contains the following features:
+ * - The user can select a group name, a group photo, and add friends to the group.
+ * - The user can search for friends to add to the group, and the friends are displayed in a list.
+ * - The user can select friends to add to the group by clicking on the friend's name.
+ * - The user can select multiple friends to add to the group by clicking on the friend's name.
+ * - The user can also remove friends from the group by clicking on the friend's name again.
+ * - The user can create the group by clicking the "Create Group" button.
+ * - The user can close the modal by clicking the "Close" button.
+ * - The user can also select a photo for the group by clicking the "Select a Photo" text.
+ */
+
 import React, {useState, useContext, useEffect} from 'react';
 import {
   Modal,
@@ -26,8 +40,8 @@ const CreateGroupModal = ({visible, onClose, friends}) => {
   const [selectedFriends, setSelectedFriends] = useState([]);
   const [filteredFriends, setFilteredFriends] = useState(friends);
 
+  // Filter friends based on the search query
   useEffect(() => {
-    // Filter friends based on the search query
     if (searchQuery.trim() !== '') {
       const filtered = friends.filter(friend =>
         friend.displayName.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -38,6 +52,7 @@ const CreateGroupModal = ({visible, onClose, friends}) => {
     }
   }, [searchQuery, friends]);
 
+  // Handle choosing a photo from the device
   const handleChoosePhoto = () => {
     launchImageLibrary({noData: true}, response => {
       if (response.assets) {
@@ -46,6 +61,7 @@ const CreateGroupModal = ({visible, onClose, friends}) => {
     });
   };
 
+  // Handle creating a group
   const handleCreateGroup = async () => {
     if (groupName.trim() === '' || selectedFriends.length === 0) {
       Alert.alert(
@@ -77,6 +93,7 @@ const CreateGroupModal = ({visible, onClose, friends}) => {
       type: 'group',
     };
 
+    // Save the group data to the database
     try {
       const chatId = await createGroup(currentUserId, null, groupData);
       if (chatId) {
@@ -90,7 +107,6 @@ const CreateGroupModal = ({visible, onClose, friends}) => {
           chatType: 'group',
         });
       } else {
-        // Handle case where chatId is null, meaning group creation failed
         console.error('Group creation failed.');
       }
     } catch (error) {
@@ -98,12 +114,14 @@ const CreateGroupModal = ({visible, onClose, friends}) => {
     }
   };
 
+  // Add a friend to the selected friends list
   const addFriendToGroup = friendId => {
     if (!selectedFriends.includes(friendId)) {
       setSelectedFriends([...selectedFriends, friendId]);
     }
   };
 
+  // Remove a friend from the selected friends list
   const removeFriendFromGroup = friendId => {
     setSelectedFriends(selectedFriends.filter(id => id !== friendId));
   };
@@ -122,7 +140,7 @@ const CreateGroupModal = ({visible, onClose, friends}) => {
           {groupPhoto && (
             <Image
               source={{uri: groupPhoto}}
-              style={{width: 100, height: 100}}
+              style={styles.image}
             />
           )}
           <TextInput
@@ -222,6 +240,19 @@ const styles = StyleSheet.create({
   },
   selectedFriendItem: {
     backgroundColor: '#f0f0f0',
+  },
+  input: {
+    width: '70%',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    padding: 10,
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  image: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
   },
 });
 

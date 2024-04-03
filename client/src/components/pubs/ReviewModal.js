@@ -1,3 +1,7 @@
+/**
+ * ReviewModal is a modal component that allows users to write a review for a pub or a menu item.
+ */
+
 import React, {useState, useEffect} from 'react';
 import {
   Modal,
@@ -34,6 +38,7 @@ const ReviewModal = ({
     }
   }, [review]);
 
+  // Review data to be submitted to the database
   const reviewData = {
     rating,
     title,
@@ -50,6 +55,7 @@ const ReviewModal = ({
     setComment('');
   };
 
+  // Handle submission of review data to the database
   const handleSubmission = async () => {
     if (!title.trim() || !comment.trim()) {
       Alert.alert('Error', 'Please fill in all fields.');
@@ -89,7 +95,7 @@ const ReviewModal = ({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.title}>
-            Write a Review - {type.charAt(0).toUpperCase() + type.slice(1)}
+            Write a Review - {type}
           </Text>
           <TouchableOpacity
             style={styles.closeButton}
@@ -160,6 +166,11 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     marginTop: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
   },
 });
 

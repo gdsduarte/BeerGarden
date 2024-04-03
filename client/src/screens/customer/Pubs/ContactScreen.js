@@ -5,7 +5,6 @@ const ContactScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Contact Screen</Text>
-      {/* Add more content and styling as needed, such as contact details, forms, etc. */}
     </View>
   );
 };

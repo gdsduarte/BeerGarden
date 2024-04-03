@@ -87,6 +87,8 @@ const BookingInputScreen = ({route}) => {
         0,
       ),
       members: [currentUserId, pubId],
+      createdBy: currentUserId,
+      pubId,
     };
 
     const updatingData = {

@@ -10,18 +10,19 @@ import {
   TextInput,
   Dimensions,
   TouchableOpacity,
+  Animated,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
-import {useNavigation} from '@react-navigation/native';
-import AuthContext from '../../../contexts/AuthContext';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import AuthContext from '@contexts/AuthContext';
 import {
   useEvents,
   useFeaturedPubs,
   useFeaturedBeers,
   useReservations,
   useRecentPubs,
-} from '../../../hooks';
+} from '@hooks';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -35,15 +36,48 @@ const HomeScreen = () => {
   const {recentPubs, loadingRecentPubs} = useRecentPubs();
   const [searchBarBackground, setSearchBarBackground] = useState('transparent');
   const [activeSlide, setActiveSlide] = useState(0);
+  const scrollY = new Animated.Value(0);
+
+  // Filter bookings by status
+  const relevantBookings = reservations.filter(
+    booking => booking.status !== 'completed',
+  );
+
+  // Interpolate background color
+  const backgroundColor = scrollY.interpolate({
+    inputRange: [0, 150, 300],
+    outputRange: ['transparent', 'rgba(0,0,0,0.5)', 'white'],
+    extrapolate: 'clamp',
+  });
 
   const handleScroll = event => {
     const yOffset = event.nativeEvent.contentOffset.y;
+
+    // Manually update the scrollY Animated.Value
+    scrollY.setValue(yOffset);
+
+    // Conditionally set the searchBarBackground state based on yOffset
     if (yOffset > 300) {
       setSearchBarBackground('white');
     } else {
       setSearchBarBackground('transparent');
     }
   };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const setStatusBarStyle = () => {
+        StatusBar.setBarStyle('light-content', true);
+      };
+
+      setStatusBarStyle();
+
+      return () => {
+        StatusBar.setBarStyle('dark-content', true);
+      };
+    }, []),
+  );
+
   const pagination = () => {
     return (
       <Pagination
@@ -72,32 +106,50 @@ const HomeScreen = () => {
     );
   };
 
-  const renderEvents = ({item, index}) => {
-    return (
+  const renderEvents = ({item}) => (
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('PubEventsDetails', {eventId: item.id})
+      }>
       <View style={styles.eventItem}>
         <Image source={{uri: item.eventImage}} style={styles.eventImage} />
         <Text style={styles.eventName}>{item.eventName}</Text>
         <Text style={styles.eventDescription}>{item.description}</Text>
       </View>
-    );
-  };
+    </TouchableOpacity>
+  );
 
   const renderFeaturedPub = ({item}) => (
-    <View style={styles.pubItem}>
-      <Image source={{uri: item.photoUrl}} style={styles.pubImage} />
-      <Text style={styles.pubName}>{item.displayName}</Text>
-    </View>
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('PubScreen', {pubId: item.id})
+      }>
+      <View style={styles.pubItem}>
+        <Image source={{uri: item.photoUrl}} style={styles.pubImage} />
+        <Text style={styles.pubName}>{item.displayName}</Text>
+      </View>
+    </TouchableOpacity>
   );
 
   const renderFeaturedBeer = ({item}) => (
-    <View style={styles.beerItem}>
-      <Image source={{uri: item.image}} style={styles.beerImage} />
-      <Text style={styles.beerName}>{item.name}</Text>
-    </View>
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('BeersDetailsScreen', {beerId: item.id})
+      }>
+      <View style={styles.beerItem}>
+        <Image source={{uri: item.image}} style={styles.beerImage} />
+        <Text style={styles.beerName}>{item.name}</Text>
+      </View>
+    </TouchableOpacity>
   );
 
-  const renderBooking = ({item}) => {
-    return (
+  const renderBooking = ({item}) => (
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('ReservationDetailsScreen', {
+          booking: item,
+        })
+      }>
       <View style={styles.bookingItem}>
         <Image source={{uri: item.pubAvatar}} style={styles.bookingThumbnail} />
         <View style={styles.bookingInfo}>
@@ -108,22 +160,36 @@ const HomeScreen = () => {
           <Text style={styles.bookingStatus}>{item.status}</Text>
         </View>
       </View>
-    );
-  };
+    </TouchableOpacity>
+  );
 
   const renderDiscover = ({item}) => (
-    <View style={styles.pubItem}>
-      <Image source={{uri: item.photoUrl}} style={styles.pubImage} />
-      <Text style={styles.pubName}>{item.displayName}</Text>
-    </View>
+    <TouchableOpacity
+      onPress={() => navigation.navigate('PubScreen', {pubId: item.id})}>
+      <View style={styles.pubItem}>
+        <Image source={{uri: item.photoUrl}} style={styles.pubImage} />
+        <Text style={styles.pubName}>{item.displayName}</Text>
+      </View>
+    </TouchableOpacity>
   );
 
   const renderPromotion = ({item}) => (
-    <View style={styles.promotionItem}>
-      <Image source={{uri: item.eventImage}} style={styles.promotionImage} />
-      <Text style={styles.promotionName}>{item.eventName}</Text>
-      <Text style={styles.promotionDescription}>{item.description}</Text>
-    </View>
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('PubScreen', {
+          pubId: item.pubId,
+          screen: 'Details',
+          params: {
+            screen: 'PubEvents',
+          },
+        })
+      }>
+      <View style={styles.promotionItem}>
+        <Image source={{uri: item.eventImage}} style={styles.promotionImage} />
+        <Text style={styles.promotionName}>{item.eventName}</Text>
+        <Text style={styles.promotionDescription}>{item.description}</Text>
+      </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -133,7 +199,7 @@ const HomeScreen = () => {
           searchBarBackground === 'white' ? 'dark-content' : 'light-content'
         }
       />
-      <View style={[styles.searchBar, {backgroundColor: searchBarBackground}]}>
+      <Animated.View style={[styles.searchBar, {backgroundColor}]}>
         <Icon
           name="search"
           size={20}
@@ -141,7 +207,7 @@ const HomeScreen = () => {
           style={styles.searchIcon}
         />
         <TextInput
-          placeholder="Search"
+          placeholder="Search for pubs, events, beers..."
           placeholderTextColor={
             searchBarBackground === 'white' ? 'black' : 'white'
           }
@@ -153,7 +219,7 @@ const HomeScreen = () => {
             },
           ]}
         />
-      </View>
+      </Animated.View>
       <ScrollView
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -181,7 +247,12 @@ const HomeScreen = () => {
           />
         )}
         {pagination()}
-        <Text style={styles.sectionTitle}>Featured Pubs</Text>
+        <View style={styles.bookingsHeader}>
+          <Text style={styles.sectionTitle}>Featured Pubs</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('PubsFinderScreen')}>
+            <Text style={styles.moreButton}>More</Text>
+          </TouchableOpacity>
+        </View>
         {loadingPubs ? (
           <Text>Loading...</Text>
         ) : (
@@ -196,7 +267,12 @@ const HomeScreen = () => {
           />
         )}
         {/* Featured Beers Section */}
-        <Text style={styles.sectionTitle}>Featured Beers</Text>
+        <View style={styles.bookingsHeader}>
+          <Text style={styles.sectionTitle}>Featured Beers</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('BeersScreen')}>
+            <Text style={styles.moreButton}>More</Text>
+          </TouchableOpacity>
+        </View>
         {loadingBeers ? (
           <Text>Loading featured beers...</Text>
         ) : (
@@ -219,18 +295,23 @@ const HomeScreen = () => {
         </View>
         {loading ? (
           <Text>Loading bookings...</Text>
-        ) : (
+        ) : relevantBookings.length > 0 ? (
           <FlatList
-            data={reservations.slice(0, 2)}
+            data={relevantBookings}
             renderItem={renderBooking}
             keyExtractor={item => item.id}
             style={styles.bookingsSection}
           />
+        ) : (
+          <View style={styles.emptyBookingContainer}>
+            <Text style={styles.emptyBookingText}>No upcoming bookings.</Text>
+          </View>
         )}
+
         {/* Discovery Section */}
         <View style={styles.bookingsHeader}>
           <Text style={styles.sectionTitle}>New Pubs</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('SearchScreen')}>
+          <TouchableOpacity onPress={() => navigation.navigate('PubsFinderScreen')}>
             <Text style={styles.moreButton}>More</Text>
           </TouchableOpacity>
         </View>
@@ -250,7 +331,7 @@ const HomeScreen = () => {
         {/* Promotions and Events */}
         <View style={styles.bookingsHeader}>
           <Text style={styles.sectionTitle}>Promotions and Events</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('')}>
+          <TouchableOpacity onPress={() => navigation.navigate('PubsFinderScreen')}>
             <Text style={styles.moreButton}>More</Text>
           </TouchableOpacity>
         </View>
@@ -280,6 +361,15 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  emptyBookingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  emptyBookingText: {
+    fontSize: 16,
+    color: '#666',
+  },
   featuredPubs: {
     paddingLeft: 16,
     paddingTop: 16,

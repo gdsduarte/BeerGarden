@@ -1,3 +1,7 @@
+/**
+ * ReviewsModal component is modal that displays a list of reviews, places, or friends.
+ */
+
 import React, {useState} from 'react';
 import {
   Modal,

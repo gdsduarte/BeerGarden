@@ -1,3 +1,14 @@
+/**
+ * GroupAddFriendModal is a modal component that allows users to add friends to a group chat.
+ * 
+ * It contains the following features:
+ * - The user can search for friends to add to the group, and the friends are displayed in a list.
+ * - The user can select friends to add to the group by clicking on the friend's name.
+ * - The user can add the selected friends to the group by clicking the "Add Friends" button.
+ * - The user can close the modal by clicking the "Close" button.
+ * - The modal is displayed when the user clicks on the "Add Friend" button in the GroupInfoModal.
+ */
+
 import React, {useState, useEffect} from 'react';
 import {
   Modal,
@@ -12,22 +23,33 @@ import {
 } from 'react-native';
 import {addMemberToGroup} from '@services/chat/chatService';
 
-const GroupAddFriendModal = ({visible, onClose, friends, groupData, onMemberAdded}) => {
+const GroupAddFriendModal = ({
+  visible,
+  onClose,
+  friends,
+  groupData,
+  onMemberAdded,
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFriends, setSelectedFriends] = useState([]);
-  
+
   // Filter out friends who are in the group
-  const availableFriends = friends.filter(friend => !groupData.members.includes(friend.id));
+  const availableFriends = friends.filter(
+    friend => !groupData.members.includes(friend.id),
+  );
 
   // State to hold the filtered list of friends based on search query and membership
   const [filteredFriends, setFilteredFriends] = useState(availableFriends);
 
+  // Filter out friends who are in the group
   useEffect(() => {
-    // Filter out friends who are in the group
-    const availableFriends = friends.filter(friend => !groupData.members.includes(friend.userId));
+    const availableFriends = friends.filter(
+      friend => !groupData.members.includes(friend.userId),
+    );
     setFilteredFriends(availableFriends);
-  }, [friends, groupData.members]);  
+  }, [friends, groupData.members]);
 
+  // Filter friends based on search query
   useEffect(() => {
     if (searchQuery.trim() !== '') {
       const filtered = availableFriends.filter(friend =>
@@ -39,6 +61,7 @@ const GroupAddFriendModal = ({visible, onClose, friends, groupData, onMemberAdde
     }
   }, [searchQuery, friends, availableFriends]);
 
+  // Toggle friend selection when the user taps on a friend
   const toggleFriendSelection = friend => {
     if (selectedFriends.includes(friend.id)) {
       setSelectedFriends(selectedFriends.filter(id => id !== friend.id));
@@ -47,13 +70,15 @@ const GroupAddFriendModal = ({visible, onClose, friends, groupData, onMemberAdde
     }
   };
 
+  // Add selected friends to the group
   const handleAddFriendsToGroup = () => {
     selectedFriends.forEach(friendId => {
       handleAddSelectedFriend(friendId);
     });
   };
 
-  const handleAddSelectedFriend = async (selectedFriendId) => {
+  // Add a friend to the database and update the UI
+  const handleAddSelectedFriend = async selectedFriendId => {
     try {
       await addMemberToGroup(groupData.id, selectedFriendId);
       Alert.alert('Friend added to group');
@@ -89,18 +114,23 @@ const GroupAddFriendModal = ({visible, onClose, friends, groupData, onMemberAdde
                 <TouchableOpacity
                   style={[
                     styles.friendItem,
-                    selectedFriends.includes(item.id) && styles.selectedFriendItem,
-                    isAdded && styles.friendAlreadyAdded
+                    selectedFriends.includes(item.id) &&
+                      styles.selectedFriendItem,
+                    isAdded && styles.friendAlreadyAdded,
                   ]}
                   onPress={() => !isAdded && toggleFriendSelection(item)}
-                  disabled={isAdded}
-                >
-                  <Text style={{ color: isAdded ? '#A0A0A0' : '#000' }}>{item.displayName}</Text>
-                  {isAdded && <Text style={styles.alreadyAddedText}>Already in Group</Text>}
+                  disabled={isAdded}>
+                  <Text style={{color: isAdded ? '#A0A0A0' : '#000'}}>
+                    {item.displayName}
+                  </Text>
+                  {isAdded && (
+                    <Text style={styles.alreadyAddedText}>
+                      Already in Group
+                    </Text>
+                  )}
                 </TouchableOpacity>
               );
             }}
-            
           />
           <Button title="Add Friends" onPress={handleAddFriendsToGroup} />
           <TouchableOpacity

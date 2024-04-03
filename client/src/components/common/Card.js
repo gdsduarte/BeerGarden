@@ -1,3 +1,7 @@
+/**
+ * This file defines the Card component which is used to display the image and name of the item.
+ */
+
 import React from 'react';
 import { TouchableOpacity, Image, Text, StyleSheet } from 'react-native';
 

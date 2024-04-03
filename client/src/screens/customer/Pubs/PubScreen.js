@@ -1,7 +1,7 @@
 import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
-import {Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {Text, TouchableOpacity, StyleSheet, View} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {usePubDetails} from '@hooks';
 import {PubNavigator} from '@navigation';
@@ -20,9 +20,21 @@ const PubScreen = ({route}) => {
   const {pub, loading, error} = usePubDetails(pubId);
   const navigation = useNavigation();
 
-  if (loading) return <Loading />;
-  if (error || !pub) return <Text>Pub not found.</Text>;
-
+  if (loading) {
+    return <Loading />;
+  }
+  
+  if (error || !pub) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>We're sorry, the requested pub could not be found.</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.goBackButton}>
+          <Text style={styles.goBackButtonText}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+  
   return (
     <Drawer.Navigator
       initialRouteName="Details"
@@ -82,6 +94,27 @@ const styles = StyleSheet.create({
   headerButton: {
     paddingHorizontal: 10,
   },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  errorText: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  goBackButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#007bff',
+    borderRadius: 5,
+  },
+  goBackButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+  },  
 });
 
 export default PubScreen;

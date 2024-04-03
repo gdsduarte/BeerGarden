@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import firestore from '@react-native-firebase/firestore';
 
 export const updateReservation = async (reservationId, newDetails) => {
@@ -44,5 +43,17 @@ export const fetchPubDetailsById = async id => {
     }
   } catch (error) {
     console.error('Failed to fetch pub details:', error);
+  }
+};
+
+export const sendNotificationToUser = async (notificationDetails) => {
+  try {
+    await firestore().collection('notifications').add({
+      ...notificationDetails,
+      createdAt: firestore.FieldValue.serverTimestamp(),
+    });
+    console.log('Notification sent successfully');
+  } catch (error) {
+    console.error('Error sending notification:', error);
   }
 };

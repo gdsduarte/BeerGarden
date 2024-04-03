@@ -23,9 +23,10 @@ export {default as ReservationDetailsScreen} from './customer/Bookings/Reservati
 export {default as PubScreen} from './customer/Pubs/PubScreen';
 export {default as PubDetailsScreen} from './customer/Pubs/PubDetailsScreen';
 export {default as PubEventsScreen} from './customer/Pubs/Events/PubEventsScreen';
-export {default as PubEventDetailsScreen} from './customer/Pubs/Events/PubEventDetailsScreen';
+export {default as PubEventsDetailsScreen} from './customer/Pubs/Events/PubEventsDetailsScreen';
 export {default as PubReviewsScreen} from './customer/Pubs/Reviews/PubReviewsScreen';
 export {default as ContactScreen} from './customer/Pubs/ContactScreen';
+export {default as PubsFinderScreen} from './customer/Pubs/PubsFinderScreen';
 
 // Food Routes
 export {default as FoodMenuScreen} from './customer/Pubs/Foods/FoodMenuScreen';
@@ -37,12 +38,16 @@ export {default as DrinkMenuScreen} from './customer/Pubs/Drinks/DrinkMenuScreen
 export {default as DrinkDetailScreen} from './customer/Pubs/Drinks/DrinkDetailScreen';
 export {default as DrinkReviewsScreen} from './customer/Pubs/Drinks/DrinkReviewsScreen';
 
+// Beers Routes
+export {default as BeersScreen} from './customer/Beers/BeersScreen';
+export {default as BeersDetailsScreen} from './customer/Beers/BeersDetailsScreen';
+
 // Booking Routes
 export {default as BookingScreen} from './customer/Pubs/Booking/BookingScreen';
 export {default as BookingInputScreen} from './customer/Pubs/Booking/BookingInputScreen';
 
 // Business Routes
 export {default as DashboardScreen} from './business/DashboardScreen';
-
-// Business Reservations Routes
-export {default as BookingsScreen} from './business/BookingsScreen';
+export {default as PubChatScreen} from './business/PubChatScreen';
+export {default as PubReservationScreen} from './business/PubReservationScreen';
+export {default as PubReservationDetailsScreen} from './business/PubReservationDetailsScreen';

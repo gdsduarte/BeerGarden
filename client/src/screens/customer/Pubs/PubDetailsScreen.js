@@ -10,10 +10,9 @@ const PubDetailsScreen = ({pubId}) => {
 
   if (loading) return <Loading />;
   if (error || !pubId) {
-    // Handle the lack of a valid pubId, e.g., show an error or navigate back
     console.error('Invalid pubId provided');
     navigation.goBack();
-    return null; // Prevent further rendering
+    return null;
   }
 
   return (
