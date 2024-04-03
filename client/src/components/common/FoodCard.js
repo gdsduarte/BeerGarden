@@ -1,3 +1,7 @@
+/**
+ * FoodCard is a reusable component that displays a food item with its image, name, and price.
+ */
+
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 

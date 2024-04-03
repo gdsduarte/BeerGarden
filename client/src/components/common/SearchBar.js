@@ -1,3 +1,7 @@
+/**
+ * The SearchBar component is a reusable component that displays a search input field and a search button.
+ */
+
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
 

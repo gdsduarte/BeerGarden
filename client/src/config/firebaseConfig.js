@@ -1,4 +1,10 @@
-/* eslint-disable prettier/prettier */
+/**
+ * Firebase configuration is stored in a separate file to keep the code clean and organized.
+ * This file is used to initialize Firebase in the application.
+ * It exports the Firebase instance to be used in other parts of the application.
+ * The configuration values are stored in environment variables for security.
+ */
+
 import firebase from '@react-native-firebase/app';
 
 // Firebase configuration

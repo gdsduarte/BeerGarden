@@ -1,4 +1,13 @@
-/* eslint-disable prettier/prettier */
+/**
+ * Note: This file is NOT used in the project. It is for future implementations!!
+ * 
+ * Navigation Configuration is a central place to define all the screens and their configurations.
+ * The configuration includes the screen component and its options.
+ * The configuration can be used to generate the navigation stack for the application.
+ * The configuration can be used to navigate between screens and pass parameters.
+ * The configuration can be used to define the screen navigation guards and permissions.
+ */
+
 import {
   HomeScreen,
   LoginScreen,
@@ -18,18 +27,17 @@ import {
   DrinkMenuScreen,
   FoodMenuScreen,
   PubScreen,
-} from '../screens';
+} from '@screens';
 
 
-// Define screen options (if any) for customization
-// Example: const defaultOptions = { headerShown: false };
+const defaultOptions = { headerShown: false };
 
 const screensConfig = {
   // Home Navigator Screens
   Home: {
     component: HomeScreen,
     options: {
-      /* HomeScreen options */
+      defaultOptions: defaultOptions
     },
   },
 
@@ -153,26 +161,3 @@ const screensConfig = {
 };
 
 export default screensConfig;
-
-
-/* import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-import { screensConfig } from './navigationConfig'; // Adjust the path as necessary
-
-const Stack = createStackNavigator();
-
-const BookingNavigator = () => {
-  return (
-    <Stack.Navigator>
-      {Object.entries(screensConfig)
-        // Assuming each key in screensConfig is exactly matching your screen names used in the navigator
-        .filter(([key]) => ['ReservationScreen', 'ReservationDetailsScreen', 'SpecificChatScreen'].includes(key))
-        .map(([name, { component, options }]) => (
-          <Stack.Screen name={name} component={component} options={options} key={name} />
-        ))}
-    </Stack.Navigator>
-  );
-};
-
-export default BookingNavigator; */
-

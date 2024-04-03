@@ -1,3 +1,8 @@
+/**
+ * InputValidation component is a reusable component that validates user input based on the type of input.
+ * It displays an error message if the input is invalid.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 

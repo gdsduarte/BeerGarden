@@ -5,10 +5,10 @@ module.exports = {
     '@react-native',
     'plugin:react/recommended',
   ],
-  plugins: ['react'],
+  plugins: ['react', 'react-native', 'jsx'],
   parserOptions: {
     ecmaFeatures: {
-      jsx: true, // Enable JSX
+      jsx: true,
     },
     requireConfigFile: false,
   },
