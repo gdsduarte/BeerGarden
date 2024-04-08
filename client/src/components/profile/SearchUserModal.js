@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
+  Image,
 } from 'react-native';
 import {useUsers} from '@hooks';
 
@@ -54,7 +55,11 @@ const SearchUserModal = ({
                   setSearchModalVisible(false);
                   navigateToUserProfile(item.id);
                 }}>
-                <Text style={styles.userName}>{item.username}</Text>
+                <Image style={styles.userImage} source={{uri: item.photoUrl}} />
+                <View>
+                  <Text style={styles.userDisplayName}>{item.displayName}</Text>
+                  <Text style={styles.userName}>@{item.username}</Text>
+                </View>
               </TouchableOpacity>
             )}
           />
@@ -94,14 +99,6 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
   },
-  userItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  userName: {
-    fontSize: 16,
-  },
   closeButton: {
     position: 'absolute',
     top: 20,
@@ -110,6 +107,25 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#355E3B',
     fontWeight: 'bold',
+  },
+  userItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  userImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  userDisplayName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  userName: {
+    fontSize: 14,
+    color: '#666',
   },
 });
 

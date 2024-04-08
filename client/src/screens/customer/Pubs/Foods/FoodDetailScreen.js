@@ -1,7 +1,13 @@
+/**
+ * This file is a screen that displays the details of a food.
+ * It uses the item prop to display the details of the food item.
+ */
+
 import React, {useEffect} from 'react';
 import {View, Text, Image, StyleSheet, ScrollView} from 'react-native';
 
 const FoodDetailScreen = ({item, navigation}) => {
+
   useEffect(() => {
     if (item && navigation) {
       navigation.setOptions({headerTitle: item.name});

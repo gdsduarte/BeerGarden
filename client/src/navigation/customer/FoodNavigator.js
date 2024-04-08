@@ -1,3 +1,7 @@
+/**
+ * This file contains the navigation for the food details and reviews screens.
+ */
+
 import React from 'react';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import {FoodDetailScreen, FoodReviewsScreen} from '@screens';

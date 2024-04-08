@@ -1,3 +1,10 @@
+/**
+ * This file defines the DrinkMenuScreen component which displays the drink menu for a pub.
+ * It uses the useDrinkMenu hook to fetch the drink items for the pub based on the pubId.
+ * The component renders the drink items based on the selected category and allows the user to view the details of each item.
+ * The component also allows the owner to add new categories and items to the menu.
+ */
+
 import React, {useState, useMemo, useEffect} from 'react';
 import {
   View,
@@ -14,16 +21,14 @@ import {useNavigation} from '@react-navigation/native';
 import Loading from '@components/common/Loading';
 import {useAuth} from '@contexts/AuthContext';
 
+// CategoryTabs component to display the categories as tabs
 const CategoryTabs = ({categories, onSelectCategory, currentCategory}) => {
   return (
-    <FlatList 
+    <FlatList
       data={categories}
       renderItem={({item}) => (
         <TouchableOpacity
-          style={[
-            styles.tab,
-            item === currentCategory && styles.activeTab,
-          ]}
+          style={[styles.tab, item === currentCategory && styles.activeTab]}
           onPress={() => onSelectCategory(item)}>
           <Text style={styles.tabText}>{item}</Text>
         </TouchableOpacity>
@@ -69,8 +74,11 @@ const DrinkMenuScreen = ({pubId, image}) => {
       'Limited Time',
       'New Arrivals',
     ];
+
     const categorySet = new Set(drinkItems.map(item => item.category));
     const unorderedCategories = Array.from(categorySet);
+
+    // Sort the categories based on the predefined order
     const orderedCategories = predefinedOrder
       .filter(cat => categorySet.has(cat))
       .concat(
@@ -81,8 +89,8 @@ const DrinkMenuScreen = ({pubId, image}) => {
     return orderedCategories;
   }, [drinkItems]);
 
-   // State for the current category
-   const [currentCategory, setCurrentCategory] = useState('');
+  // State for the current category
+  const [currentCategory, setCurrentCategory] = useState('');
 
   // Update the currentCategory based on the categories array
   useEffect(() => {
@@ -100,6 +108,7 @@ const DrinkMenuScreen = ({pubId, image}) => {
   if (error) return <Text>Menu not found.</Text>;
   if (loading) return <Loading />;
 
+  // Handle the press event for each drink item
   const handlePress = item => {
     navigation.navigate('DrinkNavigator', {
       screen: 'DrinkDetails',
@@ -107,6 +116,7 @@ const DrinkMenuScreen = ({pubId, image}) => {
     });
   };
 
+  // Render each drink item using the card component
   const renderItem = ({item}) => (
     <FoodCard item={item} onPress={() => handlePress(item)} />
   );
@@ -123,7 +133,7 @@ const DrinkMenuScreen = ({pubId, image}) => {
         <Button
           title="Add Category"
           onPress={() => {
-            /* Implement add category logic */
+            /* TODO: Implement add category logic */
           }}
         />
       )}
@@ -137,7 +147,7 @@ const DrinkMenuScreen = ({pubId, image}) => {
         <Button
           title="Add Item"
           onPress={() => {
-            /* Implement add item logic */
+            /* TODO: Implement add item logic */
           }}
         />
       )}

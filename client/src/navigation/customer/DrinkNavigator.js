@@ -1,3 +1,7 @@
+/**
+ * This component is used to navigate between the drink details and reviews screens.
+ */
+
 import React from 'react';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import {DrinkDetailScreen, DrinkReviewsScreen} from '@screens';

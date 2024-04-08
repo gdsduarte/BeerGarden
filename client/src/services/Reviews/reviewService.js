@@ -1,3 +1,7 @@
+/**
+ * ReviewService to manager reviews in the database
+ */
+
 import firestore from '@react-native-firebase/firestore';
 
 const db = firestore();

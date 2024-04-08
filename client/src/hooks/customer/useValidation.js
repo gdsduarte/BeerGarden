@@ -1,6 +1,9 @@
-/* eslint-disable prettier/prettier */
-
-/* File not in use in the project*/
+/**
+ * Note: This file is NOT used in the project. It is for feature implementations!!
+ * 
+ * This hook is used to validate input fields in forms.
+ * It takes the initial value of the input field and a validation function as arguments.
+ */
 
 import { useState, useEffect } from 'react';
 

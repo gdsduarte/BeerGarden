@@ -1,9 +1,16 @@
+/**
+ * Note: This file is NOT used in the project. It is for feature implementations!!
+ * 
+ * This screen is used to register a new owner account.
+ * The owner account is used to manage a business account.
+ * The owner account can add, update, and delete business information.
+ */
+
 import React, {useState, useContext} from 'react';
-import {View, Text, TouchableOpacity} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {AuthContext} from '../../../../contexts/AuthContext';
-import styles from '../../../../styles/signUpScreenStyles';
-import InputValidation from '../../../../components/common/InputValidation';
+import AuthContext from '@contexts/AuthContext';
+import InputValidation from '@components/common/InputValidation';
 
 const OwnerSignUpScreen = () => {
   // Input states
@@ -122,5 +129,42 @@ const OwnerSignUpScreen = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f8f1e7',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  input: {
+    minWidth: '80%',
+    height: 50,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  button: {
+    width: '80%',
+    height: 50,
+    backgroundColor: '#007AFF',
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
 
 export default OwnerSignUpScreen;

@@ -1,3 +1,8 @@
+/**
+ * This hook fetches all reviews for a given pub from the database.
+ * It takes a pubId as an argument and returns the reviews for that pub.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

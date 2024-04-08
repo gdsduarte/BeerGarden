@@ -1,3 +1,7 @@
+/**
+ * This file contains the navigation stack for the login and signup screens.
+ */
+
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {
@@ -5,7 +9,7 @@ import {
   SignupSelectionScreen,
   UserSignUpScreen,
   OwnerSignUpScreen,
-} from '../../screens';
+} from '@screens';
 import BottomTabNavigator from './BottomTabNavigator';
 
 const Stack = createStackNavigator();
@@ -19,7 +23,7 @@ const LoginNavigator = ({isUserLoggedIn}) => (
     />
     <Stack.Screen
       name="SignUp"
-      component={SignupSelectionScreen}
+      component={UserSignUpScreen}
       options={{headerShown: false}}
     />
     <Stack.Screen

@@ -1,3 +1,8 @@
+/**
+ * This file defines the ReservationScreen component which is used to display the list of bookings.
+ * The ReservationScreen component uses the useReservations hook to fetch the reservations from Firestore.
+ */
+
 import React, {useContext} from 'react';
 import {
   View,
@@ -28,6 +33,7 @@ const ReservationScreen = () => {
   );
 };
 
+// This component is used to display the list of bookings based on the isBooked prop.
 const BookingsTab = ({navigation, isBooked}) => {
   const {currentUserId} = useContext(AuthContext);
   const [reservations, loading] = useReservations(currentUserId);
@@ -36,7 +42,7 @@ const BookingsTab = ({navigation, isBooked}) => {
     return <Loading />;
   }
 
-  // Filtering based on 'group' field in Firestore
+  // Filter the reservations based on the isBooked prop.
   const bookings = reservations.filter(
     reservation => reservation.isBooked === isBooked,
   );
@@ -44,6 +50,7 @@ const BookingsTab = ({navigation, isBooked}) => {
   return <BookingsList bookings={bookings} navigation={navigation} />;
 };
 
+// This component is used to display the list of bookings.
 const BookingsList = ({bookings, navigation}) => (
   <FlatList
     data={bookings}
@@ -55,11 +62,10 @@ const BookingsList = ({bookings, navigation}) => (
   />
 );
 
+// This component is used to display the booking details.
 const BookingItem = ({booking, navigation}) => {
   const formattedDate = format(booking.date, 'dd/MM/yyyy');
   const formattedTime = format(booking.date, 'HH:mm');
-
-  console.log('Booking:', booking);
 
   const onBookingPress = () => {
     navigation.navigate('ReservationDetailsScreen', {booking});
@@ -69,10 +75,7 @@ const BookingItem = ({booking, navigation}) => {
     <View style={styles.container}>
       <TouchableOpacity style={styles.bookingItem} onPress={onBookingPress}>
         <View style={styles.bookingHeader}>
-          <Image
-            source={{uri: booking.pubAvatar}}
-            style={styles.pubAvatar}
-          />
+          <Image source={{uri: booking.pubAvatar}} style={styles.pubAvatar} />
           <Text style={styles.pubName}>{booking.pubName}</Text>
           <Text style={styles.pubName}>
             {formattedDate} {formattedTime}

@@ -1,4 +1,7 @@
-/* eslint-disable prettier/prettier */
+/**
+ * This service is used to handle authentication-related operations.
+ */
+
 import auth from '@react-native-firebase/auth';
 
 const authService = {

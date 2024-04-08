@@ -1,4 +1,8 @@
-/* eslint-disable prettier/prettier */
+/**
+ * This hook is used to fetch all the pubs from the firestore database.
+ * It returns an array of pubs.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

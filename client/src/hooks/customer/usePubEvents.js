@@ -1,3 +1,8 @@
+/**
+ * This hook is used to fetch all events that are associated with a particular pub.
+ * It takes the pubId as an argument and returns the events.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

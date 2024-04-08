@@ -1,3 +1,10 @@
+/**
+ * This hook fetches pubs from Firestore and filters them by distance from the user's location.
+ * It calculates the distance between the user's location and each pub using the Haversine formula.
+ * The pubs within the specified maximum distance are returned.
+ * The pubs are sorted by distance in ascending order.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

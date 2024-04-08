@@ -1,4 +1,7 @@
-/* eslint-disable prettier/prettier */
+/**
+ * This hook is used to fetch the beers from the database.
+ */
+
 import {useEffect, useState} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

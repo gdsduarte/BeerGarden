@@ -1,3 +1,11 @@
+/**
+ * Booking is the screen for the bookings screen
+ * It displays a calendar and a list of available hours for the selected date and time
+ * It also allows the user to navigate to the BookingInputScreen to make a reservation 
+ or to the ReservationDetailsScreen to view or update an existing reservation.
+ * It uses the useReservationUtils to calculate the availability and update the marked dates.
+ */
+
 import React, {useState, useEffect, useContext} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
 import {Calendar} from 'react-native-calendars';
@@ -72,9 +80,6 @@ const BookingScreen = ({route, pubId: propPubId}) => {
       remainingTables,
       pubAvatar: pub.photoUrl,
     });
-
-    console.log('Remaining Seats:', remainingSeats);
-    console.log('Navigating with remainingTables:', remainingTables);
   };
 
   const onDayPress = day => {

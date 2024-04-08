@@ -1,7 +1,13 @@
-/* eslint-disable prettier/prettier */
+/**
+ * This file is used to export all the screens from the folder into one file.
+ * This way, we can import all the screens from the folder using a single import statement.
+ */
+
 export {default as LoginScreen} from './customer/Login/LoginScreen';
 export {default as HomeScreen} from './customer/Home/HomeScreen';
+
 export {default as ProfileScreen} from './customer/Profile/ProfileScreen';
+export {default as UsersProfileScreen} from './customer/Profile/UsersProfileScreen';
 
 // Search Routes
 export {default as SearchScreen} from './customer/Search/SearchScreen';

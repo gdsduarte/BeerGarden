@@ -1,4 +1,7 @@
-/* eslint-disable prettier/prettier */
+/**
+ * This hook fetches all menu items from the database based on the search term.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
@@ -26,6 +29,7 @@ const useAllMenuItems = searchTerm => {
         .orderBy('category', 'asc')
         .get();
 
+      // Combine the results of both queries
       Promise.all([fetchFood, fetchDrinks])
         .then(responses => {
           const combinedItems = responses.flatMap(response =>

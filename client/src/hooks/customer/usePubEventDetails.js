@@ -1,11 +1,14 @@
+/**
+ * This hook is used to fetch the event details of an event.
+ * It takes an eventId as an argument and returns the event details.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
 const usePubEventDetails = eventId => {
   const [eventDetails, setEventDetails] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  console.log('Event Details: ', eventDetails);
 
   useEffect(() => {
     const unsubscribe = firestore()

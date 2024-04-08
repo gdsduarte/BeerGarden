@@ -1,4 +1,7 @@
-/* eslint-disable prettier/prettier */
+/**
+ * This file is used to export all the navigators from the folder into one file.
+ * This way, we can import all the navigators from the folder using a single import statement.
+ */
 
 // Customer hooks for fetching data from Firestore
 export {default as BookingNavigator} from './customer/BookingNavigator';

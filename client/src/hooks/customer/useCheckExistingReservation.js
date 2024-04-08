@@ -1,4 +1,9 @@
-/* eslint-disable prettier/prettier */
+/**
+ * This hook is used to check if a reservation already exists for a given pub, date, time slot and user.
+ * It is used to prevent duplicate reservations for the same user.
+ * If a reservation exists, the existing reservation details are returned.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
@@ -8,6 +13,7 @@ const useCheckExistingReservation = (pubId, date, timeSlot, userId) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Check if pubId, date, timeSlot, and userId are valid
     if (!pubId || !date || !timeSlot || !userId) {
       setExistingReservation(null);
       setError('Missing parameters for checking existing reservation');

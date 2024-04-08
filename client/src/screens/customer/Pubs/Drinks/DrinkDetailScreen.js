@@ -1,7 +1,13 @@
+/**
+ * This file is a screen that displays the details of a drink.
+ * It uses the item prop to display the details of the drink item.
+ */
+
 import React, {useEffect} from 'react';
 import {View, Text, Image, StyleSheet, ScrollView} from 'react-native';
 
 const DrinkDetailScreen = ({item, navigation}) => {
+
   useEffect(() => {
     if (item && navigation) {
       navigation.setOptions({headerTitle: item.name});

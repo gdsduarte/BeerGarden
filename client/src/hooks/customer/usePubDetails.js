@@ -1,3 +1,8 @@
+/**
+ * This hook is used to fetch the details of a pub from the database.
+ * It takes a pubId as an argument and returns the pub details.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

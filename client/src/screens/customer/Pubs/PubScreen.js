@@ -1,3 +1,8 @@
+/**
+ * A screen that displays the details of a pub, and provides navigation to other screens related to the pub.
+ * The drawer navigator is used to navigate between the different screens.
+ */
+
 import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
@@ -24,6 +29,7 @@ const PubScreen = ({route}) => {
     return <Loading />;
   }
   
+  // If the pub cannot be found, display an error message
   if (error || !pub) {
     return (
       <View style={styles.errorContainer}>

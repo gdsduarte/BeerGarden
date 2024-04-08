@@ -1,3 +1,10 @@
+/**
+ * This file defines the BookingInputScreen component which is used to render the reservation input form for the customer.
+ * The component receives the pubId, selectedDate, selectedHour, pubName, pubAvatar, remainingSeats, and remainingTables as props.
+ * It also receives the updating and bookingDetails props if the user is updating an existing reservation.
+ * The component renders an input form for the user to enter their reservation details and submit the reservation.
+ */
+
 import React, {useState, useContext, useEffect} from 'react';
 import {
   View,
@@ -31,8 +38,6 @@ const BookingInputScreen = ({route}) => {
   const [partySize, setPartySize] = useState('');
   const [specialRequest, setSpecialRequest] = useState('');
 
-  console.log('Route Params:', bookingDetails);
-
   useEffect(() => {
     if (updating && bookingDetails) {
       setPartySize(bookingDetails.partySize.toString());
@@ -46,7 +51,7 @@ const BookingInputScreen = ({route}) => {
     // Calculate effective remaining seats by considering the current reservation's size if updating
     let effectiveRemainingSeats = remainingSeats;
     if (updating && bookingDetails) {
-      effectiveRemainingSeats += bookingDetails.partySize; // Add back the current reservation's party size
+      effectiveRemainingSeats += bookingDetails.partySize;
     }
 
     const tableAllocation = calculateTableAllocation(size, remainingTables);
@@ -99,9 +104,6 @@ const BookingInputScreen = ({route}) => {
         0,
       ),
     };
-
-    console.log('Table Allocation:', tableAllocation);
-    console.log('Reservation Data:', reservationData);
 
     try {
       // If updating, update the existing document

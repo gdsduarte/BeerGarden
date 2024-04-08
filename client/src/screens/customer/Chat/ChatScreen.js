@@ -1,3 +1,10 @@
+/**
+ * ChatScreen is the screen for the chat feature. It contains the top tab navigation for the garden, friends, and groups chats.
+ * The garden chat displays the nearby pubs chat, the friends chat displays the user's friends chat, and the groups chat displays the user's groups chat.
+ * The garden chat displays the pubs chat by calculating the distance between the user's location and the pubs' locations. The pubs are sorted based on the distance and the chat only appears if the distance is less than 100 meters by default.
+ * The screen also contains the FriendSelectionModal and CreateGroupModal components for selecting friends and creating groups.
+ */
+
 import React, {useContext, useState, useEffect} from 'react';
 import {
   Text,
@@ -34,6 +41,7 @@ const ChatScreen = ({navigation, item}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [groupModalVisible, setGroupModalVisible] = useState(false);
 
+  // Set the header right button based on the active tab
   useEffect(() => {
     let headerRight = null;
 
@@ -73,7 +81,7 @@ const ChatScreen = ({navigation, item}) => {
   if (loading) return <Loading />;
 
   return (
-    <>
+    <View style={styles.container}>
       <Tab.Navigator>
         <Tab.Screen
           name="Garden"
@@ -104,10 +112,11 @@ const ChatScreen = ({navigation, item}) => {
         userId={userId}
         item={item}
       />
-    </>
+    </View>
   );
 };
 
+// Function to calculate the distance between two coordinates
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Radius of the Earth in kilometers
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -123,11 +132,10 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return distance;
 }
 
+// Function to display the pub chat item
 const PubChatItem = ({item, navigation, userLocation}) => {
   const [pubDetails, setPubDetails] = useState(null);
   const {currentUserId} = useContext(AuthContext);
-
-  console.log('PubChatItem:', item);
 
   useEffect(() => {
     fetchPubDetailsById(item.pubId).then(setPubDetails);
@@ -173,24 +181,30 @@ const PubChatItem = ({item, navigation, userLocation}) => {
   );
 };
 
+// Function to display the friend chat item
 const FriendChatItem = ({item, navigation, currentUserId}) => {
   const [userDetails, setUserDetails] = useState(null);
   const [pubDetails, setPubDetails] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Fetch user details and pub details for the chat item
   useEffect(() => {
     setLoading(true);
+    // Find the target user ID for the chat
     const targetUserId = item.members.find(member => member !== currentUserId);
+    // Fetch user details for the chat item
     fetchUserDetailsById(targetUserId).then(details => {
       setUserDetails(details);
       setLoading(false);
     });
+    // Fetch pub details for the chat item
     fetchPubDetailsById(targetUserId).then(details => {
       setPubDetails(details);
       setLoading(false);
     });
   }, [item, currentUserId]);
 
+  // Function to handle the press event on the chat item
   const handlePress = () => {
     const targetUserId = item.members.find(member => member !== currentUserId);
     if (loading) return;
@@ -216,13 +230,16 @@ const FriendChatItem = ({item, navigation, currentUserId}) => {
           <Text style={styles.chatTitle}>
             {pubDetails ? pubDetails.displayName : userDetails?.displayName}
           </Text>
-          <Text style={styles.chatSnippet}>{item.lastMessage?.messageText}</Text>
+          <Text style={styles.chatSnippet}>
+            {item.lastMessage?.messageText}
+          </Text>
         </View>
       </>
     </TouchableOpacity>
   );
 };
 
+// Function to display the group chat item
 const GroupChatItem = ({item, navigation, currentUserId}) => {
   return (
     <TouchableOpacity
@@ -245,6 +262,7 @@ const GroupChatItem = ({item, navigation, currentUserId}) => {
   );
 };
 
+// Function to display the chat list
 const ChatList = ({groups, navigation, fetchAdditionalDetails}) => {
   const {currentUserId} = useContext(AuthContext);
 
@@ -267,10 +285,12 @@ const ChatList = ({groups, navigation, fetchAdditionalDetails}) => {
       data={groups}
       renderItem={renderItem}
       keyExtractor={item => item.id}
+      style={styles.container}
     />
   );
 };
 
+// Function to display the garden chats
 const GardenChat = ({navigation}) => {
   const {location} = useUserLocation();
   const {pubs, loading} = useNearbyPubs(
@@ -310,10 +330,12 @@ const GardenChat = ({navigation}) => {
         />
       )}
       keyExtractor={item => item.id}
+      style={styles.container}
     />
   );
 };
 
+// Function to display the friends chats
 const FriendsChat = ({navigation}) => {
   const {currentUserId} = useContext(AuthContext);
   const friendsChats = useGroups(currentUserId, 'private');
@@ -327,6 +349,7 @@ const FriendsChat = ({navigation}) => {
   );
 };
 
+// Function to display the groups chats
 const GroupsChat = ({navigation}) => {
   const {currentUserId} = useContext(AuthContext);
   const groupsChats = useGroups(currentUserId, 'group');

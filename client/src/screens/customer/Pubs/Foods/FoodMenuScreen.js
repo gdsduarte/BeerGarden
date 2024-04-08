@@ -1,3 +1,10 @@
+/**
+ * A screen component for displaying the food menu of a pub.
+ * It shows a list of food items grouped by categories.
+ * Users can click on a food item to view its details.
+ * Owners can add new categories and items to the menu.
+ */
+
 import React, {useState, useMemo, useEffect} from 'react';
 import {
   View,
@@ -14,16 +21,14 @@ import {useNavigation} from '@react-navigation/native';
 import Loading from '@components/common/Loading';
 import {useAuth} from '@contexts/AuthContext';
 
+// Component for the category tabs
 const CategoryTabs = ({categories, onSelectCategory, currentCategory}) => {
   return (
-    <FlatList 
+    <FlatList
       data={categories}
       renderItem={({item}) => (
         <TouchableOpacity
-          style={[
-            styles.tab,
-            item === currentCategory && styles.activeTab,
-          ]}
+          style={[styles.tab, item === currentCategory && styles.activeTab]}
           onPress={() => onSelectCategory(item)}>
           <Text style={styles.tabText}>{item}</Text>
         </TouchableOpacity>
@@ -62,6 +67,8 @@ const FoodMenuScreen = ({pubId, image}) => {
     ];
     const categorySet = new Set(foodItems.map(item => item.category));
     const unorderedCategories = Array.from(categorySet);
+
+    // Sort the categories based on the predefined order
     const orderedCategories = predefinedOrder
       .filter(cat => categorySet.has(cat))
       .concat(
@@ -72,8 +79,8 @@ const FoodMenuScreen = ({pubId, image}) => {
     return orderedCategories;
   }, [foodItems]);
 
-   // State for the current category
-   const [currentCategory, setCurrentCategory] = useState('');
+  // State for the current category
+  const [currentCategory, setCurrentCategory] = useState('');
 
   // Update the currentCategory based on the categories array
   useEffect(() => {
@@ -91,6 +98,7 @@ const FoodMenuScreen = ({pubId, image}) => {
   if (error) return <Text>Menu not found.</Text>;
   if (loading) return <Loading />;
 
+  // Handle the press event for a food item
   const handlePress = item => {
     navigation.navigate('FoodNavigator', {
       screen: 'FoodDetails',
@@ -99,6 +107,7 @@ const FoodMenuScreen = ({pubId, image}) => {
     console.log('Pressed item:', item);
   };
 
+  // Render each food item as a FoodCard component
   const renderItem = ({item}) => (
     <FoodCard item={item} onPress={() => handlePress(item)} />
   );
@@ -115,7 +124,7 @@ const FoodMenuScreen = ({pubId, image}) => {
         <Button
           title="Add Category"
           onPress={() => {
-            /* Implement add category logic */
+            /* TODO: Implement add category logic */
           }}
         />
       )}
@@ -129,7 +138,7 @@ const FoodMenuScreen = ({pubId, image}) => {
         <Button
           title="Add Item"
           onPress={() => {
-            /* Implement add item logic */
+            /* TODO: Implement add item logic */
           }}
         />
       )}

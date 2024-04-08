@@ -1,4 +1,7 @@
-/* eslint-disable prettier/prettier */
+/**
+ * This hook is used to fetch all the premium pubs from the database to be displayed on the Home screen.
+ */
+
 import {useEffect, useState} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

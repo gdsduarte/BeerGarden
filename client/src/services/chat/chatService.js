@@ -1,3 +1,7 @@
+/**
+ * Chat Service to manage chat and messages
+ */
+
 import firestore from '@react-native-firebase/firestore';
 
 const db = firestore();
@@ -54,7 +58,7 @@ const manageChatAndSendMessage = async (
     );
   }
 
-  return chatId; // Return chatId for any further operations
+  return chatId;
 };
 
 // Sends a message to a private chat, creating the chat if it does not exist
@@ -75,12 +79,12 @@ const findChat = async (currentUserId, targetUserID, groupData) => {
       console.log('Existing private chat found:', existingChat.id);
       chatId = existingChat.id;
     } else {
-      return null; // No chat found
+      return null; 
     }
     return chatId;
   } catch (error) {
     handleError(error, 'Error finding private chat');
-    return null; // Return null in case of error
+    return null;
   }
 };
 
@@ -182,7 +186,6 @@ const deleteMessage = async (chatId, messageId) => {
       }
     }
 
-    // Commit the batch
     await batch.commit();
 
     console.log('Message deleted successfully');

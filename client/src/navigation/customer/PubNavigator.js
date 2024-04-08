@@ -1,3 +1,7 @@
+/**
+ * This component is used to navigate between the pub details, reviews, and events screens.
+ */
+
 import React from 'react';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import {PubDetailsScreen, PubReviewsScreen, PubEventsScreen} from '@screens';

@@ -1,3 +1,12 @@
+/**
+ * SearchScreen is a screen that displays a map with markers for nearby pubs and a carousel of nearby pubs.
+ * The user can search for locations, view nearby pubs, and navigate to a pub's screen.
+ * The user can view the pub's screen by tapping on a marker or carousel item.
+ * The user can swipe up on the carousel to view a modal with more information about the pub.
+ * The user can tap on the "My Location" button to navigate to their current location.
+ * The user can tap on the "Search for locations..." input to search for locations.
+ */
+
 import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
@@ -6,8 +15,6 @@ import {
   TouchableOpacity,
   Image,
   Text,
-  Modal,
-  FlatList,
 } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
@@ -21,6 +28,9 @@ import {
   PanGestureHandler,
 } from 'react-native-gesture-handler';
 import SearchModal from '@components/search/SearchModal';
+import Config from 'react-native-config';
+
+const apiKey = Config.MAPS_API_KEY;
 
 const SearchScreen = ({navigation}) => {
   const userLocation = useUserLocation();
@@ -39,6 +49,7 @@ const SearchScreen = ({navigation}) => {
   const autocompleteRef = useRef(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  // Sort the pubs by distance from the user's location
   useEffect(() => {
     if (userLocation.location && pubs.length) {
       const sorted = sortPubsByDistance(pubs, userLocation.location);
@@ -47,6 +58,7 @@ const SearchScreen = ({navigation}) => {
     }
   }, [pubs, userLocation.location]);
 
+  // Check if the user is within 100m of a pub and clear the search query
   useEffect(() => {
     if (userLocation.location && currentRegion) {
       const distance = getDistance(
@@ -63,6 +75,7 @@ const SearchScreen = ({navigation}) => {
     }
   }, [currentRegion, userLocation.location]);
 
+  // Sort the pubs by distance from the user's location
   const sortPubsByDistance = (pubs, userLocation) => {
     return pubs.sort((a, b) => {
       return (
@@ -78,12 +91,14 @@ const SearchScreen = ({navigation}) => {
     });
   };
 
+  // Handle the marker press event
   const handleMarkerPress = pub => {
     const index = sortedPubs.findIndex(p => p.id === pub.id);
     setSelectedPubId(pub.id);
     carouselRef.current?.snapToItem(index);
   };
 
+  // Handle the carousel snap to item event
   const handleSnapToItem = index => {
     const selectedPub = sortedPubs[index];
     setSelectedPubId(selectedPub.id);
@@ -95,7 +110,7 @@ const SearchScreen = ({navigation}) => {
     });
   };
 
-  // update the user location on the map and fetch pubs near the user's location
+  // Update the user location on the map and fetch pubs near the user's location
   const updateToUserLocation = () => {
     if (userLocation.location) {
       mapRef.current?.animateToRegion({
@@ -176,7 +191,7 @@ const SearchScreen = ({navigation}) => {
           }
         }}
         query={{
-          key: 'AIzaSyBD7oKnn0RnM2Xid3UXvEKq2FnbtrCSRcE',
+          key: apiKey,
           language: 'en',
         }}
         fetchDetails
@@ -215,7 +230,6 @@ const SearchScreen = ({navigation}) => {
         style={styles.location}
         onPress={() => {
           if (userLocation.location) {
-            // Center the map on the user's location
             mapRef.current.animateToRegion(
               {
                 latitude: userLocation.location.latitude,
@@ -224,12 +238,8 @@ const SearchScreen = ({navigation}) => {
                 longitudeDelta: 0.01,
               },
               1000,
-            ); // Animated transition to the user's location
-
-            // Clear the search input
+            );
             autocompleteRef.current?.setAddressText('');
-
-            // Fetch and display pubs near the user's location
             updateToUserLocation();
           }
         }}>
@@ -284,7 +294,7 @@ const SearchScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   location: {
     position: 'absolute',
-    top: 70,
+    top: 120,
     right: 10,
     padding: 10,
     backgroundColor: '#fff',
@@ -293,19 +303,20 @@ const styles = StyleSheet.create({
   },
   swipeUpBar: {
     alignSelf: 'center',
-    height: 30,
-    width: '100%',
+    height: 20,
+    width: '50%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#355E3B',
+    borderRadius: 20,
   },
   swipeUpBarText: {
-    color: '#000',
+    color: '#fff',
   },
   map: {
     width: '100%',
     height: '100%',
-    marginTop: -100,
+    marginTop: -200,
   },
   fullscreen: {
     flex: 1,
@@ -313,7 +324,7 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     position: 'absolute',
-    top: 20,
+    top: '30%',
     left: '10%',
     right: '10%',
     zIndex: 10,
@@ -328,6 +339,7 @@ const styles = StyleSheet.create({
   carouselContainer: {
     position: 'absolute',
     bottom: 0,
+    backgroundColor: '#f8f1e7',
   },
   carousel: {
     flexGrow: 0,

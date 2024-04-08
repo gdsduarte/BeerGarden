@@ -1,4 +1,9 @@
-/* eslint-disable prettier/prettier */
+/**
+ * This hook fetches all reservations for a given user.
+ * It fetches reservations where the user is a member of the reservation.
+ * It also updates the reservation status to completed if the reservation date is in the past and the reservation is booked.  
+ */
+
 import firestore from '@react-native-firebase/firestore';
 import {useState, useEffect} from 'react';
 
@@ -18,7 +23,7 @@ const useReservations = userId => {
           const fetchedReservations = querySnapshot.docs.map(doc => {
             const data = doc.data();
             const reservationDate = data.date.toDate();
-            // Queue updates if the reservation date has passed and isBooked is true
+            // If the reservation date is in the past and it is booked, mark it as completed
             if (reservationDate < now && data.isBooked) {
               updates.push(
                 firestore()

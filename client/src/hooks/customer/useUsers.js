@@ -1,3 +1,8 @@
+/**
+ * This hook is used to fetch all users from the database and provide a function to check if a username already exists.
+ * It also provides a function to search users by partial username.
+ */
+
 import {useState, useEffect, useCallback} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
@@ -32,14 +37,11 @@ const useUsers = () => {
     return !snapshot.empty; // Returns true if username exists, false otherwise
   }, []);
 
-  console.log('Users:', users);
-
   // Function for searching users by partial username
   const searchUsers = useCallback(
     searchText => {
       // Lowercase the search text to make the search case-insensitive
       const loweredSearchText = searchText.toLowerCase();
-      // Filter the loaded users based on the search text
       const filteredUsers = users.filter(user =>
         user.username?.toLowerCase().includes(loweredSearchText),
       );

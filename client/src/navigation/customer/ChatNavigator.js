@@ -1,3 +1,7 @@
+/**
+ * ChatNavigator component is used to navigate between chat screens.
+ */
+
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {ChatScreen, SpecificChatScreen} from '@screens';
