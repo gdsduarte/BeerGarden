@@ -1,8 +1,7 @@
 /**
- * ProfileScreen is the screen for the user profile.
- * It displays the user's profile information, places visited, reviews, and friends.
- * The user can also edit their profile, logout, and search for other users.
- * The user can also navigate to the details of the places they visited and the reviews they made.
+ * UsersProfileScreen is a screen to see the others profile
+ * It displays the users profile information, places visited, reviews, and friends.
+ * The user can also navigate to the details of the places the users visited and the reviews they made.
  * The user can also navigate to the profile of their friends.
  */
 
@@ -17,9 +16,6 @@ import {
   SafeAreaView,
   RefreshControl,
   FlatList,
-  Modal,
-  TextInput,
-  Button,
   StatusBar,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -27,48 +23,30 @@ import {useUserProfileData} from '@hooks';
 import AuthContext from '@contexts/AuthContext';
 import {Rating} from 'react-native-ratings';
 import ReviewsModal from '@components/profile/ReviewsModal';
-import SearchUserModal from '@components/profile/SearchUserModal';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import {launchImageLibrary} from 'react-native-image-picker';
+import {addFriend, removeFriend} from '@services/databaseService';
 import {fetchUserDetailsById} from '../../../hooks/customer/useReservationActions';
-import {updateProfile} from '@services/databaseService';
 import {useFocusEffect} from '@react-navigation/native';
+import Loading from '@components/common/Loading';
 
-const ProfileScreen = ({route}) => {
+const UsersProfileScreen = ({route}) => {
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(false);
   const {currentUserId} = useContext(AuthContext);
-  const {signOut} = useContext(AuthContext);
-  const userId = currentUserId;
+  const {userId} = route.params;
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('pubs');
+  const [modalData, setModalData] = useState([]);
+  const [modalDataType, setModalDataType] = useState('');
+  const [isReviewsModalVisible, setReviewsModalVisible] = useState(false);
   const {
     profile,
     places,
     friends,
     reviews,
     loading: profileLoading,
-    refreshData,
   } = useUserProfileData(userId);
-  const [activeTab, setActiveTab] = useState('pubs');
   const filteredReviews = reviews.filter(review => review.type === activeTab);
-  const [modalData, setModalData] = useState([]);
-  const [modalDataType, setModalDataType] = useState('');
-  const [isReviewsModalVisible, setReviewsModalVisible] = useState(false);
-  const [isSearchUserModalVisible, setSearchUserModalVisible] = useState(false);
-  const [isDropdownVisible, setDropdownVisible] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [name, setName] = useState('');
-  const [bio, setBio] = useState('');
-  const [photo, setPhoto] = useState(null);
   const [friendsDetails, setFriendsDetails] = useState({});
-
-  // Handle choosing a photo from the device
-  const handleChoosePhoto = () => {
-    launchImageLibrary({noData: true}, response => {
-      if (response.assets) {
-        setPhoto(response.assets[0].uri);
-      }
-    });
-  };
+  const [isFriend, setIsFriend] = useState(false);
 
   // Fetch the details of the user's friends
   useEffect(() => {
@@ -93,6 +71,16 @@ const ProfileScreen = ({route}) => {
     fetchAndSetFriendsDetails();
   }, [friends]);
 
+  // Check if the user is a friend of the current user
+  useEffect(() => {
+    const checkFriendship = () => {
+      const friendIds = friends.map(friend => friend.id);
+      setIsFriend(friendIds.includes(currentUserId));
+    };
+
+    checkFriendship();
+  }, [friends, currentUserId]);
+
   // Change the status bar color
   useFocusEffect(
     React.useCallback(() => {
@@ -103,14 +91,29 @@ const ProfileScreen = ({route}) => {
     }, []),
   );
 
-  // Set the profile data when it is loaded
+  useEffect(() => {
+    // Set the header title to the user's name and color green
+    navigation.setOptions({
+      title: profile?.displayName,
+      headerStyle: {
+        backgroundColor: '#355E3B',
+        elevation: 0,
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        //fontWeight: 'bold',
+      },
+    });
+  }, [profile, navigation]);
+
   useEffect(() => {
     setLoading(profileLoading);
   }, [profileLoading]);
 
   // Navigate to another user's profile
   const navigateToUserProfile = userId => {
-    navigation.navigate('UsersProfileScreen', {
+    navigation.navigate('ProfileScreen', {
+      isOtherUserProfile: true,
       userId: userId,
     });
   };
@@ -205,59 +208,9 @@ const ProfileScreen = ({route}) => {
     );
   };
 
-  // Render the dropdown menu for the settings button
-  const renderDropdownMenu = () => (
-    <Modal
-      animationType="none"
-      transparent={true}
-      visible={isDropdownVisible}
-      onRequestClose={() => setDropdownVisible(false)}>
-      <TouchableOpacity
-        style={styles.dropdownOverlay}
-        activeOpacity={1}
-        onPressOut={() => setDropdownVisible(false)}>
-        <View style={styles.dropdownMenu}>
-          <TouchableOpacity onPress={handleEditProfile}>
-            <Text style={styles.dropdownItem}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleLogout}>
-            <Text style={styles.dropdownItem}>Logout</Text>
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
-    </Modal>
-  );
-
-  // Handle the edit profile button
-  const handleEditProfile = () => {
-    setIsEditMode(true);
-    setDropdownVisible(false);
-  };
-
-  // Save the profile data
-  const saveProfile = () => {
-    const profileData = {
-      displayName: name,
-      bio,
-      photoUrl: photo,
-    };
-    updateProfile(currentUserId, profileData);
-    refreshData();
-    setIsEditMode(false);
-  };
-
-  // Handle the cancel edit button
-  const handleCancelEdit = () => {
-    setIsEditMode(false);
-    setBio(profile?.bio);
-    setName(profile?.displayName);
-    setPhoto(profile?.photoUrl);
-  };
-
-  // Handle the logout button
-  const handleLogout = () => {
-    signOut();
-  };
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -268,54 +221,49 @@ const ProfileScreen = ({route}) => {
           <RefreshControl refreshing={loading} onRefresh={() => {}} />
         }>
         {/* Header Section */}
-        <View style={styles.header}>
+        <View style={styles.header}></View>
+        {/* Profile Section */}
+        <View style={styles.profileSection}>
+          <Image style={styles.avatar} source={{uri: profile?.photoUrl}} />
+          <Text style={styles.name}>{profile?.displayName}</Text>
+          <Text style={styles.bio}>@{profile?.username}</Text>
+          <Text style={styles.bio}>{profile?.bio}</Text>
+        </View>
+        {/* Buttons Section */}
+        <View style={styles.buttonContainer}>
+          {isFriend ? (
+            <TouchableOpacity
+              style={styles.unAddButton}
+              onPress={() => {
+                removeFriend(currentUserId, userId);
+                setIsFriend(false);
+              }}>
+              <Text style={styles.addButtonText}>Remove Friend</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() =>
+                addFriend(currentUserId, userId)
+                  .then(() => setIsFriend(true))
+                  .catch(error => console.error(error))
+              }>
+              <Text style={styles.addButtonText}>Add Friend</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
-            style={styles.settingsButton}
-            onPress={() => setDropdownVisible(!isDropdownVisible)}>
-            <Icon style={styles.settingsButtonText} name="cog" size={28} />
+            style={styles.messageButton}
+            onPress={() => {
+              navigation.navigate('SpecificChatScreen', {
+                targetUserId: userId,
+                currentUserId: currentUserId,
+                chatType: 'private',
+                displayName: profile?.displayName,
+              });
+            }}>
+            <Text style={styles.messageButtonText}>Message</Text>
           </TouchableOpacity>
         </View>
-        {/* Profile Section */}
-        {isEditMode ? (
-          <View style={styles.profileSection}>
-            <TouchableOpacity onPress={handleChoosePhoto}>
-              <Image
-                style={styles.avatar}
-                source={{uri: photo || profile?.photoUrl}}
-              />
-            </TouchableOpacity>
-            <TextInput
-              style={styles.textInput}
-              value={name}
-              onChangeText={setName}
-              placeholder="Name"
-            />
-            <TextInput
-              style={styles.textInput}
-              value={bio}
-              onChangeText={setBio}
-              placeholder="Bio"
-              multiline
-            />
-            <View style={styles.editButton}>
-              <Button title="Save" onPress={saveProfile} />
-              <Button title="Cancel" onPress={handleCancelEdit} />
-            </View>
-          </View>
-        ) : (
-          <View style={styles.profileSection}>
-            <Image style={styles.avatar} source={{uri: profile?.photoUrl}} />
-            <Text style={styles.name}>{profile?.displayName}</Text>
-            <Text style={styles.bio}>@{profile?.username}</Text>
-            <Text style={styles.bio}>{profile?.bio}</Text>
-          </View>
-        )}
-        {/* Trigger Search Modal */}
-        <TouchableOpacity
-          style={styles.searchButton}
-          onPress={() => setSearchUserModalVisible(true)}>
-          <Text style={styles.searchButtonText}>Search Users</Text>
-        </TouchableOpacity>
         {/* Stats Section */}
         <View style={styles.statsSection}>
           <View style={styles.statItem}>
@@ -374,12 +322,6 @@ const ProfileScreen = ({route}) => {
         renderReviewsItem={renderReviewsItem}
         renderFriendsItem={renderFriendsItem}
       />
-      <SearchUserModal
-        isSearchModalVisible={isSearchUserModalVisible}
-        setSearchModalVisible={setSearchUserModalVisible}
-        navigateToUserProfile={navigateToUserProfile}
-      />
-      {renderDropdownMenu()}
     </SafeAreaView>
   );
 };
@@ -567,7 +509,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    height: 180,
+    height: 80,
     paddingTop: 40,
   },
   backButton: {
@@ -613,7 +555,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    paddingVertical: 10,
+    justifyContent: 'center',
   },
   addButton: {
     backgroundColor: '#8B4513',
@@ -623,7 +565,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   unAddButton: {
-    backgroundColor: '#B22222',
+    backgroundColor: 'red',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginHorizontal: 5,
   },
   messageButton: {
     backgroundColor: '#f0e6d2',
@@ -670,10 +616,10 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   horizontalScroll: {
-    paddingLeft: 20,
-    paddingRight: 20,
-    //marginLeft: 20,
-    //marginRight: 20,
+    //paddingLeft: 20,
+    //paddingRight: 20,
+    marginLeft: 20,
+    marginRight: 20,
   },
   placeItem: {
     marginRight: 15,
@@ -754,4 +700,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfileScreen;
+export default UsersProfileScreen;

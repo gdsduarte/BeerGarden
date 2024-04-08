@@ -1,3 +1,8 @@
+/**
+ * This hook is used to get the user's current location. 
+ * This is used to show the user's location on the map.
+ */
+
 import {useState, useEffect} from 'react';
 import Geolocation from '@react-native-community/geolocation';
 

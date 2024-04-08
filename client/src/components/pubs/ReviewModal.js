@@ -49,20 +49,21 @@ const ReviewModal = ({
     itemId: type === 'pubs' ? null : itemId,
   };
 
+  // Reset form fields
   const resetForm = () => {
     setRating(0);
     setTitle('');
     setComment('');
   };
 
-  // Handle submission of review data to the database
+  // Handle submission of review data to the database 
   const handleSubmission = async () => {
     if (!title.trim() || !comment.trim()) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
-    console.log('Submitting Review Data:', reviewData);
     try {
+      // If review exists, update it; otherwise, add a new review
       if (review) {
         const reviewId = review.id;
         await updateReview(type, reviewId, reviewData);

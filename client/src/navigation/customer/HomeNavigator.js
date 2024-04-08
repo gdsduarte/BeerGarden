@@ -1,3 +1,7 @@
+/**
+ * This file contains the navigation stack for the customer home screen.
+ */
+
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {
@@ -11,6 +15,7 @@ import {
   BeersScreen,
   SpecificChatScreen,
   PubsFinderScreen,
+  BookingInputScreen,
 } from '@screens';
 import {FoodNavigator, DrinkNavigator} from '@navigation';
 
@@ -75,7 +80,12 @@ const HomeNavigator = () => {
       <Stack.Screen
         name="PubsFinderScreen"
         component={PubsFinderScreen}
-        options={{title: 'Find Pubs'}}
+        options={{title: 'Finder'}}
+      />
+      <Stack.Screen
+        name="BookingInputScreen"
+        component={BookingInputScreen}
+        options={{title: 'Booking'}}
       />
     </Stack.Navigator>
   );

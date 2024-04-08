@@ -1,4 +1,8 @@
-/* Not in use */
+/**
+ * Note: This file is NOT used in the project. It is for feature implementations!!
+ * 
+ * This file contains functions that interact with the Firestore database.
+ */
 
 import firebase from '@react-native-firebase/app';
 import '@react-native-firebase/firestore';

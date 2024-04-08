@@ -1,3 +1,7 @@
+/**
+ * This hook is used to fetch food details from firestore based on the pubId.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

@@ -1,3 +1,8 @@
+/**
+ * This hook is used to fetch all reviews for a specific food item. 
+ * This hook takes the itemId as an argument and returns the reviews.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

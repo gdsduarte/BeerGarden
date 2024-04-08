@@ -74,7 +74,7 @@ export const AuthProvider = ({children}) => {
         password,
       );
       const {user} = userCredential;
-      await firestore().collection('users').doc(user.uid).set(userData);
+      await firestore().collection('user').doc(user.uid).set(userData);
       await user.sendEmailVerification();
       return user;
     } catch (error) {

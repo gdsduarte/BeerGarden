@@ -1,12 +1,13 @@
+/**
+ * This hook is used to fetch all reviews for a specific drink item.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 
 const useDrinkReviews = itemId => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  console.log('Item 222:', itemId);
-  console.log('Review 222:', reviews);
 
   useEffect(() => {
     const unsubscribe = firestore()

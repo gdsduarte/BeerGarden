@@ -1,4 +1,7 @@
-/* eslint-disable prettier/prettier */
+/**
+ * This hook is used to fetch groups that the user is member of.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

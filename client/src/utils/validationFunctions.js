@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 
 /* File not in use in the project*/
 

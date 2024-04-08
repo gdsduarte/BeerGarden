@@ -1,3 +1,7 @@
+/**
+ * This service is used to upload photos to Firebase Storage.
+ */
+
 import storage from '@react-native-firebase/storage';
 
 const uploadPhotoToFirebaseStorage = async (filePath) => {
@@ -13,10 +17,10 @@ const uploadPhotoToFirebaseStorage = async (filePath) => {
     await storageRef.putFile(uploadUri);
     const url = await storageRef.getDownloadURL();
     console.log('File uploaded and URL fetched:', url);
-    return url; // Return the URL of the uploaded photo
+    return url;
   } catch (e) {
     console.error(e);
-    return null; // Return null if the upload fails
+    return null;
   }
 };
 

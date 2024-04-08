@@ -1,3 +1,8 @@
+/**
+ * BottomTabNavigator component is used to navigate between Home, Search, Chat, Booking and Profile screens.
+ * This is the main navigation for the customer side of the application.
+ */
+
 import React, {useState, useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Text, Platform, Keyboard} from 'react-native';
@@ -15,7 +20,7 @@ import {
   ChatNavigator,
   ProfileNavigator,
   HomeNavigator,
-} from '..';
+} from '@navigation';
 
 const Tab = createBottomTabNavigator();
 

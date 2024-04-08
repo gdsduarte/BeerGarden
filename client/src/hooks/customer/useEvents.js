@@ -1,4 +1,7 @@
-/* eslint-disable prettier/prettier */
+/**
+ * This hook is used to fetch events that are from premium pubs.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

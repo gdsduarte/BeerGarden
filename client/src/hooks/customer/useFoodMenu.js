@@ -1,3 +1,8 @@
+/**
+ * This hook is used to fetch the food menu of a pub.
+ * It takes the pubId as an argument and returns the food items.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

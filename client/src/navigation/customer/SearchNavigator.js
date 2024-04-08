@@ -1,3 +1,7 @@
+/**
+ * This file contains the stack navigator that contains all the screens related to the search screen.
+ */
+
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {
@@ -18,7 +22,8 @@ const SearchNavigator = () => {
       <Stack.Screen
         name="SearchArea"
         component={SearchScreen}
-        options={{title: 'Search'}}
+        //options={{title: 'Search'}}
+        options={{headerShown: false}}
       />
       <Stack.Screen
         name="PubScreen"

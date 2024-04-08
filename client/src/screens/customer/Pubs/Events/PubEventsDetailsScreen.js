@@ -1,3 +1,7 @@
+/**
+ * This screen displays the details of a specific event.
+ */
+
 import React from 'react';
 import {ScrollView, Text, Image, StyleSheet, View} from 'react-native';
 import Loading from '@components/common/Loading';
@@ -9,7 +13,7 @@ const PubEventDetailScreen = ({route}) => {
   
   if (loading) return <Loading />;
 
-  // Render each schedule item as a text block
+  // Render the schedule for the event
   const renderSchedule = (schedule) => {
     return schedule.map((item, index) => (
       <View key={index} style={styles.scheduleItem}>
@@ -23,7 +27,7 @@ const PubEventDetailScreen = ({route}) => {
   return (
     <ScrollView style={styles.container}>
       <Image source={{uri: eventDetails.eventImage}} style={styles.image} />
-      <Text style={styles.name}>{eventDetails.eventName}</Text>
+      <Text style={styles.name}>{eventDetails.eventName || eventDetails.displayName}</Text>
       <Text style={styles.bio}>{eventDetails.description}</Text>
       {eventDetails.schedule && (
         <View style={styles.scheduleContainer}>

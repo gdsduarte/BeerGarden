@@ -1,6 +1,8 @@
-/* eslint-disable prettier/prettier */
+/**
+ * This file is used to export all the hooks from the customer folder into one file.
+ * This way, we can import all the hooks from the customer folder using a single import statement.
+ */
 
-// Customer hooks for fetching data from Firestore
 export {default as useAllMenuItems} from './customer/useAllMenuItems';
 export {default as useBookingAvailability} from './customer/useBookingAvailability';
 export {default as useChatMessages} from './customer/useChatMessages';
@@ -26,5 +28,4 @@ export {default as useUsers} from './customer/useUsers';
 export {default as useValidation} from './customer/useValidation';
 export {default as usePubEvents} from './customer/usePubEvents';
 export {default as usePubEventDetails} from './customer/usePubEventDetails';
-
-// Bussines hooks for fetching data from Firestore
+export {default as useFinder} from './customer/useFinder';

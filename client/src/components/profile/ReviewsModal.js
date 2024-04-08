@@ -31,8 +31,8 @@ const ReviewsModal = ({
       onRequestClose={() => {
         setModalVisible(!isModalVisible);
       }}>
-      <View style={styles.modalContent}>
-        <View>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
           <TextInput
             style={styles.searchBar}
             placeholder="Search..."
@@ -60,23 +60,37 @@ const ReviewsModal = ({
               }
             }}
           />
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalVisible(!isModalVisible)}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
         </View>
       </View>
-      <TouchableOpacity
-        style={styles.closeButton}
-        onPress={() => setModalVisible(!isModalVisible)}>
-        <Text style={styles.closeButtonText}>Close</Text>
-      </TouchableOpacity>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  modalContent: {
+  modalOverlay: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: '90%',
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#355E3B',
+    fontWeight: 'bold',
   },
   closeButton: {
     position: 'absolute',
@@ -89,10 +103,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     fontSize: 16,
-  },
-  closeButtonText: {
-    color: '#355E3B',
-    fontWeight: 'bold',
   },
 });
 

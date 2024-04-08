@@ -1,3 +1,9 @@
+/**
+ * A screen to display a specific chat between two users or a group chat.
+ * This screen is used to send and receive messages in a chat.
+ * It also allows the user to delete their own messages.
+ */
+
 import React, {useState, useEffect, useContext, useRef} from 'react';
 import {
   View,
@@ -6,7 +12,6 @@ import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
-  Image,
   TouchableWithoutFeedback,
   Alert,
 } from 'react-native';
@@ -33,12 +38,11 @@ const SpecificChatScreen = ({route, navigation}) => {
   const {messages} = useChatMessages(chatId);
   const flatListRef = useRef();
   const [isModalVisible, setModalVisible] = useState(false);
-
-  console.log('Route: ', route.params);
-
-  // State to manage updates to groupData
   const [updatedGroupData, setUpdatedGroupData] = useState(initialGroupData);
 
+  console.log('Route params:', route.params);
+
+  // Handle member change in group chat
   const handleMemberChange = updatedMemberIds => {
     setUpdatedGroupData(prevData => ({
       ...prevData,
@@ -46,6 +50,7 @@ const SpecificChatScreen = ({route, navigation}) => {
     }));
   };
 
+  // Find the chatId if it doesn't exist
   useEffect(() => {
     const initChat = async () => {
       if (!chatId && targetUserId) {
@@ -55,13 +60,12 @@ const SpecificChatScreen = ({route, navigation}) => {
         }
       }
     };
-
     initChat();
   }, [currentUserId, targetUserId, chatId]);
 
+  // Update the header title and options based on the chat type
   useEffect(() => {
     const {chatType, displayName} = route.params;
-
     navigation.setOptions({
       headerShown: true,
       title: displayName || 'Chat',
@@ -75,11 +79,7 @@ const SpecificChatScreen = ({route, navigation}) => {
         ) : null,
     });
   }, [navigation, route.params]);
-
-  useEffect(() => {
-    flatListRef.current?.scrollToEnd({animated: true});
-  }, [messages]);
-
+  
   // Handle sending a message
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
@@ -87,17 +87,16 @@ const SpecificChatScreen = ({route, navigation}) => {
     try {
       const {chatType, chatId} = route.params;
 
-      // Construct the message object
       const message = {
         messageText: inputText.trim(),
         sentBy: currentUserId,
       };
 
       if (chatType === 'open' || chatType === 'group') {
-        // Directly send the message to the garden chatId
+        // Directly send the message to the garden or group chat
         await sendMessage(chatId, message, chatType);
       } else {
-        // Handle private and group chats as before
+        // Manage the chat and send the message to the user
         const usedChatId = await manageChatAndSendMessage(
           currentUserId,
           targetUserId,
@@ -107,7 +106,7 @@ const SpecificChatScreen = ({route, navigation}) => {
         if (!chatId) setChatId(usedChatId);
       }
 
-      setInputText(''); // Clear input after successful send
+      setInputText('');
     } catch (error) {
       console.error('Error sending message222:', error);
     }
@@ -129,7 +128,6 @@ const SpecificChatScreen = ({route, navigation}) => {
         ],
       );
     } else {
-      // Optionally, inform the user they can only delete their own messages
       Alert.alert(
         'Cannot Delete Message',
         'You can only delete messages you sent.',
@@ -141,7 +139,6 @@ const SpecificChatScreen = ({route, navigation}) => {
   const deleteMessageHandler = async messageId => {
     try {
       await deleteMessage(chatId, messageId);
-      // Optionally, refresh messages or handle UI feedback
     } catch (error) {
       console.error('Error deleting message:', error);
     }
@@ -173,6 +170,9 @@ const SpecificChatScreen = ({route, navigation}) => {
         renderItem={renderMessageItem}
         keyExtractor={(item, index) => item.id || index.toString()}
         contentContainerStyle={styles.listContentContainer}
+        /* onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+        onLayout={() => flatListRef.current?.scrollToEnd()} */
+        inverted
       />
       <View style={styles.inputContainer}>
         <TextInput

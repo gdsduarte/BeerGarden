@@ -1,5 +1,10 @@
-/* eslint-disable prettier/prettier */
-import {useState, useEffect} from 'react';
+/**
+ * This hook fetches the user's profile data from Firestore.
+ * It fetches the user's profile, places visited, friends, and reviews.
+ * It takes a userId as an argument and returns the user's profile data.
+ */
+
+import { useState, useEffect, useCallback } from 'react';
 import firestore from '@react-native-firebase/firestore';
 
 const useUserProfileData = userId => {
@@ -8,6 +13,12 @@ const useUserProfileData = userId => {
   const [friends, setFriends] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Function to refresh the data
+  const refreshData = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
 
   useEffect(() => {
     // Fetch user's profile data
@@ -74,7 +85,7 @@ const useUserProfileData = userId => {
 
     fetchReviews();
     fetchProfile();
-  }, [userId]);
+  }, [userId, refreshTrigger]);
 
   return {
     profile,
@@ -82,6 +93,7 @@ const useUserProfileData = userId => {
     friends,
     reviews,
     loading,
+    refreshData,
   };
 };
 

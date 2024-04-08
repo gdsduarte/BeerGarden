@@ -1,3 +1,7 @@
+/**
+ * This hook is used to fetch the drink menu items for a specific pub.
+ */
+
 import {useState, useEffect} from 'react';
 import firestore from '@react-native-firebase/firestore';
 

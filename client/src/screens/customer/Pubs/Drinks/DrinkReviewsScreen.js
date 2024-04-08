@@ -1,3 +1,10 @@
+/**
+ * This screen displays the reviews for a drink in a pub.
+ * It allows users to view and write reviews for the drink.
+ * It also calculates the average rating for the drink based on all reviews.
+ * Users can edit or delete their own reviews.
+ */
+
 import React, {useState, useMemo, useContext} from 'react';
 import {
   View,
@@ -22,16 +29,16 @@ const PubReviewsScreen = ({item}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editableReview, setEditableReview] = useState(null);
 
-  console.log('PubReviewsScreen:', reviews);
-
   // Determine the default type from the first review (if reviews are loaded)
   const type = reviews.length > 0 ? reviews[0].type : undefined;
 
+  // Handle the edit action for a review
   const handleEdit = review => {
     setEditableReview(review);
     setModalVisible(true);
   };
 
+  // Calculate the average rating from all reviews
   const averageRating = useMemo(() => {
     if (!reviews.length) return 0;
     return (
@@ -39,6 +46,7 @@ const PubReviewsScreen = ({item}) => {
     );
   }, [reviews]);
 
+  // Handle the delete action for a review
   const handleDelete = reviewId => {
     Alert.alert(
       'Delete Review',
@@ -75,9 +83,7 @@ const PubReviewsScreen = ({item}) => {
         data={reviews}
         keyExtractor={item => item.id}
         renderItem={({item}) => {
-          // Initialize a default formatted date string
           let formattedReviewDate = 'Date not available';
-          // Check if createdAt exists and is not null before converting and formatting
           if (item.createdAt) {
             try {
               const reviewDate = item.createdAt.toDate();
@@ -88,9 +94,9 @@ const PubReviewsScreen = ({item}) => {
           }
           return (
             <View style={styles.reviewCard}>
-              <Text style={styles.reviewText}>{item.userName}</Text>
-              <Text style={styles.reviewText}>{item.title}</Text>
+              <Text style={styles.reviewTitle}>{item.title}</Text>
               <Text style={styles.reviewText}>{item.comment}</Text>
+              <Text style={styles.reviewText}>{item.userName}</Text>
               <Text style={styles.reviewText}>{formattedReviewDate}</Text>
               <Rating readonly startingValue={item.rating} imageSize={15} />
               {item.userId === currentUserId && (
@@ -142,6 +148,12 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     backgroundColor: 'white',
     borderRadius: 5,
+  },
+  reviewTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: 'black',
   },
   reviewText: {
     marginBottom: 5,

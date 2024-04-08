@@ -1,3 +1,12 @@
+/**
+ * This component is used to display the details of a reservation.
+ * It allows the user to view and edit the details of the reservation.
+ * The user can view the list of invited friends and remove them.
+ * The user can invite friends to the reservation and leave the reservation.
+ * The user can view the QR code for the reservation.
+ * The user can navigate to the pub details screen and start a chat with the pub.
+ */
+
 import React, {useState, useCallback, useEffect, useContext} from 'react';
 import {
   View,
@@ -41,8 +50,6 @@ const ReservationDetailsScreen = ({route, navigation}) => {
     ? booking.date.toDate()
     : new Date(booking.date);
 
-  console.log('PubId: ', pubId);
-
   // Initial details
   const initialDetails = {
     name: booking.userName,
@@ -56,9 +63,9 @@ const ReservationDetailsScreen = ({route, navigation}) => {
   const [details, setDetails] = useState(initialDetails);
   const [originalDetails, setOriginalDetails] = useState(initialDetails);
   const [originalInvitedFriends, setOriginalInvitedFriends] = useState([]);
+
   const [isEditMode, setIsEditMode] = useState(false);
   const [isNewMember, setIsNewMember] = useState(false);
-
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredFriends, setFilteredFriends] = useState([]);
@@ -73,6 +80,7 @@ const ReservationDetailsScreen = ({route, navigation}) => {
 
   const [isQRCodeModalVisible, setIsQRCodeModalVisible] = useState(false);
 
+  // Function to toggle the QR code modal
   const QRCodeModal = () => (
     <Modal
       animationType="slide"
@@ -111,10 +119,13 @@ const ReservationDetailsScreen = ({route, navigation}) => {
   );
 
   useEffect(() => {
+    // Extract the details of the invited friends
     const fetchInvitedFriendsDetails = async () => {
       const invitedMemberIds = booking.members.filter(
         id => id !== userId && id !== pubId,
       );
+
+      // Fetch the details of all the invited members
       const promises = invitedMemberIds.map(id => fetchUserDetailsById(id));
       const membersDetails = await Promise.all(promises);
 
@@ -146,6 +157,7 @@ const ReservationDetailsScreen = ({route, navigation}) => {
     setIsNewMember(!isNewMember);
   };
 
+  // Function to update the reservation
   const handleSave = async () => {
     const uniqueMemberIds = Array.from(
       new Set([...booking.members, ...selectedFriends]),
@@ -171,7 +183,6 @@ const ReservationDetailsScreen = ({route, navigation}) => {
         {
           text: 'Update',
           onPress: async () => {
-            // Update Firestore document
             const success = await updateReservation(booking.id, newDetails);
             if (success) {
               setSelectedFriends([]);
@@ -188,8 +199,8 @@ const ReservationDetailsScreen = ({route, navigation}) => {
     );
   };
 
+  // Function to delete the reservation
   const handleDelete = () => {
-    // Display confirmation dialog
     Alert.alert(
       'Confirm Delete',
       'Are you sure you want to delete this reservation?',
@@ -211,6 +222,7 @@ const ReservationDetailsScreen = ({route, navigation}) => {
     );
   };
 
+  // Function to filter friends based on the search query
   const handleSearch = query => {
     if (query === '') {
       setFilteredFriends([]);
@@ -223,6 +235,7 @@ const ReservationDetailsScreen = ({route, navigation}) => {
     }
   };
 
+  // Function to add a friend to the list of invited friends
   const handleInvite = friendId => {
     // Check if adding another friend would exceed the party size
     if (invitedFriends.length >= booking.partySize - 1) {
@@ -251,23 +264,20 @@ const ReservationDetailsScreen = ({route, navigation}) => {
     });
   };
 
+  // Function to remove a friend from the list of invited friends
   const handleRemoveFriend = friendId => {
     setInvitedFriends(currentFriends => {
-      console.log('Current friends before removal:', currentFriends);
-
       // Filter out the friend by checking both the `friendId` and `userId`
       const updatedFriends = currentFriends.filter(friend => {
         // Check if the friend object has a `friendId` field and compare it
         const idToCompare = friend.friendId || friend.userId || friend.id;
         return idToCompare !== friendId;
       });
-
-      console.log('Friends after removal:', updatedFriends);
-
       return updatedFriends;
     });
   };
 
+  // Function to cancel the edit mode
   const handleCancel = () => {
     setDetails(originalDetails);
     setIsEditMode(false);
@@ -278,6 +288,7 @@ const ReservationDetailsScreen = ({route, navigation}) => {
     setInvitedFriends(originalInvitedFriends);
   };
 
+  // Function to leave the reservation
   const handleLeaveReservation = async () => {
     Alert.alert(
       'Leave Reservation',
@@ -307,6 +318,7 @@ const ReservationDetailsScreen = ({route, navigation}) => {
     );
   };
 
+  // Update the reservation in the database
   const editDateTime = () => {
     navigation.navigate('BookingScreen', {
       updating: true,
@@ -315,6 +327,7 @@ const ReservationDetailsScreen = ({route, navigation}) => {
     });
   };
 
+  // Update the reservation in the database
   const editPartySize = () => {
     navigation.navigate('BookingInputScreen', {
       updating: true,
@@ -326,15 +339,18 @@ const ReservationDetailsScreen = ({route, navigation}) => {
     });
   };
 
+  // Function to navigate to the pub details screen
   const navigateToPubScreen = () => {
     navigation.navigate('PubDetailsScreen', {pubId});
   };
 
+  // Function to start a chat with the pub
   const startPubChat = () => {
     navigation.navigate('SpecificChatScreen', {targetUserId: pubId});
     console.log('Navigating to chat with pub ID:', pubId);
   };
 
+  // Function to start a chat with the owner
   const startOwnerChat = () => {
     navigation.navigate('SpecificChatScreen', {targetUserId: userId});
     console.log('Navigating to chat with owner ID:', userId);
@@ -450,7 +466,7 @@ const ReservationDetailsScreen = ({route, navigation}) => {
                       <TouchableOpacity
                         style={styles.openModalButton}
                         onPress={() => setIsModalVisible(true)}>
-                        <Text style={styles.openModalButtonText}>+</Text>
+                        <Icon style={styles.openModalButtonText} name="plus" />
                       </TouchableOpacity>
                     </View>
                   )}
@@ -494,61 +510,82 @@ const ReservationDetailsScreen = ({route, navigation}) => {
               onRequestClose={() => {
                 setIsModalVisible(!isModalVisible);
               }}>
-              <View style={styles.modalView}>
-                <TextInput
-                  style={styles.searchBar}
-                  placeholder="Search for friends..."
-                  onChangeText={text => {
-                    setSearchQuery(text);
-                    handleSearch(text);
-                  }}
-                  value={searchQuery}
-                />
-                <FlatList
-                  data={searchQuery.length > 0 ? filteredFriends : friends}
-                  renderItem={({item}) => (
-                    <TouchableOpacity
-                      onPress={() => handleInvite(item.id)}
-                      style={{
-                        backgroundColor: selectedFriends.includes(item.id)
-                          ? '#D3D3D3'
-                          : 'transparent',
-                      }}>
-                      <Text style={styles.friendItem}>{item.displayName}</Text>
-                    </TouchableOpacity>
-                  )}
-                  keyExtractor={item => item.id}
-                />
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => {
-                    setIsModalVisible(false);
-                    setSearchQuery('');
-                    setFilteredFriends([]);
-                  }}>
-                  <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.addButton,
-                    invitedFriends.length >= details.partySize - 1
-                      ? styles.addButtonDisabled
-                      : {},
-                  ]}
-                  onPress={() => {
-                    const updatedInvited = [
-                      ...invitedFriends,
-                      ...selectedFriends.map(id =>
-                        friends.find(friend => friend.id === id),
-                      ),
-                    ];
-                    setInvitedFriends(updatedInvited);
-                    setSelectedFriends([]);
-                    setIsModalVisible(false);
-                  }}
-                  disabled={invitedFriends.length >= details.partySize - 1}>
-                  <Text style={styles.addButtonText}>Add Selected</Text>
-                </TouchableOpacity>
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContainer}>
+                  <TextInput
+                    style={styles.searchBar}
+                    placeholder="Search for friends..."
+                    onChangeText={text => {
+                      setSearchQuery(text);
+                      handleSearch(text);
+                    }}
+                    value={searchQuery}
+                  />
+                  <FlatList
+                    data={searchQuery.length > 0 ? filteredFriends : friends}
+                    renderItem={({item}) => {
+                      const isAdded = invitedFriends.some(
+                        friend => friend.id === item.id,
+                      );
+                      return (
+                        <TouchableOpacity
+                          onPress={() => !isAdded && handleInvite(item.id)}
+                          style={[
+                            styles.friendItemModal,
+                            selectedFriends.includes(item.id) &&
+                              styles.selectedFriendItem,
+                            isAdded && styles.friendAlreadyAdded,
+                          ]}>
+                          <Image
+                            source={{uri: item.photoUrl}}
+                            style={styles.friendImage}
+                          />
+                          <View style={styles.friendDetails}>
+                            <Text style={{color: isAdded ? '#A0A0A0' : '#000'}}>
+                              {item.displayName}
+                            </Text>
+                            {isAdded && (
+                              <Text style={styles.alreadyAddedText}>
+                                Already in Reservation
+                              </Text>
+                            )}
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    }}
+                    keyExtractor={item => item.id}
+                  />
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => {
+                      setIsModalVisible(false);
+                      setSearchQuery('');
+                      setFilteredFriends([]);
+                    }}>
+                    <Text style={styles.closeButtonText}>Close</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.addButton,
+                      invitedFriends.length >= details.partySize - 1
+                        ? styles.addButtonDisabled
+                        : {},
+                    ]}
+                    onPress={() => {
+                      const updatedInvited = [
+                        ...invitedFriends,
+                        ...selectedFriends.map(id =>
+                          friends.find(friend => friend.id === id),
+                        ),
+                      ];
+                      setInvitedFriends(updatedInvited);
+                      setSelectedFriends([]);
+                      setIsModalVisible(false);
+                    }}
+                    disabled={invitedFriends.length >= details.partySize - 1}>
+                    <Text style={styles.addButtonText}>Add Selected</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </Modal>
             {/* Buttons */}
@@ -677,41 +714,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   openModalButton: {
-    marginLeft: 10,
-    backgroundColor: '#8B4513',
+    backgroundColor: '#355E3B',
+    padding: 10,
     borderRadius: 20,
-    padding: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 30,
-    height: 30,
   },
   openModalButtonText: {
-    fontSize: 24,
     color: 'white',
     fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  addButton: {
-    backgroundColor: '#008000',
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-    marginTop: 10,
-  },
-  addButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-  },
-  closeButtonText: {
-    color: '#355E3B',
-    fontWeight: 'bold',
+    fontSize: 16,
   },
   modalView: {
     margin: 20,
@@ -727,17 +737,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-  },
-  searchBar: {
-    height: 40,
-    borderWidth: 1,
-    padding: 10,
-    marginVertical: 10,
-    width: '100%',
-  },
-  friendItem: {
-    padding: 10,
-    marginVertical: 2,
   },
   editContainer: {
     flexDirection: 'row',
@@ -838,7 +837,7 @@ const styles = StyleSheet.create({
   friendAvatar: {
     width: 50,
     height: 50,
-    borderRadius: 20,
+    borderRadius: 50,
   },
   deleteButton: {
     position: 'absolute',
@@ -855,6 +854,89 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 12,
+  },
+  friendAlreadyAdded: {
+    //backgroundColor: '#e0e0e0',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  modalList: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    marginLeft: 10,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: '90%',
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+  },
+  closeButtonText: {
+    color: '#355E3B',
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+  },
+  searchBar: {
+    width: '70%',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    padding: 10,
+    fontSize: 16,
+  },
+  friendItemModal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    backgroundColor: 'white',
+  },
+  friendImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  friendDetails: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  selectedFriendItem: {
+    backgroundColor: '#f0f0f0',
+  },
+  alreadyAddedText: {
+    color: '#a0a0a0',
+    fontStyle: 'italic',
+  },
+  addButton: {
+    backgroundColor: '#355E3B',
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+    marginTop: 10,
+  },
+  addButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 

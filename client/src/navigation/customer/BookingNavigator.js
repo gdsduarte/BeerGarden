@@ -1,3 +1,7 @@
+/**
+ * This file contains the stack navigation for the customer's booking screens.
+ */
+
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {
@@ -6,7 +10,7 @@ import {
   SpecificChatScreen,
   BookingScreen,
   BookingInputScreen,
-} from '../../screens';
+} from '@screens';
 
 const Stack = createStackNavigator();
 

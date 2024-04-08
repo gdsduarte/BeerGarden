@@ -1,3 +1,7 @@
+/**
+ * This file contains the stack navigator that contains all the screens related to the profile of the user.
+ */
+
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {
@@ -7,6 +11,8 @@ import {
   ReservationDetailsScreen,
   BookingScreen,
   PubEventsDetailsScreen,
+  UsersProfileScreen,
+  SpecificChatScreen,
 } from '@screens';
 import FoodNavigator from './FoodNavigator';
 import DrinkNavigator from './DrinkNavigator';
@@ -53,11 +59,16 @@ const ProfileNavigator = () => {
         component={PubEventsDetailsScreen}
         options={{title: 'Event Details'}}
       />
-      {/* <Stack.Screen
-        name="EditProfileScreen"
-        component={EditProfileScreen}
-        options={{headerTitle: 'Edit Profile'}}
-      />  */}
+      <Stack.Screen
+        name="UsersProfileScreen"
+        component={UsersProfileScreen}
+        options={{title: ''}}
+      />
+      <Stack.Screen
+        name="SpecificChatScreen"
+        component={SpecificChatScreen}
+        options={{title: ''}}
+      />
     </Stack.Navigator>
   );
 };

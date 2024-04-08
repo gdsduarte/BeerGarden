@@ -1,3 +1,11 @@
+/**
+ * HomeScreen is the screen for the home page of the application.
+ * It displays premium events, featured pubs, featured beers, and upcoming bookings.
+ * The user can search for pubs, events, and beers using the search bar.
+ * The user can navigate to the pub screen, event screen, beer screen, and reservation details screen.
+ * The user can also navigate to the finder screen to search for pubs, events, and beers on the more buttons
+ */
+
 import React, {useState, useContext} from 'react';
 import {StatusBar} from 'react-native';
 import {
@@ -37,6 +45,7 @@ const HomeScreen = () => {
   const [searchBarBackground, setSearchBarBackground] = useState('transparent');
   const [activeSlide, setActiveSlide] = useState(0);
   const scrollY = new Animated.Value(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Filter bookings by status
   const relevantBookings = reservations.filter(
@@ -46,16 +55,14 @@ const HomeScreen = () => {
   // Interpolate background color
   const backgroundColor = scrollY.interpolate({
     inputRange: [0, 150, 300],
-    outputRange: ['transparent', 'rgba(0,0,0,0.5)', 'white'],
+    outputRange: ['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.4)', 'white'],
     extrapolate: 'clamp',
   });
 
   const handleScroll = event => {
     const yOffset = event.nativeEvent.contentOffset.y;
-
     // Manually update the scrollY Animated.Value
     scrollY.setValue(yOffset);
-
     // Conditionally set the searchBarBackground state based on yOffset
     if (yOffset > 300) {
       setSearchBarBackground('white');
@@ -64,20 +71,20 @@ const HomeScreen = () => {
     }
   };
 
+  // Set the status bar style on screen focus
   useFocusEffect(
     React.useCallback(() => {
       const setStatusBarStyle = () => {
         StatusBar.setBarStyle('light-content', true);
       };
-
       setStatusBarStyle();
-
       return () => {
         StatusBar.setBarStyle('dark-content', true);
       };
     }, []),
   );
 
+  // Pagination component for carousel
   const pagination = () => {
     return (
       <Pagination
@@ -106,6 +113,7 @@ const HomeScreen = () => {
     );
   };
 
+  // Function to render each event item in the carousel
   const renderEvents = ({item}) => (
     <TouchableOpacity
       onPress={() =>
@@ -119,11 +127,10 @@ const HomeScreen = () => {
     </TouchableOpacity>
   );
 
+  // Function to render each feature pubs.
   const renderFeaturedPub = ({item}) => (
     <TouchableOpacity
-      onPress={() =>
-        navigation.navigate('PubScreen', {pubId: item.id})
-      }>
+      onPress={() => navigation.navigate('PubScreen', {pubId: item.id})}>
       <View style={styles.pubItem}>
         <Image source={{uri: item.photoUrl}} style={styles.pubImage} />
         <Text style={styles.pubName}>{item.displayName}</Text>
@@ -131,6 +138,7 @@ const HomeScreen = () => {
     </TouchableOpacity>
   );
 
+  // Function to render each feature beer.
   const renderFeaturedBeer = ({item}) => (
     <TouchableOpacity
       onPress={() =>
@@ -143,6 +151,7 @@ const HomeScreen = () => {
     </TouchableOpacity>
   );
 
+  // Function to render each booking item
   const renderBooking = ({item}) => (
     <TouchableOpacity
       onPress={() =>
@@ -163,6 +172,7 @@ const HomeScreen = () => {
     </TouchableOpacity>
   );
 
+  // Function to render each new pubs added to the platform
   const renderDiscover = ({item}) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('PubScreen', {pubId: item.id})}>
@@ -173,6 +183,7 @@ const HomeScreen = () => {
     </TouchableOpacity>
   );
 
+  // Function to render each promotion or event
   const renderPromotion = ({item}) => (
     <TouchableOpacity
       onPress={() =>
@@ -191,6 +202,11 @@ const HomeScreen = () => {
       </View>
     </TouchableOpacity>
   );
+
+  // Function to handle search submission
+  const handleSearchSubmit = () => {
+    navigation.navigate('PubsFinderScreen', {searchQuery});
+  };
 
   return (
     <View style={styles.container}>
@@ -218,6 +234,9 @@ const HomeScreen = () => {
               borderColor: searchBarBackground === 'white' ? '#ccc' : 'white',
             },
           ]}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onSubmitEditing={handleSearchSubmit}
         />
       </Animated.View>
       <ScrollView
@@ -247,9 +266,16 @@ const HomeScreen = () => {
           />
         )}
         {pagination()}
+        {/* Featured Pubs Section */}
         <View style={styles.bookingsHeader}>
           <Text style={styles.sectionTitle}>Featured Pubs</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('PubsFinderScreen')}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('PubsFinderScreen', {
+                searchQuery: '',
+                filter: 'pubs',
+              })
+            }>
             <Text style={styles.moreButton}>More</Text>
           </TouchableOpacity>
         </View>
@@ -269,7 +295,13 @@ const HomeScreen = () => {
         {/* Featured Beers Section */}
         <View style={styles.bookingsHeader}>
           <Text style={styles.sectionTitle}>Featured Beers</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('BeersScreen')}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('PubsFinderScreen', {
+                searchQuery: '',
+                filter: 'beers',
+              })
+            }>
             <Text style={styles.moreButton}>More</Text>
           </TouchableOpacity>
         </View>
@@ -288,8 +320,7 @@ const HomeScreen = () => {
         {/* Bookings Section */}
         <View style={styles.bookingsHeader}>
           <Text style={styles.sectionTitle}>Upcoming Bookings</Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('ReservationScreen')}>
+          <TouchableOpacity onPress={handleSearchSubmit}>
             <Text style={styles.moreButton}>More</Text>
           </TouchableOpacity>
         </View>
@@ -307,11 +338,16 @@ const HomeScreen = () => {
             <Text style={styles.emptyBookingText}>No upcoming bookings.</Text>
           </View>
         )}
-
         {/* Discovery Section */}
         <View style={styles.bookingsHeader}>
           <Text style={styles.sectionTitle}>New Pubs</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('PubsFinderScreen')}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('PubsFinderScreen', {
+                searchQuery: '',
+                filter: 'pubs',
+              })
+            }>
             <Text style={styles.moreButton}>More</Text>
           </TouchableOpacity>
         </View>
@@ -331,7 +367,13 @@ const HomeScreen = () => {
         {/* Promotions and Events */}
         <View style={styles.bookingsHeader}>
           <Text style={styles.sectionTitle}>Promotions and Events</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('PubsFinderScreen')}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('PubsFinderScreen', {
+                searchQuery: '',
+                filter: 'events',
+              })
+            }>
             <Text style={styles.moreButton}>More</Text>
           </TouchableOpacity>
         </View>
@@ -349,12 +391,6 @@ const HomeScreen = () => {
         )}
         {/* User Activity Feed */}
         <Text style={styles.sectionTitle}></Text>
-        {/* <FlatList
-          // data={activity}
-          // renderItem={renderActivityItem}
-          keyExtractor={item => item.id}
-          style={styles.activityPreview}
-        /> */}
       </ScrollView>
     </View>
   );
