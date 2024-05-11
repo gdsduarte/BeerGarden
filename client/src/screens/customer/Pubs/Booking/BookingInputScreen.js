@@ -127,10 +127,14 @@ const BookingInputScreen = ({route}) => {
   // Render the reservation input form
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
       <Image style={styles.pubAvatar} source={{uri: pubAvatar}} />
+      <View style={styles.headerText}>
       <Text>Pub: {pubName}</Text>
       <Text>Date: {format(selectedDate, 'dd/MM/yyyy')}</Text>
       <Text>Time: {selectedHour}</Text>
+      </View>
+      </View>
       {!updating && (
         <TextInput
           style={styles.input}
@@ -165,6 +169,15 @@ const BookingInputScreen = ({route}) => {
 };
 
 const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row', 
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  headerText: {
+    marginLeft: 15,
+    justifyContent: 'center',
+  },
   pubAvatar: {
     width: 100,
     height: 100,
@@ -189,7 +202,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   button: {
-    backgroundColor: 'blue',
+    backgroundColor: '#355E3B',
     padding: 15,
     borderRadius: 5,
   },

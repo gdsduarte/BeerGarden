@@ -19,7 +19,6 @@ const useEvents = (onlyPremium = false) => {
     const unsubscribe = query.onSnapshot(
       querySnapshot => {
         const eventsArray = [];
-
         querySnapshot.forEach(doc => {
           eventsArray.push({
             ...doc.data(),

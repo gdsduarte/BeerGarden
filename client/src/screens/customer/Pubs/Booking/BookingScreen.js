@@ -151,9 +151,9 @@ const BookingScreen = ({route, pubId: propPubId}) => {
           [selectedDate]: {selected: true, selectedColor: '#5AC8FA'},
         }}
       />
-      {/* <Text style={styles.formTitle}>
-        Available Hours for {format(new Date(selectedDate), 'dd-MM-yyyy')}
-      </Text> */}
+      <Text style={styles.formTitle}>
+        Available Hours for {selectedDate}
+      </Text>
       {pubDetailsLoading || availabilityLoading ? (
         <Loading />
       ) : !pub ? (
