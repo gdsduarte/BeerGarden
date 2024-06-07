@@ -78,7 +78,12 @@ const PubReviewsScreen = ({item}) => {
   return (
     <View style={styles.container}>
       <Text style={styles.averageRatingText}>Average Rating</Text>
-      <Rating readonly startingValue={averageRating} imageSize={20} />
+      <Rating
+        readonly
+        startingValue={averageRating}
+        imageSize={20}
+        tintColor="#f8f1e7"
+      />
       <FlatList
         data={reviews}
         keyExtractor={item => item.id}
@@ -119,6 +124,7 @@ const PubReviewsScreen = ({item}) => {
           setEditableReview(null);
           setModalVisible(true);
         }}
+        color="#355E3B"
       />
       <ReviewModal
         isVisible={modalVisible}
@@ -137,6 +143,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    backgroundColor: '#f8f1e7',
   },
   averageRatingText: {
     fontSize: 18,

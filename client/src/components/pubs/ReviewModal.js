@@ -120,14 +120,17 @@ const ReviewModal = ({
             multiline={true}
             numberOfLines={4}
           />
+          <View style={{marginTop: 5}}></View>
           <Rating
             startingValue={rating}
             imageSize={20}
             onFinishRating={setRating}
           />
+          <View style={{marginTop: 15}}></View>
           <Button
             title={review ? 'Update' : 'Submit'}
             onPress={handleSubmission}
+            color="#355E3B"
           />
         </View>
       </View>

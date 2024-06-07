@@ -27,6 +27,7 @@ const PubEventsScreen = ({pubId}) => {
   return (
     <FlatList
       data={pubEvents}
+      style={styles.container}
       keyExtractor={item => item.id}
       renderItem={({item}) => (
         <TouchableOpacity onPress={() => handlePress(item.id)}>
@@ -42,6 +43,7 @@ const PubEventsScreen = ({pubId}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f8f1e7',
   },
   image: {
     width: '100%',

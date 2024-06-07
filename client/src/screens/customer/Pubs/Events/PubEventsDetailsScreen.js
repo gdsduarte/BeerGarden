@@ -41,6 +41,7 @@ const PubEventDetailScreen = ({route}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f8f1e7',
   },
   image: {
     width: '100%',

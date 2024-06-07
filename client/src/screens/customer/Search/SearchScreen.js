@@ -158,38 +158,6 @@ const SearchScreen = ({navigation}) => {
             </TouchableOpacity>
           ) : null
         }
-        onPress={async (data, details = null) => {
-          if (details) {
-            const lat = details.geometry.location.lat;
-            const lng = details.geometry.location.lng;
-
-            mapRef.current?.animateToRegion({
-              latitude: lat,
-              longitude: lng,
-              latitudeDelta: 0.001,
-              longitudeDelta: 0.01,
-            });
-
-            // Update selected location state
-            setSelectedLocation({latitude: lat, longitude: lng});
-
-            // Fetch pubs near the user's current location
-            fetchPubsNearLocation(lat, lng, 10).then(newPubs => {
-              const sortedNewPubs = sortPubsByDistance(newPubs, {
-                latitude: lat,
-                longitude: lng,
-              });
-              setSortedPubs(sortedNewPubs);
-              if (sortedNewPubs.length > 0) {
-                setSelectedPubId(sortedNewPubs[0].id);
-              } else {
-                setSelectedPubId(null);
-              }
-              // Update selected location state to reflect this change
-              setSelectedLocation({latitude, longitude});
-            });
-          }
-        }}
         query={{
           key: apiKey,
           language: 'en',
@@ -339,7 +307,7 @@ const styles = StyleSheet.create({
   carouselContainer: {
     position: 'absolute',
     bottom: 0,
-    backgroundColor: '#f8f1e7',
+    //backgroundColor: '#f8f1e7',
   },
   carousel: {
     flexGrow: 0,

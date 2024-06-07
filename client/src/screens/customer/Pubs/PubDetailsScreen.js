@@ -47,22 +47,33 @@ const PubDetailsScreen = ({pubId}) => {
       <Image source={{uri: pub.photoUrl}} style={styles.image} />
       <Text style={styles.name}>{pub.displayName}</Text>
       <Text style={styles.bio}>{pub.description}</Text>
-      <Text style={styles.bio}>{`Address: ${pub.address}`}</Text>
-      <Text style={styles.bio}>{`Email: ${pub.email}`}</Text>
-      <Text style={styles.bio}>{`Phone: ${pub.phone}`}</Text>
-      <Text style={styles.bio}>{`Seats Capacity: ${pub.seatsCapacity}`}</Text>
-      {pub.openingHours && (
-        <Text style={styles.sectionTitle}>Opening Hours</Text>
-      )}
-      {pub.openingHours && renderHours(pub.openingHours)}
-      {pub.foodServiceHours && (
-        <Text style={styles.sectionTitle}>Food Service Hours</Text>
-      )}
-      {pub.foodServiceHours && renderHours(pub.foodServiceHours)}
-      {pub.specialHours && (
-        <Text style={styles.sectionTitle}>Special Hours</Text>
-      )}
-      {pub.specialHours && renderSpecialHours(pub.specialHours)}
+      <View style={styles.card}>
+        <Text style={styles.bio}>{`Address: ${pub.address}`}</Text>
+        <Text style={styles.bio}>{`Email: ${pub.email}`}</Text>
+        <Text style={styles.bio}>{`Phone: ${pub.phone}`}</Text>
+        {/* <Text style={styles.bio}>{`Seats Capacity: ${pub.seatsCapacity}`}</Text> */}
+      </View>
+      <View style={styles.card}>
+        {pub.openingHours && (
+          <Text style={styles.sectionTitle}>Opening Hours</Text>
+        )}
+        {pub.openingHours && renderHours(pub.openingHours)}
+      </View>
+      <View style={styles.card}>
+        {pub.foodServiceHours && (
+          <Text style={styles.sectionTitle}>Food Service Hours</Text>
+        )}
+        {pub.foodServiceHours && renderHours(pub.foodServiceHours)}
+      </View>
+      <View style={styles.card}>
+        {pub.specialHours && (
+          <Text style={styles.sectionTitle}>Special Hours</Text>
+        )}
+        {pub.specialHours && renderSpecialHours(pub.specialHours)}
+      </View>
+      <View>
+      </View>
+
     </ScrollView>
   );
 };
@@ -70,32 +81,59 @@ const PubDetailsScreen = ({pubId}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f8f1e7',
+    padding: 15,
+  },
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+    elevation: 3,
+    marginTop: 10,
+    marginBottom: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  cardHeader: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#355E3B',
+  },
+  cardContent: {
+    fontSize: 16,
+    color: '#666666',
   },
   image: {
     width: '100%',
     height: 200,
     resizeMode: 'cover',
+    borderRadius: 10,
+    marginBottom: 15,
   },
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    color: '#355E3B',
+    borderBottomWidth: 2,
+    borderBottomColor: '#d1d1d1',
+    marginBottom: 12,
   },
   bio: {
-    fontSize: 16,
-    paddingHorizontal: 10,
-    marginBottom: 5,
-  },
-  sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    paddingHorizontal: 10,
-    marginTop: 20,
-    marginBottom: 10,
+    lineHeight: 24,
+    color: '#333',
   },
   specialHoursView: {
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#355E3B',
     marginBottom: 10,
   },
 });
