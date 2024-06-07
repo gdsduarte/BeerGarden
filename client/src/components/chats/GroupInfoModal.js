@@ -134,7 +134,7 @@ const GroupInfoModal = ({isVisible, onClose, groupData, onMemberChange}) => {
               </Text>
             </>
           )}
-          <Button title="Add Friend" onPress={handleOpenFriendSelection} />
+          <Button title="Add Friend" onPress={handleOpenFriendSelection} color="#355E3B" />
           <TextInput
             style={styles.searchBar}
             onChangeText={setSearchQuery}
@@ -162,11 +162,12 @@ const GroupInfoModal = ({isVisible, onClose, groupData, onMemberChange}) => {
                 <Button
                   title="Remove"
                   onPress={() => handleRemoveFriend(item.userId)}
+                  color="#355E3B"
                 />
               </TouchableOpacity>
             )}
           />
-          <Button title="Leave Group" onPress={handleLeaveGroup} />
+          <Button title="Leave Group" onPress={handleLeaveGroup} color="#355E3B" />
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => {

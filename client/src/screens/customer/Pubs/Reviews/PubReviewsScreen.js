@@ -124,6 +124,7 @@ const PubReviewsScreen = ({pubId}) => {
           setEditableReview(null);
           setModalVisible(true);
         }}
+        color="#355E3B"
       />
       <ReviewModal
         isVisible={modalVisible}
